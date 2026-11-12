@@ -221,6 +221,8 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
   background:var(--soft);color:var(--btn);font-size:12px;font-weight:700;text-align:center;transform:translateY(-1px)}
 .pasos-c b{color:var(--navy)}
 .fmt h3{font-size:15px}
+.tip-h{font-size:22px;margin:0 0 2px}
+.tip span{font-size:13.5px;color:var(--muted)}
 .fmt-g{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .fmt-g button{height:38px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:16px;cursor:pointer}
 .fmt-g button:hover{background:var(--soft);border-color:var(--lav)}
@@ -399,7 +401,7 @@ Liquidación
   <div class="editor" id="paso-editar" hidden>
     <div>
       <div class="pbar">
-        <p class="tip" id="tip"><b>Haz clic en cualquier texto del correo para cambiarlo.</b></p>
+        <div class="tip" id="tip"><h2 class="tip-h">Revisa los últimos detalles</h2><span>Haz clic en cualquier texto del correo para cambiarlo.</span></div>
         <div class="tools">
         <div class="seg" role="group" aria-label="Tamaño de pantalla">
           <button type="button" id="ver-pc" aria-pressed="true">Computador</button>
