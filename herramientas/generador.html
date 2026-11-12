@@ -1087,7 +1087,9 @@ $("frame").addEventListener("load", () => {
   const st = doc.createElement("style"); st.id = "edit-ui"; st.textContent = EDIT_CSS; doc.head.appendChild(st);
   doc.querySelectorAll(EDITABLE).forEach(n => { n.setAttribute("contenteditable", "true"); n.setAttribute("spellcheck", "true"); });
 
-  doc.addEventListener("input", () => { revisarLink(); sync(); });
+  doc.addEventListener("input", () => { ultimoTexto = Date.now(); revisarLink(); sync(); });
+  borrados = [];
+  doc.addEventListener("keydown", teclaDeshacer);
   activarBorrar(doc);
   doc.addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
   doc.addEventListener("paste", e => {
@@ -1157,13 +1159,53 @@ function activarBorrar(d) {
   del.addEventListener("click", e => {
     e.preventDefault(); e.stopPropagation();
     if (!actual) return;
-    const b = actual; mostrar(null); b.remove();
-    btnActivo = null;
-    const a = d.querySelector(".btn a");
-    $("link").value = a && LINK_OK.test(a.getAttribute("href") || "") ? a.getAttribute("href") : "";
-    revisarLink(); syncAhora(); setTimeout(fitFrame, 30);
+    const b = actual; mostrar(null);
+    borrados.push({ nodo: b, padre: b.parentNode, sig: b.nextSibling, t: Date.now() });
+    b.remove();
+    trasCambio();
+    avisoBorrado();
   });
 }
+
+// Deshacer lo eliminado: Ctrl+Z / ⌘Z (o el botón «Deshacer» del aviso). Si lo último fue escribir texto,
+// Ctrl+Z deshace el texto como siempre.
+let borrados = [], ultimoTexto = 0;
+function trasCambio() {
+  btnActivo = null;
+  const a = doc.querySelector(".btn a");
+  $("link").value = a && LINK_OK.test(a.getAttribute("href") || "") ? a.getAttribute("href") : "";
+  revisarLink(); syncAhora(); setTimeout(fitFrame, 30);
+}
+function avisoBorrado() {
+  const el = $("aviso");
+  el.className = "status";
+  el.textContent = "Sección eliminada. ";
+  const u = document.createElement("button");
+  u.type = "button"; u.className = "link"; u.textContent = "Deshacer";
+  u.onclick = () => deshacerBorrado();
+  el.append(u, ` (${/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘Z" : "Ctrl+Z"})`);
+}
+function deshacerBorrado() {
+  const r = borrados.pop();
+  if (!r || !doc) return false;
+  if (r.sig && r.padre.contains(r.sig) && r.sig.parentNode === r.padre) r.padre.insertBefore(r.nodo, r.sig);
+  else r.padre.appendChild(r.nodo);
+  trasCambio();
+  if (borrados.length) avisoBorrado(); else setStatus($("aviso"), "Sección recuperada.");
+  return true;
+}
+function teclaDeshacer(e) {
+  if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.key.toLowerCase() !== "z") return;
+  if ($("paso-editar").hidden || !borrados.length) return;
+  const t = e.target;
+  // En los campos del panel (asunto, link, código) se deja el deshacer normal.
+  if (t && t.ownerDocument === document && /^(INPUT|TEXTAREA)$/.test(t.tagName)) return;
+  // Si lo último fue escribir en el correo, que deshaga el texto.
+  if (t && t.isContentEditable && ultimoTexto > borrados[borrados.length - 1].t) return;
+  e.preventDefault();
+  deshacerBorrado();
+}
+document.addEventListener("keydown", teclaDeshacer);
 // Devuelve true si el botón del correo todavía no tiene un link que funcione.
 let btnActivo = null;
 const botonActivo = () => doc && (btnActivo && doc.contains(btnActivo) ? btnActivo : doc.querySelector(".btn a"));
