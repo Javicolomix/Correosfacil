@@ -238,6 +238,9 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .fmt-sec{display:grid;gap:2px;padding-top:10px;border-top:1px solid var(--line)}
 .fmt-sec[hidden]{display:none}
 .sw-box button{border-radius:8px;width:34px;height:26px}
+.rng{display:grid;grid-template-columns:48px 1fr 40px;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:6px}
+.rng input{width:100%;accent-color:var(--btn)}
+.rng output{font-size:12px;text-align:right;color:var(--navy)}
 .sw button,.sw-own{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #d6d6de;cursor:pointer;padding:0}
 .sw button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--btn)}
 .sw-own{position:relative;display:grid;place-items:center;background:conic-gradient(#f44,#fd4,#4d8,#4af,#a4f,#f44);overflow:hidden}
@@ -472,6 +475,9 @@ Liquidación
         <div class="fmt-sec" id="fmt-box">
           <span class="lbl" id="fmt-box-lbl">Color del recuadro</span>
           <div class="sw sw-box" id="sw-box" role="group" aria-label="Color del recuadro"></div>
+          <label class="rng">Ancho <input type="range" id="box-w" min="40" max="100" step="5" value="100"><output id="box-w-o">100%</output></label>
+          <label class="rng">Alto <input type="range" id="box-h" min="4" max="40" step="2" value="18"><output id="box-h-o">18</output></label>
+          <p class="hint" style="margin:2px 0 0">También puedes arrastrar la esquina ◢ del recuadro en el correo.</p>
         </div>
       </div>
 
@@ -1241,6 +1247,7 @@ const EDIT_CSS = `[contenteditable]{cursor:text;border-radius:4px;transition:out
 #edit-ui-del{position:absolute;z-index:9;display:none;align-items:center;gap:4px;height:26px;padding:0 9px 0 7px;border:0;border-radius:13px;
   background:#c62f3a;color:#fff;font:700 12px/1 Tahoma,Arial,sans-serif;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 #edit-ui-del:hover{background:#a3222c}
+#edit-ui-rsz{position:absolute;z-index:9;display:none;place-items:center;width:20px;height:20px;border-radius:5px;background:#27198E;color:#fff;font-size:11px;line-height:1;cursor:nwse-resize;user-select:none;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 #edit-ui-del svg{width:13px;height:13px}`;
 
 function previewHtml(h) {
@@ -1252,7 +1259,7 @@ function previewHtml(h) {
 function exportHtml() {
   if (!doc) return "";
   const root = doc.documentElement.cloneNode(true);
-  root.querySelectorAll("#edit-ui, #edit-ui-del").forEach(n => n.remove());
+  root.querySelectorAll("#edit-ui, #edit-ui-del, #edit-ui-rsz").forEach(n => n.remove());
   root.querySelectorAll(".edit-sel").forEach(n => { n.classList.remove("edit-sel"); if (!n.className) n.removeAttribute("class"); });
   root.querySelectorAll("[contenteditable]").forEach(n => { n.removeAttribute("contenteditable"); n.removeAttribute("spellcheck"); });
   let out = "<!DOCTYPE html>\n" + root.outerHTML + "\n";
@@ -1298,6 +1305,7 @@ $("frame").addEventListener("load", () => {
   borrados = [];
   doc.addEventListener("keydown", teclaDeshacer);
   activarBorrar(doc);
+  activarTamano(doc);
   doc.addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
   doc.addEventListener("paste", e => {
     e.preventDefault();
@@ -1500,16 +1508,61 @@ swatches("sw-box", PAL_BOX, ([bg, , ct, cx, borde]) => {
   const td = recuadroActivo();
   if (!td) { fmtMsg("Este correo no tiene recuadros.", true); return; }
   td.style.background = bg;
-  td.style.borderLeft = borde ? `4px solid ${borde}` : "";
+  td.style.borderLeft = "";
   td.querySelectorAll(".lt, .v, .k").forEach(x => { x.style.color = ct || (x.classList.contains("k") ? "#4429cc" : "#0b013c"); });
   td.querySelectorAll(".ls, .m").forEach(x => { x.style.color = cx || "#4f5157"; });
   marcar("sw-box", bg);
   syncAhora();
 });
+// Ancho (% del correo) y alto (relleno de arriba y abajo) del recuadro activo.
+function tamanoRecuadro(td, w, h) {
+  const t = td.closest("table");
+  if (w != null) { t.setAttribute("width", w + "%"); t.style.width = w + "%"; }
+  if (h != null) { td.style.paddingTop = h + "px"; td.style.paddingBottom = h + "px"; }
+  leerTamano(td);
+}
+function leerTamano(td) {
+  const t = td.closest("table");
+  const w = parseInt(t.getAttribute("width")) || 100;
+  const h = parseInt(doc.defaultView.getComputedStyle(td).paddingTop) || 18;
+  $("box-w").value = w; $("box-w-o").textContent = w + "%";
+  $("box-h").value = h; $("box-h-o").textContent = h;
+}
+$("box-w").addEventListener("input", e => { const td = recuadroActivo(); if (td) { tamanoRecuadro(td, +e.target.value, null); sync(); fitFrame(); } });
+$("box-h").addEventListener("input", e => { const td = recuadroActivo(); if (td) { tamanoRecuadro(td, null, +e.target.value); sync(); fitFrame(); } });
+// Esquina para arrastrar: horizontal = ancho, vertical = alto.
+function activarTamano(d) {
+  const h = d.createElement("div");
+  h.id = "edit-ui-rsz"; h.title = "Arrastra para cambiar el tamaño del recuadro"; h.textContent = "◢";
+  d.body.appendChild(h);
+  let td = null, arr = null;
+  const poner = () => {
+    if (!td || !d.contains(td)) { h.style.display = "none"; return; }
+    const r = td.getBoundingClientRect(), w = d.defaultView;
+    h.style.display = "grid";
+    h.style.left = (r.right + w.scrollX - 18) + "px";
+    h.style.top = (r.bottom + w.scrollY - 18) + "px";
+  };
+  d.addEventListener("mouseover", e => { if (arr) return; const b = e.target.closest && e.target.closest("td.box"); if (b) { td = b; poner(); } });
+  h.addEventListener("mousedown", e => {
+    e.preventDefault();
+    const t = td.closest("table"), cont = t.parentElement.getBoundingClientRect().width;
+    arr = { x: e.clientX, y: e.clientY, w: t.getBoundingClientRect().width, p: parseInt(d.defaultView.getComputedStyle(td).paddingTop) || 18, cont };
+    boxActivo = td; revisarRecuadro();
+  });
+  d.addEventListener("mousemove", e => {
+    if (!arr) return;
+    const w = Math.round(Math.max(40, Math.min(100, (arr.w + e.clientX - arr.x) / arr.cont * 100)) / 5) * 5;
+    const p = Math.round(Math.max(4, Math.min(40, arr.p + (e.clientY - arr.y) / 2)) / 2) * 2;
+    tamanoRecuadro(td, w, p); poner(); fitFrame();
+  });
+  d.addEventListener("mouseup", () => { if (arr) { arr = null; syncAhora(); } });
+}
 function revisarRecuadro() {
   const td = recuadroActivo();
   $("fmt-box").hidden = !td;
   if (!td) return;
+  leerTamano(td);
   const n = doc.querySelectorAll("td.box").length;
   $("fmt-box-lbl").textContent = n > 1 ? "Color del recuadro (haz clic en el que quieras cambiar)" : "Color del recuadro";
   const bg = td.style.background || "", rgb = bg.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
