@@ -216,20 +216,21 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .tester-steps{counter-reset:t;list-style:none;margin:0;padding:0!important;display:grid;gap:8px}
 .tester-steps li{counter-increment:t;display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start}
 .tester-steps li::before{content:counter(t);width:26px;height:26px;border-radius:8px;background:var(--soft);color:var(--btn);font-weight:700;display:grid;place-items:center;font-size:13px}
+.intro-c{margin:0;color:var(--muted)}.intro-c b{color:var(--navy)}
 .pasos-c{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:p}
 .pasos-c li{display:flex;gap:10px;align-items:baseline;color:var(--muted);font-size:15px;line-height:1.45}
 .pasos-c li::before{counter-increment:p;content:counter(p);flex:none;width:22px;height:22px;line-height:22px;border-radius:50%;
   background:var(--soft);color:var(--btn);font-size:12px;font-weight:700;text-align:center;transform:translateY(-1px)}
 .pasos-c b{color:var(--navy)}
 .marcas{margin:6px 0 2px;border:1px solid #e3e1f3;border-radius:12px;overflow:hidden}
-.marcas-t{margin:0;padding:12px 14px;background:var(--soft);font-size:14px;font-weight:700;color:var(--navy);line-height:1.4}
+.marcas-t{margin:0;padding:9px 14px;background:var(--soft);font-size:14px;font-weight:700;color:var(--navy);line-height:1.4}
 .marcas-t span{display:block;font-weight:400;font-size:13px;color:var(--muted)}
-.mf{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:8px 16px;align-items:center;padding:14px;border-top:1px solid #e3e1f3}
-.mf-txt b{display:block;color:var(--navy);font-size:14px;margin-bottom:2px}
+.mf{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:8px 16px;align-items:center;padding:10px 14px;border-top:1px solid #e3e1f3}
+.mf-txt b{display:block;color:var(--navy);font-size:14px;margin-bottom:5px}
 .mf-txt p{margin:0 0 8px;font-size:13px;line-height:1.45;color:var(--muted)}
 .mf-txt pre{margin:0;font-family:var(--mono);font-size:12px;line-height:1.5;background:#15122b;color:#e6e3fb;padding:8px 10px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
 .mf-txt pre i{font-style:normal;color:#b9aefe}
-.mf-res{display:grid;gap:8px;justify-items:start}
+.mf-res{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .mf-lbl{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
 .r-tit{font:700 17px/1.2 Arial,sans-serif;color:#0b013c}.r-tit em{font-style:normal;color:#4429cc}
 .r-box{background:#f0f0fb;border-radius:8px;padding:9px 11px;font:13px/1.4 Arial,sans-serif;color:#4f5157;width:100%}
@@ -307,47 +308,39 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
   <div class="crear" id="paso-escribir">
   <div class="card compose">
     <h2>Escribe el texto de tu correo</h2>
-    <ol class="pasos-c">
-      <li><span><b>Escribe</b> lo que le quieres contar al cliente: qué pasó, qué tiene que hacer, montos, fechas y links.</span></li>
-      <li><span><b>Mira</b> cómo va quedando el correo, al lado.</span></li>
-      <li><span><b>Aprieta Diseñar</b> para retocarlo sobre el mismo correo y copiar el HTML.</span></li>
-    </ol>
+    <p class="intro-c">Escribe tu correo, mira cómo queda al lado y aprieta <b>Diseñar</b>.</p>
     <label class="lbl" for="texto" hidden>Texto del correo</label>
     <div class="redactar">
-      <div class="saludo" aria-hidden="true"><span>Hola, <b>{{nombre cliente}}</b>:</span><small>El saludo se agrega solo · no lo repitas</small></div>
+      <div class="saludo" aria-hidden="true"><span>Hola, <b>{{nombre cliente}}</b>:</span><small>Se agrega solo</small></div>
       <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
     </div>
     <div class="marcas" id="texto-tip">
-      <p class="marcas-t">¿Quieres elegir tú el título, un recuadro o un botón? (opcional)
-        <span>Escribe la marca en el texto, tal como en el ejemplo, o aprieta «Insertar» y se pone donde está el cursor.</span></p>
+      <p class="marcas-t">Marcas opcionales</p>
       <div class="mf">
         <div class="mf-txt">
           <b>Título</b>
-          <p>Pon <code class="k">{{título}}</code> antes de la frase que quieres como título.</p>
           <pre><i>{{título}}</i> Tu cuota vence pronto</pre>
         </div>
-        <div class="mf-res"><span class="mf-lbl">Así sale</span><div class="r-tit">Tu cuota vence <em>pronto</em></div>
+        <div class="mf-res"><div class="r-tit">Tu cuota vence <em>pronto</em></div>
           <button type="button" class="marca" data-m="titulo">+ Insertar</button></div>
       </div>
       <div class="mf">
         <div class="mf-txt">
           <b>Recuadro destacado</b>
-          <p>Pon <code class="k">{{cuadro destacado}}</code> en la línea de arriba y en la de abajo del texto. La primera línea sale en negrita.</p>
           <pre><i>{{cuadro destacado}}</i>
 Importante
 Tu pago puede tardar 48 horas.
 <i>{{cuadro destacado}}</i></pre>
         </div>
-        <div class="mf-res"><span class="mf-lbl">Así sale</span><div class="r-box"><strong>Importante</strong>Tu pago puede tardar 48 horas.</div>
+        <div class="mf-res"><div class="r-box"><strong>Importante</strong>Tu pago puede tardar 48 horas.</div>
           <button type="button" class="marca" data-m="cuadro">+ Insertar</button></div>
       </div>
       <div class="mf">
         <div class="mf-txt">
           <b>Botón</b>
-          <p>Pon <code class="k">{{botón}}</code>, el texto del botón y su link. También puede ir dentro de un recuadro.</p>
           <pre><i>{{botón}}</i> Pagar mi cuota https://lexy.cl/</pre>
         </div>
-        <div class="mf-res"><span class="mf-lbl">Así sale</span><span class="r-btn">Pagar mi cuota</span>
+        <div class="mf-res"><span class="r-btn">Pagar mi cuota</span>
           <button type="button" class="marca" data-m="boton">+ Insertar</button></div>
       </div>
     </div>
@@ -589,7 +582,7 @@ const acentuar = t => {
   const fin = t.replace(/[.!?:]+$/, "").length;
   const MES = "enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre";
   const dato = new RegExp(`\\d{1,2} de (${MES})( de \\d{4})?|\\$\\s?[\\d.,]+|\\d+ (días|meses|semanas|horas)( hábiles)?|\\d+ de \\d+|\\d+\\s?%`, "i").exec(t);
-  if (dato) return marca(dato.index, dato.index + dato[0].length);
+  if (dato && dato.index > 0) return marca(dato.index, fin);
   const pal = [...t.slice(0, fin).matchAll(/\S+/g)];
   if (pal.length < 2) return marca(0, fin);
   const ART = /^(tu|tus|su|sus|la|las|el|los|un|una|de|del|al|en|con|para|a)$/i;
@@ -597,7 +590,7 @@ const acentuar = t => {
     const resto = pal.length - 1 - i;
     if (ART.test(pal[i][0]) && resto >= 1 && resto <= 4 && !ART.test(pal[i + 1][0])) return marca(pal[i + 1].index, fin);
   }
-  return marca(pal[pal.length - 2].index, fin);
+  return marca(pal[pal.length - (pal.length <= 3 ? 1 : 2)].index, fin);
 };
 
 const E = {
@@ -1032,7 +1025,7 @@ Responde SOLO con el borrador, sin explicaciones ni bloques de código, una inst
 Tipo: informativo | cta | hito
 Asunto: (menos de 60 caracteres)
 Vista previa: (una frase que complemente el asunto)
-Título: (una sola idea; OBLIGATORIO: pon entre *asteriscos* la parte clave, de 1 a 4 palabras, que irá en morado; por ejemplo «Tu cuota vence el *10 de diciembre*» o «Ya tienes tu *Portal del Cliente*»)
+Título: (una sola idea; OBLIGATORIO: el título va en dos colores, primero oscuro y al final morado; pon entre *asteriscos* la parte final clave, de 1 a 4 palabras, que irá en morado (nunca al comienzo); por ejemplo «Tu cuota vence el *10 de diciembre*» o «Ya tienes tu *Portal del Cliente*»)
 (párrafos de texto libre, separados por una línea en blanco; **doble asterisco** para negrita, úsalo poco)
 Línea de tiempo: Etapa 1 | Etapa 2* | Etapa 3   (en hitos, siempre; de 3 a 5 etapas con nombres cortos de 1 a 4 palabras; el asterisco marca la etapa actual)
 Dato: Rótulo | Dato clave | Detalle   (opcional: recuadro con un monto, fecha o plazo; máximo 2)
