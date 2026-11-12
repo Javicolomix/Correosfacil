@@ -39,6 +39,8 @@ header, y entrega el HTML listo para montar), **Objetivos básicos** (la guía) 
 **Probar mi correo** (el tester, código `lexy123`).
 
 - Publicada en Claude, con redacción automática: https://claude.ai/artifact/TLc8JdSmemZbtYMgwwzn3C
+- En Vercel, para el equipo (sin redacción automática; se actualiza solo con cada `git push`):
+  https://correos-facil.vercel.app
 - Local, sin redacción automática (se escribe el borrador a mano):
   `http://localhost:5181/generador.html` con el servidor de abajo.
 
