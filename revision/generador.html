@@ -207,6 +207,7 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .marca:focus-visible{outline:2px solid var(--btn);outline-offset:2px}
 .marca code{font-family:var(--mono);font-size:13px;background:var(--soft);color:var(--btn);padding:2px 7px;border-radius:6px;white-space:nowrap}
 .marca span{font-size:12.5px;line-height:1.45;color:var(--muted)}
+.marca span b{font-family:var(--mono);font-weight:400;color:var(--btn)}
 @media (max-width:620px){.marcas-g{grid-template-columns:1fr}.marca{flex-direction:row;align-items:baseline}.marca code{flex:none}}
 code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:1px 6px;border-radius:6px}
 
@@ -287,7 +288,7 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
         </button>
         <button type="button" class="marca" data-m="cuadro">
           <code>{{cuadro destacado}}</code>
-          <span>Ábrelo y ciérralo con la misma marca. La 1.ª línea es su título; el resto, texto normal.</span>
+          <span>Ábrelo y ciérralo con la misma marca. La 1.ª línea es su título; el resto, texto normal. Puede llevar un <b>{{botón}}</b> adentro.</span>
         </button>
         <button type="button" class="marca" data-m="boton">
           <code>{{botón}}</code>
@@ -484,10 +485,9 @@ Antes ya habíamos presentado la solicitud. Ahora se publica en el Boletín Conc
 
 {{cuadro destacado}}
 No tienes que hacer nada por ahora
-Te avisaremos por este medio apenas el tribunal dicte la resolución de liquidación.
-{{cuadro destacado}}
-
-{{botón}} Ver mi caso https://lexy.cl/`;
+Te avisaremos por este medio apenas el tribunal dicte la resolución de liquidación. Mientras, puedes revisar el detalle de tu proceso.
+{{botón}} Ver mi proceso https://lexy.cl/
+{{cuadro destacado}}`;
 
 /* ===================== Plantilla del correo (mismo diseño que build_emails.py) ===================== */
 const FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif";
@@ -627,12 +627,17 @@ const E = {
   },
   // «Título | texto»: el título va en navy y negrita; el resto, como texto normal dentro del mismo recuadro.
   destacado: t => {
-    const [tit, ...r] = String(t).split(/\s*\|\s*/);
+    t = String(t);
+    const mb = t.match(/\s*\[\s*bot[oó]n\s*:\s*([^\]]*)\]\s*$/i);
+    if (mb) t = t.slice(0, mb.index);
+    const [tit, ...r] = t.split(/\s*\|\s*/);
     const cuerpo = r.join(" ").trim();
+    let boton = "";
+    if (mb) { const [bl, bu] = parts(mb[1]); boton = "\n          " + E.button(bl || "Ver mi caso", bu || "").replace("margin:6px 0 20px", "margin:14px 0 0"); }
     return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0;">
         <tr><td class="box" style="background:#f0f0fb;border-radius:12px;padding:18px 20px;">
           <div class="lt" style="font-size:16px;line-height:1.5;font-weight:700;color:#0b013c;">${inline(tit)}</div>${cuerpo ? `
-          <div class="ls" style="margin-top:6px;font-size:15px;line-height:1.6;font-weight:400;color:#4f5157;">${inline(cuerpo)}</div>` : ""}
+          <div class="ls" style="margin-top:6px;font-size:15px;line-height:1.6;font-weight:400;color:#4f5157;">${inline(cuerpo)}</div>` : ""}${boton}
         </td></tr>
       </table>`;
   },
@@ -820,6 +825,17 @@ const lineaMarca = (k, t) => {
 };
 // Recuadro abierto con {{destacar}} / {{cuadro destacado}} y cerrado con otra marca igual al final de una línea:
 // todo lo que queda entre ambas va dentro del mismo recuadro.
+// Dentro del recuadro, una línea con {{botón}} (o «Botón:») pasa a ser un botón dentro del mismo recuadro: «… [Botón: texto | link]».
+function recuadroConBoton(contenido) {
+  let btn = null;
+  const resto = contenido.replace(/\{\{\s*bot[oó]n\s*:([^}]*)\}\}/gi, (m, t) => "\n{{botón}} " + t + "\n").split("\n").filter(l => {
+    const conMarca = /\{\{\s*(bot[oó]n|button|cta)\b[^}]*\}\}/i.test(l), conClave = /^\s*bot[oó]n\s*:/i.test(l);
+    if (!conMarca && !conClave) return true;
+    if (!btn) btn = lineaMarca("Botón", l.replace(/\{\{[^}]*\}\}/g, "")).trim().replace(/^Botón:\s*/, "");
+    return false;
+  }).join("\n");
+  return partirDestacado(resto) + (btn !== null ? ` [Botón: ${btn}]` : "");
+}
 function cerrarRecuadros(out) {
   const ms = [...out.matchAll(/\{\{([^}]*)\}\}/g)]
     .filter(m => tipoMarca(m[1].replace(/^\s*\//, "")) === "Destacado")
@@ -829,7 +845,7 @@ function cerrarRecuadros(out) {
     if (ms[k + 1].cierre) { pares.push([ms[k], ms[k + 1]]); k++; }
   }
   for (const [a, b] of pares.reverse())
-    out = out.slice(0, a.i) + `\n\nDestacado: ${partirDestacado(out.slice(a.end, b.i))}\n\n` + out.slice(b.end);
+    out = out.slice(0, a.i) + `\n\nDestacado: ${recuadroConBoton(out.slice(a.end, b.i))}\n\n` + out.slice(b.end);
   return out;
 }
 function marcarDestacados(src) {
@@ -857,8 +873,10 @@ function basico(src) {
   if (/^\s*asunto\s*:/im.test(src)) return completarBotones(parse(src), src);
   // Título y botones pedidos con marca: se apartan antes de limpiar los links del texto.
   let titulo = "";
-  const botones = [];
+  const botones = [], dests = [];
   src = src.split("\n").map(l => {
+    const ds = l.match(/^\s*destacado\s*:\s*(.*)$/i);
+    if (ds) { dests.push(ds[1].trim()); return `@@DEST${dests.length - 1}@@`; }
     const t = l.match(/^\s*t[ií]tulo\s*:\s*(.*)$/i);
     if (t) { if (!titulo) titulo = t[1].trim(); return ""; }
     const b = l.match(/^\s*bot[oó]n\s*:\s*(.*)$/i);
@@ -870,7 +888,7 @@ function basico(src) {
     .replace(/\s+(en|a)\s+https?:\/\/[^\s)]+/gi, (m, w) => w.toLowerCase() === "a" ? " al botón de abajo" : " en el botón de abajo")
     .replace(/\s*:?\s*https?:\/\/[^\s)]+/g, "").replace(/[ \t]+/g, " ");
   const paras = limpio.split(/\n\s*\n/).map(p => p.replace(/\s*\n\s*/g, " ").trim()).filter(Boolean);
-  const esDest = p => /^destacado\s*:/i.test(p);
+  const esDest = p => /^@@DEST\d+@@$/.test(p);
   const esBtn = p => /^@@BOTON\d+@@$/.test(p);
   const esTexto = p => !esDest(p) && !esBtn(p);
   const iT = titulo ? -1 : paras.findIndex(esTexto);
@@ -885,11 +903,12 @@ function basico(src) {
   const tituloTxt = titulo.replace(/\*/g, "");
   const primero = paras.find(esTexto) || "";
   const d = { tipo: "informativo", asunto: tituloTxt.length <= 60 ? tituloTxt : tituloTxt.slice(0, 58).replace(/\s+\S*$/, "") + "…", pre: primero.split(/(?<=[.!?])\s/)[0].slice(0, 110), titulo,
-    blocks: paras.map(t => esDest(t) ? { k: "destacado", t: t.replace(/^destacado\s*:\s*/i, "") }
+    blocks: paras.map(t => esDest(t) ? { k: "destacado", t: dests[+t.match(/\d+/)[0]] }
       : esBtn(t) ? botones[+t.match(/\d+/)[0]] : { k: "p", t }) };
   const acc = ACCIONES.find(([r]) => r.test(norm(src)));
   if (acc) d.tipo = "cta";
-  if (!botones.length && (url || acc)) d.blocks.push({ k: "boton", t: acc ? acc[1] : "Ver mi caso", u: url || "" });
+  const botonEnRecuadro = dests.some(x => /\[\s*bot[oó]n\s*:/i.test(x));
+  if (!botones.length && !botonEnRecuadro && (url || acc)) d.blocks.push({ k: "boton", t: acc ? acc[1] : "Ver mi caso", u: url || "" });
   d.blocks.push({ k: "firma" });
   return completarBotones(d, src);
 }
@@ -955,7 +974,7 @@ Título: (una sola idea; OBLIGATORIO: pon entre *asteriscos* la parte clave, de 
 (párrafos de texto libre, separados por una línea en blanco; **doble asterisco** para negrita, úsalo poco)
 Línea de tiempo: Etapa 1 | Etapa 2* | Etapa 3   (en hitos, siempre; de 3 a 5 etapas con nombres cortos de 1 a 4 palabras; el asterisco marca la etapa actual)
 Dato: Rótulo | Dato clave | Detalle   (opcional: recuadro con un monto, fecha o plazo; máximo 2)
-Destacado: Título corto | texto   (recuadro destacado: antes de « | » va su título, que sale en negrita; después, el texto normal. OBLIGATORIO para cada línea del texto que empiece con «Destacado:»: mantenla como línea «Destacado:» en el mismo lugar del relato, con el mismo título y texto separados por « | »; puedes pulir la redacción, pero sin quitarle datos)
+Destacado: Título corto | texto   (recuadro destacado: antes de « | » va su título, que sale en negrita; después, el texto normal. OBLIGATORIO para cada línea del texto que empiece con «Destacado:»: mantenla como línea «Destacado:» en el mismo lugar del relato, con el mismo título y texto separados por « | »; si termina en «[Botón: texto | link]», déjalo igual al final: es un botón dentro del recuadro; puedes pulir la redacción, pero sin quitarle datos)
 - Título del paso | detalle   (opcional: pasos numerados, uno por línea)
 Botón: Texto del botón | link   (OBLIGATORIO cuando el cliente tiene que hacer algo: pagar, subir, completar, firmar, agendar, revisar o entrar a algún lado. Un solo botón. El texto empieza con un verbo y va en primera persona, por ejemplo «Pagar mi cuota», «Subir mis documentos», «Completar mi ficha». Usa el link del texto que corresponde a esa acción; si el texto no trae link, escribe FALTA_LINK. Si no hay ninguna acción, no pongas botón.)
 Nota: (opcional, texto chico)
@@ -1001,7 +1020,12 @@ function segPress(sel, attr, val) {
 const EDITABLE = "h1.h1, p.txt:not(.hi), div.k, td.k, div.v, div.m, div.lt, div.ls, div.em, div.tl-t, .btn a";
 const EDIT_CSS = `[contenteditable]{cursor:text;border-radius:4px;transition:outline-color .1s}
 [contenteditable]:hover{outline:1.5px dashed #9d90fc;outline-offset:3px}
-[contenteditable]:focus{outline:2px solid #27198E;outline-offset:3px}`;
+[contenteditable]:focus{outline:2px solid #27198E;outline-offset:3px}
+.edit-sel{outline:1.5px dashed #e05a5a !important;outline-offset:4px;border-radius:6px}
+#edit-ui-del{position:absolute;z-index:9;display:none;align-items:center;gap:4px;height:26px;padding:0 9px 0 7px;border:0;border-radius:13px;
+  background:#c62f3a;color:#fff;font:700 12px/1 Tahoma,Arial,sans-serif;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+#edit-ui-del:hover{background:#a3222c}
+#edit-ui-del svg{width:13px;height:13px}`;
 
 function previewHtml(h) {
   let out = h;
@@ -1012,7 +1036,8 @@ function previewHtml(h) {
 function exportHtml() {
   if (!doc) return "";
   const root = doc.documentElement.cloneNode(true);
-  root.querySelectorAll("#edit-ui").forEach(n => n.remove());
+  root.querySelectorAll("#edit-ui, #edit-ui-del").forEach(n => n.remove());
+  root.querySelectorAll(".edit-sel").forEach(n => { n.classList.remove("edit-sel"); if (!n.className) n.removeAttribute("class"); });
   root.querySelectorAll("[contenteditable]").forEach(n => { n.removeAttribute("contenteditable"); n.removeAttribute("spellcheck"); });
   let out = "<!DOCTYPE html>\n" + root.outerHTML + "\n";
   for (const [u, data] of Object.entries(PREVIEW_IMG)) out = out.split(data).join(u);
@@ -1053,6 +1078,7 @@ $("frame").addEventListener("load", () => {
   doc.querySelectorAll(EDITABLE).forEach(n => { n.setAttribute("contenteditable", "true"); n.setAttribute("spellcheck", "true"); });
 
   doc.addEventListener("input", () => { revisarLink(); sync(); });
+  activarBorrar(doc);
   doc.addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
   doc.addEventListener("paste", e => {
     e.preventDefault();
@@ -1062,12 +1088,18 @@ $("frame").addEventListener("load", () => {
   doc.addEventListener("click", e => {
     const a = e.target.closest("a");
     if (a) e.preventDefault();
-    if (a && a.closest(".btn")) { $("link").focus({ preventScroll: true }); $("link").select(); }
+    if (a && a.closest(".btn")) {
+      btnActivo = a;
+      const h = a.getAttribute("href") || ""; $("link").value = LINK_OK.test(h) ? h : "";
+      revisarLink();
+      $("link").focus({ preventScroll: true }); $("link").select();
+    }
   });
 
   // panel lateral
   $("asunto").value = doc.title || "";
   $("p-asunto").textContent = doc.title || "(sin asunto)";
+  btnActivo = null;
   const btn = doc.querySelector(".btn a");
   if (btn) { const h = btn.getAttribute("href") || ""; $("link").value = LINK_OK.test(h) ? h : ""; }
   else $("link").value = "";
@@ -1079,9 +1111,54 @@ $("frame").addEventListener("load", () => {
 window.addEventListener("resize", () => requestAnimationFrame(fitFrame));
 
 $("asunto").addEventListener("input", () => { if (!doc) return; doc.title = $("asunto").value; $("p-asunto").textContent = $("asunto").value || "(sin asunto)"; sync(); });
+// Eliminar secciones: al pasar el mouse por un bloque del cuerpo aparece «Eliminar».
+// Bloques: todo lo que va directo en el cuerpo, y el botón que va dentro de un recuadro.
+function activarBorrar(d) {
+  const cuerpo = d.querySelector("td.pad");
+  if (!cuerpo) return;
+  const del = d.createElement("button");
+  del.id = "edit-ui-del"; del.type = "button"; del.title = "Eliminar esta sección";
+  del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Eliminar';
+  d.body.appendChild(del);
+  let actual = null;
+  const bloque = el => {
+    if (!el || !cuerpo.contains(el) || el === cuerpo) return null;
+    const enRecuadro = el.closest("td.box table");
+    if (enRecuadro && enRecuadro.querySelector(".btn")) return enRecuadro;
+    while (el.parentElement && el.parentElement !== cuerpo) el = el.parentElement;
+    return el.parentElement === cuerpo ? el : null;
+  };
+  const mostrar = b => {
+    if (actual === b) return;
+    if (actual) actual.classList.remove("edit-sel");
+    actual = b;
+    if (!b) { del.style.display = "none"; return; }
+    b.classList.add("edit-sel");
+    const r = b.getBoundingClientRect(), w = d.defaultView;
+    del.style.display = "inline-flex";
+    del.style.top = (r.top + w.scrollY - 13) + "px";
+    del.style.left = (r.right + w.scrollX - del.offsetWidth + 6) + "px";
+  };
+  d.addEventListener("mouseover", e => { if (e.target.closest("#edit-ui-del")) return; mostrar(bloque(e.target)); });
+  d.addEventListener("mouseleave", () => mostrar(null));
+  // En celular / touch: tocar un bloque lo selecciona.
+  d.addEventListener("touchstart", e => { if (!e.target.closest("#edit-ui-del")) mostrar(bloque(e.target)); }, { passive: true });
+  del.addEventListener("mousedown", e => e.preventDefault());
+  del.addEventListener("click", e => {
+    e.preventDefault(); e.stopPropagation();
+    if (!actual) return;
+    const b = actual; mostrar(null); b.remove();
+    btnActivo = null;
+    const a = d.querySelector(".btn a");
+    $("link").value = a && LINK_OK.test(a.getAttribute("href") || "") ? a.getAttribute("href") : "";
+    revisarLink(); syncAhora(); setTimeout(fitFrame, 30);
+  });
+}
 // Devuelve true si el botón del correo todavía no tiene un link que funcione.
+let btnActivo = null;
+const botonActivo = () => doc && (btnActivo && doc.contains(btnActivo) ? btnActivo : doc.querySelector(".btn a"));
 function revisarLink() {
-  const a = doc && doc.querySelector(".btn a");
+  const a = botonActivo();
   $("link-hint").hidden = !!a;
   $("link-lbl").textContent = a ? `Link del botón «${a.textContent.trim()}»` : "Link del correo";
   if (!a) { $("falta-link").hidden = true; $("link").classList.remove("sin-link"); return false; }
@@ -1094,7 +1171,7 @@ function revisarLink() {
 $("link").addEventListener("input", () => {
   if (!doc) return;
   const url = $("link").value.trim();
-  let a = doc.querySelector(".btn a");
+  let a = botonActivo();
   if (!a && LINK_OK.test(url)) {
     const firma = [...doc.querySelectorAll("p.txt")].find(p => /Tu equipo Lexy/.test(p.textContent));
     const cuerpo = doc.querySelector("td.pad");
@@ -1171,7 +1248,9 @@ $("disenar").onclick = async () => {
       const { text } = await sample(promptDisenar(marcado), { cache: false });
       d = parse(text.replace(/^```\w*\n?|```\s*$/g, ""));
       // Si Claude dejó fuera algún recuadro pedido, se agregan los del texto original después del primer párrafo.
-      if (cuentaDestacados(marcado) > d.blocks.filter(b => b.k === "destacado").length) {
+      const conBoton = bs => bs.filter(b => b.k === "destacado" && /\[\s*bot[oó]n\s*:/i.test(b.t)).length;
+      if (cuentaDestacados(marcado) > d.blocks.filter(b => b.k === "destacado").length
+          || conBoton(parse(marcado).blocks) > conBoton(d.blocks)) {
         d.blocks = d.blocks.filter(b => b.k !== "destacado");
         const dest = parse(marcado).blocks.filter(b => b.k === "destacado");
         const i = d.blocks.findIndex(b => b.k === "p");
