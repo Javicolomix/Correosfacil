@@ -344,6 +344,7 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
     <div class="agregar" id="texto-tip">
       <div class="ag-row">
         <span class="ag-t">Agregar</span>
+        <button type="button" class="marca" data-m="texto"><span class="ag-i">¶</span>Texto</button>
         <button type="button" class="marca" data-m="titulo"><span class="ag-i">T</span>Título</button>
         <button type="button" class="marca" data-m="cuadro"><span class="ag-i">▢</span>Recuadro</button>
         <button type="button" class="marca" data-m="boton"><span class="ag-i">◉</span>Botón</button>
@@ -1090,7 +1091,9 @@ function basico(src) {
   const esBtn = p => /^@@BOTON\d+@@$/.test(p);
   const esTexto = p => !/^@@(DEST|BOTON|SUB|LINEA)\d+@@$/.test(p);
   const nro = p => +p.match(/\d+/)[0];
-  const iT = titulo ? -1 : paras.findIndex(esTexto);
+  // Sin {{título}}: el título sale solo de la 1.ª frase únicamente si no se usó ninguna marca.
+  const conMarcas = botones.length || dests.length || lineas.length;
+  const iT = titulo || conMarcas ? -1 : paras.findIndex(esTexto);
   if (iT >= 0) {
     const otros = paras.filter(esTexto).length;
     if (paras[iT].length <= 90 && otros > 1) titulo = paras.splice(iT, 1)[0].replace(/[.:]$/, "");
@@ -1561,7 +1564,10 @@ document.querySelectorAll(".marca").forEach(b => b.onclick = () => {
   const sel = v.slice(i, j), antes = v.slice(0, i), nl = antes && !antes.endsWith("\n") ? "\n" : "";
   const m = b.dataset.m;
   // Lo que va entre ⟦ ⟧ queda seleccionado: se escribe encima y reemplaza el «Escribe aquí…».
-  let ins = m === "cuadro" ? `${nl}{{cuadro destacado}}\n${sel || "⟦Escribe aquí el título del recuadro⟧\nEscribe aquí el texto del recuadro"}\n{{cuadro destacado}}\n`
+  // Texto libre: un párrafo nuevo, separado por una línea en blanco.
+  const nl2 = !antes.trim() ? "" : antes.endsWith("\n\n") ? "" : antes.endsWith("\n") ? "\n" : "\n\n";
+  let ins = m === "texto" ? `${nl2}${sel || "⟦Escribe aquí tu texto⟧"}\n`
+    : m === "cuadro" ? `${nl}{{cuadro destacado}}\n${sel || "⟦Escribe aquí el título del recuadro⟧\nEscribe aquí el texto del recuadro"}\n{{cuadro destacado}}\n`
     : m === "titulo" ? `${nl}{{título}} ${sel || "⟦Escribe aquí el título⟧"}`
     : m === "linea" ? `${nl}{{línea de tiempo}}\n${sel || "⟦Escribe aquí la etapa 1⟧\nEscribe aquí la etapa 2 *\nEscribe aquí la etapa 3"}\n{{línea de tiempo}}\n`
     : `${nl}{{botón}} ${sel || "⟦Escribe aquí el texto del botón⟧ https://"}`;
