@@ -903,20 +903,33 @@ function cerrarRecuadros(out) {
 }
 // El saludo lo pone la plantilla: si alguien lo escribe igual al comienzo, se quita.
 const sinSaludo = t => t.replace(/^\s*(hola|estimad[oa]s?|querid[oa])\b[^\n]{0,40}?(\{\{[^}]*\}\}|[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\s*[:,!]?[ \t]*(\n|$)/i, "");
+// Marcas mal escritas: {cuadro destacado}, [botón], {{{título}}}, (( … )) → {{…}}
+const normalizarMarcas = t => t.replace(/[\[{(]{1,3}\s*(\/?\s*(?:cuadro destacado|recuadro destacado|cuadro|destacar|destacado|bot[oó]n|t[ií]tulo))\s*[\]})]{1,3}/gi,
+  (m, a) => `{{${a.replace(/\s+/g, " ").trim()}}}`);
 function marcarDestacados(src) {
-  let out = cerrarRecuadros(sinSaludo(src.replace(/\r/g, "")));
+  let out = cerrarRecuadros(normalizarMarcas(sinSaludo(src.replace(/\r/g, ""))));
   out = out.replace(/\{\{([^}\/]*)\}\}([\s\S]*?)\{\{\s*\/[^}]*\}\}/g, (m, a, t) => tipoMarca(a) ? lineaMarca(tipoMarca(a), t) : m);
   out = out.replace(/\{\{([^}:]*):([^}]*)\}\}/g, (m, a, t) => tipoMarca(a) ? lineaMarca(tipoMarca(a), t) : m);
   const res = [];
-  let pendiente = null;
+  let pendiente = null, bloque = null;
+  // Recuadro abierto sin cerrar: toma las líneas siguientes hasta una línea en blanco.
+  const cerrarBloque = () => { if (bloque && bloque.length) res.push(`\n\nDestacado: ${recuadroConBoton(bloque.join("\n"))}\n\n`); bloque = null; };
   for (const raw of out.split("\n")) {
+    if (bloque) {
+      const esOtraMarca = /\{\{([^}]*)\}\}/.test(raw) && !/\{\{\s*(bot[oó]n|button|cta)\b/i.test(raw) && [...raw.matchAll(/\{\{([^}]*)\}\}/g)].some(m => tipoMarca(m[1]));
+      if (raw.trim() && !esOtraMarca) { bloque.push(raw); continue; }
+      cerrarBloque();
+      if (!raw.trim()) { res.push(raw); continue; }
+    }
     let k = null;
     const line = raw.replace(/\{\{([^}]*)\}\}/g, (m, a) => tipoMarca(a) ? (k = k || tipoMarca(a), "") : m).trim();
+    if (k === "Destacado" && !line) { bloque = []; continue; }
     if (k && !line) { pendiente = k; continue; }
     if (pendiente && line && !k) { k = pendiente; pendiente = null; }
     if (k && line) res.push(lineaMarca(k, line));
     else res.push(raw);
   }
+  cerrarBloque();
   if (pendiente === "Botón") res.push("\n\nBotón: \n\n");
   return res.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
