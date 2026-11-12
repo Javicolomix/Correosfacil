@@ -1538,8 +1538,7 @@ function vivoAhora() {
   clearTimeout(vivoT);
   if ($("paso-escribir").hidden) return;
   const texto = $("texto").value.trim();
-  const d = texto ? basico(texto) : { tipo: "", asunto: "", pre: "", titulo: "Tu título aparecerá aquí",
-    blocks: [{ k: "p", t: "Escribe a la izquierda y aquí verás cómo va quedando tu correo." }, { k: "firma" }] };
+  const d = texto ? basico(texto) : { tipo: "", asunto: "", pre: "", titulo: "", blocks: [{ k: "firma" }] };
   const html = previewHtml(emailHtml(d, headerSel));
   if (html === vivoUltimo) return;
   vivoUltimo = html;
