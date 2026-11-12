@@ -356,8 +356,9 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
     <div class="agregar" id="texto-tip">
       <div class="ag-row">
         <span class="ag-t">Agregar</span>
-        <button type="button" class="marca" data-m="texto"><span class="ag-i">¶</span>Texto</button>
         <button type="button" class="marca" data-m="titulo"><span class="ag-i">T</span>Título</button>
+        <button type="button" class="marca" data-m="subtitulo"><span class="ag-i" style="font-size:10px">T</span>Subtítulo</button>
+        <button type="button" class="marca" data-m="texto"><span class="ag-i">¶</span>Texto</button>
         <button type="button" class="marca" data-m="cuadro"><span class="ag-i">▢</span>Recuadro</button>
         <button type="button" class="marca" data-m="boton"><span class="ag-i">◉</span>Botón</button>
         <button type="button" class="marca" data-m="linea"><span class="ag-i">⋯</span>Línea de tiempo</button>
@@ -369,7 +370,7 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
           <div class="cm">
             <pre><i>{{título}}</i> Tu cuota vence pronto</pre>
             <div class="r-tit">Tu cuota vence <em>pronto</em></div>
-            <small>El 1.º es el título; los siguientes, subtítulos.</small>
+            <small>Para un subtítulo usa <b>{{subtítulo}}</b>: sale más chico y de un color.</small>
           </div>
           <div class="cm">
             <pre><i>{{cuadro destacado}}</i>
@@ -708,7 +709,7 @@ const E = {
   hi: t => '<p class="txt hi" style="margin:0 0 10px;font-size:20px;line-height:1.4;color:#4f5157;">'
     + esc(t).replace(/\{\{[^}]+\}\}/g, v => `<span class="name" style="font-weight:700;color:#0b013c;border-bottom:3px solid #f0a23b;padding-bottom:1px;">${v}</span>`) + '</p>',
   h1: t => `<h1 class="h1" style="margin:0 0 14px;font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-0.5px;color:#0b013c;">${inline(acentuar(t))}</h1>`,
-  sub: t => `<h2 class="h2 lt" style="margin:28px 0 10px;font-size:21px;line-height:1.25;font-weight:700;letter-spacing:-0.3px;color:#0b013c;">${inline(acentuar(t))}</h2>`,
+  sub: t => `<h2 class="h2 lt" style="margin:18px 0 8px;font-size:19px;line-height:1.3;font-weight:700;letter-spacing:-0.2px;color:#27198e;">${inline(t)}</h2>`,
   p: t => `<p class="txt" style="margin:0 0 16px;color:#4f5157;">${inline(t)}</p>`,
   note: t => `<p class="txt" style="margin:0 0 16px;font-size:13px;color:#7a7d87;">${inline(t)}</p>`,
   box: (k, v, m) => {
@@ -848,7 +849,7 @@ const TPL = `<!DOCTYPE html>
     .pad{padding:28px 22px 8px !important;}
     .padf{padding:26px 22px !important;}
     .h1{font-size:24px !important;}
-    .h2{font-size:19px !important;}
+    .h2{font-size:17px !important;}
     .hi{font-size:18px !important;}
     .v{font-size:28px !important;}
     .tl-t{font-size:11px !important;padding:6px 2px 0 !important;}
@@ -907,7 +908,7 @@ const TPL = `<!DOCTYPE html>
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
 const KEYS = {
   "tipo": "tipo", "asunto": "asunto", "vista previa": "pre", "preheader": "pre",
-  "titulo": "titulo", "dato": "dato", "recuadro": "dato", "dato clave": "dato",
+  "titulo": "titulo", "subtitulo": "sub", "dato": "dato", "recuadro": "dato", "dato clave": "dato",
   "linea de tiempo": "linea", "etapas": "linea", "boton": "boton", "nota": "nota",
   "pasos": "pasos", "firma": "firma", "parrafo": "parrafo",
   "destacado": "destacado", "destacar": "destacado", "cuadro destacado": "destacado", "recuadro destacado": "destacado"
@@ -931,6 +932,7 @@ function parse(src) {
       else if (key === "asunto") d.asunto = v;
       else if (key === "pre") d.pre = v;
       else if (key === "titulo") { if (d.titulo) { if (v) d.blocks.push({ k: "sub", t: v }); } else d.titulo = v; }
+      else if (key === "sub") { if (v) d.blocks.push({ k: "sub", t: v }); }
       else if (key === "parrafo") { if (v) d.blocks.push({ k: "p", t: v }); }
       else if (key === "destacado" || (key === "dato" && !v.includes("|"))) { if (v) d.blocks.push({ k: "destacado", t: v }); }
       else if (key === "dato") { const [k, val, det] = parts(v); d.blocks.push({ k: "dato", r: k || "", v: val || "", m: det || "" }); }
@@ -975,6 +977,7 @@ const tipoMarca = inner => {
   if (/^(linea de tiempo|linea del tiempo|timeline|etapas)\b/.test(n)) return "Línea de tiempo";
   if (/destac|cuadro/.test(n)) return "Destacado";
   if (/^(boton|button|cta)\b/.test(n)) return "Botón";
+  if (/^(sub ?titulo|subtitle|bajada)\b/.test(n)) return "Subtítulo";
   if (/^(titulo|title)\b/.test(n)) return "Título";
   return null;
 };
@@ -1039,7 +1042,7 @@ function cerrarRecuadros(out) {
 // El saludo lo pone la plantilla: si alguien lo escribe igual al comienzo, se quita.
 const sinSaludo = t => t.replace(/^\s*(hola|estimad[oa]s?|querid[oa])\b[^\n]{0,40}?(\{\{[^}]*\}\}|[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\s*[:,!]?[ \t]*(\n|$)/i, "");
 // Marcas mal escritas: {cuadro destacado}, [botón], {{{título}}}, (( … )) → {{…}}
-const normalizarMarcas = t => t.replace(/[\[{(]{1,3}\s*(\/?\s*(?:l[ií]nea de tiempo|cuadro destacado|recuadro destacado|cuadro|destacar|destacado|bot[oó]n|t[ií]tulo))\s*[\]})]{1,3}/gi,
+const normalizarMarcas = t => t.replace(/[\[{(]{1,3}\s*(\/?\s*(?:l[ií]nea de tiempo|subt[ií]tulo|cuadro destacado|recuadro destacado|cuadro|destacar|destacado|bot[oó]n|t[ií]tulo))\s*[\]})]{1,3}/gi,
   (m, a) => `{{${a.replace(/\s+/g, " ").trim()}}}`);
 function marcarDestacados(src) {
   let out = cerrarRecuadros(normalizarMarcas(sinSaludo(src.replace(/\r/g, ""))));
@@ -1085,6 +1088,8 @@ function basico(src) {
     if (ln) { const b = parse("Línea de tiempo: " + ln[1]).blocks[0]; if (!b || !b.items.length) return ""; lineas.push(b); return `@@LINEA${lineas.length - 1}@@`; }
     const ds = l.match(/^\s*destacado\s*:\s*(.*)$/i);
     if (ds) { dests.push(ds[1].trim()); return `@@DEST${dests.length - 1}@@`; }
+    const st = l.match(/^\s*subt[ií]tulo\s*:\s*(.*)$/i);
+    if (st) { subs.push(st[1].trim()); return `@@SUB${subs.length - 1}@@`; }
     const t = l.match(/^\s*t[ií]tulo\s*:\s*(.*)$/i);
     if (t) {
       if (!titulo) { titulo = t[1].trim(); return ""; }
@@ -1103,20 +1108,11 @@ function basico(src) {
   const esBtn = p => /^@@BOTON\d+@@$/.test(p);
   const esTexto = p => !/^@@(DEST|BOTON|SUB|LINEA)\d+@@$/.test(p);
   const nro = p => +p.match(/\d+/)[0];
-  // Sin {{título}}: el título sale solo de la 1.ª frase únicamente si no se usó ninguna marca.
-  const conMarcas = botones.length || dests.length || lineas.length;
-  const iT = titulo || conMarcas ? -1 : paras.findIndex(esTexto);
-  if (iT >= 0) {
-    const otros = paras.filter(esTexto).length;
-    if (paras[iT].length <= 90 && otros > 1) titulo = paras.splice(iT, 1)[0].replace(/[.:]$/, "");
-    else {
-      const m = paras[iT].match(/^(.{10,90}?[.!?])\s+(.*)$/);
-      if (m) { titulo = m[1].replace(/\.$/, ""); paras[iT] = m[2]; } else { titulo = paras.splice(iT, 1)[0]; }
-    }
-  }
+  // El título solo existe si se pidió con {{título}}: el texto libre queda siempre como texto.
   const tituloTxt = titulo.replace(/\*/g, "");
   const primero = paras.find(esTexto) || "";
-  const d = { tipo: "informativo", asunto: tituloTxt.length <= 60 ? tituloTxt : tituloTxt.slice(0, 58).replace(/\s+\S*$/, "") + "…", pre: primero.split(/(?<=[.!?])\s/)[0].slice(0, 110), titulo,
+  const base = tituloTxt || (primero.split(/(?<=[.!?])\s/)[0] || "").replace(/[.:]$/, "");
+  const d = { tipo: "informativo", asunto: base.length <= 60 ? base : base.slice(0, 58).replace(/\s+\S*$/, "") + "…", pre: primero.split(/(?<=[.!?])\s/)[0].slice(0, 110), titulo,
     blocks: paras.map(t => esDest(t) ? { k: "destacado", t: dests[+t.match(/\d+/)[0]] }
       : esBtn(t) ? botones[nro(t)]
       : /^@@SUB\d+@@$/.test(t) ? { k: "sub", t: subs[nro(t)] }
@@ -1189,7 +1185,8 @@ Responde SOLO con el borrador, sin explicaciones ni bloques de código, una inst
 Tipo: informativo | cta | hito
 Asunto: (menos de 60 caracteres)
 Vista previa: (una frase que complemente el asunto)
-Título: (una sola idea; OBLIGATORIO: el título va en dos colores, primero oscuro y al final morado; pon entre *asteriscos* la parte final clave, de 1 a 4 palabras, que irá en morado (nunca al comienzo); por ejemplo «Tu cuota vence el *10 de diciembre*» o «Ya tienes tu *Portal del Cliente*»)
+Título: (SOLO si el texto trae una línea «Título:»; si no la trae, no pongas título. Una sola idea; OBLIGATORIO: el título va en dos colores, primero oscuro y al final morado; pon entre *asteriscos* la parte final clave, de 1 a 4 palabras, que irá en morado (nunca al comienzo); por ejemplo «Tu cuota vence el *10 de diciembre*» o «Ya tienes tu *Portal del Cliente*»)
+Subtítulo: texto   (solo si el texto trae líneas «Subtítulo:»; van en el mismo lugar)
 (párrafos de texto libre, separados por una línea en blanco; **doble asterisco** para negrita, úsalo poco)
 Línea de tiempo: Etapa 1 | Etapa 2* | Etapa 3   (en hitos, siempre; de 3 a 5 etapas con nombres cortos de 1 a 4 palabras; el asterisco marca la etapa actual)
 Dato: Rótulo | Dato clave | Detalle   (opcional: recuadro con un monto, fecha o plazo; máximo 2)
@@ -1199,7 +1196,7 @@ Botón: Texto del botón | link   (OBLIGATORIO cuando el cliente tiene que hacer
 Nota: (opcional, texto chico)
 Firma   (opcional: agrega «Tu equipo Lexy»)
 
-Si el texto trae varias líneas «Título:», la primera es el título y las demás son subtítulos: déjalas como líneas «Título:» en su lugar. Si trae una línea «Línea de tiempo:», mantenla igual (mismas etapas y el * en la actual). Si el texto trae una línea «Título:», ese es el título: úsalo tal cual y solo agrégale los *asteriscos*. Si trae una línea «Botón:», el correo lleva ese botón con ese texto y ese link (si viene sin texto, ponle uno según la acción; si viene sin link, FALTA_LINK).
+Si el texto trae líneas «Subtítulo:», mantenlas como «Subtítulo:» en su lugar. Si el texto trae varias líneas «Título:», la primera es el título y las demás son subtítulos: déjalas como líneas «Título:» en su lugar. Si trae una línea «Línea de tiempo:», mantenla igual (mismas etapas y el * en la actual). Si el texto trae una línea «Título:», ese es el título: úsalo tal cual y solo agrégale los *asteriscos*. Si trae una línea «Botón:», el correo lleva ese botón con ese texto y ese link (si viene sin texto, ponle uno según la acción; si viene sin link, FALTA_LINK).
 
 Texto del correo:
 ${texto}`;
@@ -1656,6 +1653,7 @@ document.querySelectorAll(".marca").forEach(b => b.onclick = () => {
   let ins = m === "texto" ? `${nl2}${sel || "⟦Escribe aquí tu texto⟧"}\n`
     : m === "cuadro" ? `${nl}{{cuadro destacado}}\n${sel || "⟦Escribe aquí el título del recuadro⟧\nEscribe aquí el texto del recuadro"}\n{{cuadro destacado}}\n`
     : m === "titulo" ? `${nl}{{título}} ${sel || "⟦Escribe aquí el título⟧"}`
+    : m === "subtitulo" ? `${nl}{{subtítulo}} ${sel || "⟦Escribe aquí el subtítulo⟧"}`
     : m === "linea" ? `${nl}{{línea de tiempo}}\n${sel || "⟦Escribe aquí la etapa 1⟧\nEscribe aquí la etapa 2 *\nEscribe aquí la etapa 3"}\n{{línea de tiempo}}\n`
     : `${nl}{{botón}} ${sel || "⟦Escribe aquí el texto del botón⟧ | Pega aquí el link"}`;
   const a0 = ins.indexOf("⟦"), a1 = ins.indexOf("⟧") - 1;
@@ -1712,7 +1710,8 @@ $("disenar").onclick = async () => {
       }
       // Título pedido con {{título}}: se respeta (Claude solo puede agregarle los *asteriscos*).
       const tPedido = (marcado.match(/^\s*t[ií]tulo\s*:\s*(.+)$/im) || [])[1];
-      if (tPedido && norm(d.titulo.replace(/\*/g, "")) !== norm(tPedido.replace(/\*/g, ""))) d.titulo = tPedido.trim();
+      if (!tPedido) d.titulo = "";
+      else if (norm(d.titulo.replace(/\*/g, "")) !== norm(tPedido.replace(/\*/g, ""))) d.titulo = tPedido.trim();
       // Botón pedido con {{botón}}: si Claude no lo puso, se agrega antes de la firma; su texto y link mandan.
       const bPedidos = parse(marcado).blocks.filter(b => b.k === "boton");
       if (bPedidos.length) {
