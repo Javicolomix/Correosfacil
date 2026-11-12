@@ -68,7 +68,14 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .compose{max-width:760px;margin:12px auto 0;padding:28px;display:grid;gap:16px}
 .compose h2{font-size:26px}
 .compose > p{color:var(--muted)}
-#texto{min-height:260px;font-size:17px;line-height:1.6;padding:16px 18px;border-radius:12px}
+/* Caja de escritura: el saludo va fijo arriba (se agrega solo) y el texto debajo */
+.redactar{border:1.5px solid var(--line);border-radius:12px;background:#fff;transition:border-color .15s}
+.redactar:focus-within{border-color:var(--btn)}
+.saludo{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px 0;font-size:17px;color:#4f5157;user-select:none}
+.saludo b{color:var(--navy);border-bottom:3px solid #f0a23b;padding-bottom:1px}
+.saludo small{font-size:12px;color:var(--muted);background:var(--soft);padding:3px 9px;border-radius:999px}
+#texto{min-height:240px;font-size:17px;line-height:1.6;padding:8px 18px 16px;border:0;border-radius:0 0 12px 12px}
+#texto:focus{outline:none}
 .compose .go{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .compose .opts{display:grid;gap:6px}
 .compose .opts span{font-size:13px;color:var(--muted)}
@@ -276,7 +283,10 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
     <h2>Escribe el texto de tu correo</h2>
     <p>Cuéntalo como te salga: qué pasó, qué tiene que hacer el cliente, montos, fechas y links. Al apretar Diseñar queda con el formato y el diseño de Lexy.</p>
     <label class="lbl" for="texto" hidden>Texto del correo</label>
-    <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
+    <div class="redactar">
+      <div class="saludo" aria-hidden="true"><span>Hola, <b>{{nombre cliente}}</b>:</span><small>El saludo se agrega solo · no lo repitas</small></div>
+      <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
+    </div>
     <div class="marcas" id="texto-tip">
       <p class="marcas-t">Marcas opcionales <span>· toca una para insertarla donde está el cursor</span></p>
       <div class="marcas-g">
@@ -846,8 +856,10 @@ function cerrarRecuadros(out) {
     out = out.slice(0, a.i) + `\n\nDestacado: ${recuadroConBoton(out.slice(a.end, b.i))}\n\n` + out.slice(b.end);
   return out;
 }
+// El saludo lo pone la plantilla: si alguien lo escribe igual al comienzo, se quita.
+const sinSaludo = t => t.replace(/^\s*(hola|estimad[oa]s?|querid[oa])\b[^\n]{0,40}?(\{\{[^}]*\}\}|[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\s*[:,!]?[ \t]*(\n|$)/i, "");
 function marcarDestacados(src) {
-  let out = cerrarRecuadros(src.replace(/\r/g, ""));
+  let out = cerrarRecuadros(sinSaludo(src.replace(/\r/g, "")));
   out = out.replace(/\{\{([^}\/]*)\}\}([\s\S]*?)\{\{\s*\/[^}]*\}\}/g, (m, a, t) => tipoMarca(a) ? lineaMarca(tipoMarca(a), t) : m);
   out = out.replace(/\{\{([^}:]*):([^}]*)\}\}/g, (m, a, t) => tipoMarca(a) ? lineaMarca(tipoMarca(a), t) : m);
   const res = [];
