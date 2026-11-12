@@ -222,24 +222,47 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .pasos-c li::before{counter-increment:p;content:counter(p);flex:none;width:22px;height:22px;line-height:22px;border-radius:50%;
   background:var(--soft);color:var(--btn);font-size:12px;font-weight:700;text-align:center;transform:translateY(-1px)}
 .pasos-c b{color:var(--navy)}
-.marcas{margin:6px 0 2px;border:1px solid #e3e1f3;border-radius:12px;overflow:hidden}
-.marcas-t{margin:0;padding:9px 14px;background:var(--soft);font-size:14px;font-weight:700;color:var(--navy);line-height:1.4}
-.marcas-t span{display:block;font-weight:400;font-size:13px;color:var(--muted)}
-.mf{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:8px 16px;align-items:center;padding:10px 14px;border-top:1px solid #e3e1f3}
-.mf-txt b{display:block;color:var(--navy);font-size:14px;margin-bottom:5px}
-.mf-txt p{margin:0 0 8px;font-size:13px;line-height:1.45;color:var(--muted)}
-.mf-txt pre{margin:0;font-family:var(--mono);font-size:12px;line-height:1.5;background:#15122b;color:#e6e3fb;padding:8px 10px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
-.mf-txt pre i{font-style:normal;color:#b9aefe}
-.mf-res{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.mf-lbl{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-.r-tit{font:700 17px/1.2 Arial,sans-serif;color:#0b013c}.r-tit em{font-style:normal;color:#4429cc}
-.r-box{background:#f0f0fb;border-radius:8px;padding:9px 11px;font:13px/1.4 Arial,sans-serif;color:#4f5157;width:100%}
-.r-box strong{display:block;color:#0b013c}
-.r-btn{display:inline-block;background:#4429cc;color:#fff;border-radius:7px;padding:7px 13px;font:700 13px Arial,sans-serif}
-.marca{font:inherit;font-size:12.5px;font-weight:700;color:var(--btn);background:#fff;border:1px solid var(--lav);border-radius:999px;padding:4px 11px;cursor:pointer}
-.marca:hover{background:var(--soft)}
+.fmt h3{font-size:15px}
+.fmt-g{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.fmt-g button{height:38px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:16px;cursor:pointer}
+.fmt-g button:hover{background:var(--soft);border-color:var(--lav)}
+.fmt-g sup{font-size:10px;margin-left:1px}
+.sw{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.sw button,.sw-own{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #d6d6de;cursor:pointer;padding:0}
+.sw button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--btn)}
+.sw-own{position:relative;display:grid;place-items:center;background:conic-gradient(#f44,#fd4,#4d8,#4af,#a4f,#f44);overflow:hidden}
+.sw-own span{font-weight:700;color:#fff;text-shadow:0 0 3px #0008;pointer-events:none}
+.sw-own input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.agregar{display:grid;gap:8px}
+.ag-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ag-t{font-size:13px;font-weight:700;color:var(--navy);margin-right:2px}
+.marca{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:13.5px;font-weight:700;color:var(--navy);background:#fff;
+  border:1px solid #dcd8f3;border-radius:999px;padding:6px 13px 6px 6px;cursor:pointer;transition:background .15s,border-color .15s}
+.marca:hover{background:var(--soft);border-color:var(--lav)}
 .marca:focus-visible{outline:2px solid var(--btn);outline-offset:2px}
-@media (max-width:620px){.mf{grid-template-columns:1fr}}
+.ag-i{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--soft);color:var(--btn);font-size:12px;line-height:1}
+.marca:hover .ag-i{background:#fff}
+.como{border:1px solid #e3e1f3;border-radius:12px;background:#fff}
+.como summary{cursor:pointer;padding:9px 14px;font-size:13px;font-weight:700;color:var(--btn);list-style:none}
+.como summary::-webkit-details-marker{display:none}
+.como summary::before{content:"▸";display:inline-block;margin-right:6px;transition:transform .15s}
+.como[open] summary::before{transform:rotate(90deg)}
+.como summary span{font-weight:400;color:var(--muted);margin-left:6px}
+.como-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:0 12px 12px}
+.cm{display:grid;gap:8px;align-content:start;border:1px solid #eeecf8;border-radius:10px;padding:10px}
+.cm pre{margin:0;font-family:var(--mono);font-size:11.5px;line-height:1.5;background:#15122b;color:#e6e3fb;padding:8px 10px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cm pre i{font-style:normal;color:#b9aefe}
+.cm small{font-size:11.5px;color:var(--muted);line-height:1.4}
+.r-tit{font:700 16px/1.2 Arial,sans-serif;color:#0b013c}.r-tit em{font-style:normal;color:#4429cc}
+.r-box{background:#f0f0fb;border-radius:8px;padding:8px 10px;font:12.5px/1.4 Arial,sans-serif;color:#4f5157}
+.r-box strong{display:block;color:#0b013c}
+.r-btn{justify-self:start;display:inline-block;background:#4429cc;color:#fff;border-radius:7px;padding:7px 13px;font:700 13px Arial,sans-serif}
+.r-tl{display:flex;align-items:center}
+.r-tl .d{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#f0f0fb;font-size:15px;flex:none}
+.r-tl .d.c{background:#4429cc;box-shadow:0 0 0 3px #d9d4fb}
+.r-tl .d.f{background:#f7f7f9;border:1px dashed #cfcfd8;opacity:.6}
+.r-tl .l{flex:1;height:2px;background:#e3e3e8}.r-tl .l.on{background:#4429cc}
+@media (max-width:620px){.como-g{grid-template-columns:1fr}}
 code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:1px 6px;border-radius:6px}
 
 .g-check{background:var(--soft);border-radius:14px;padding:22px;display:grid;gap:14px}
@@ -314,35 +337,44 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
       <div class="saludo" aria-hidden="true"><span>Hola, <b>{{nombre cliente}}</b>:</span><small>Se agrega solo</small></div>
       <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
     </div>
-    <div class="marcas" id="texto-tip">
-      <p class="marcas-t">Marcas opcionales</p>
-      <div class="mf">
-        <div class="mf-txt">
-          <b>Título</b>
-          <pre><i>{{título}}</i> Tu cuota vence pronto</pre>
-        </div>
-        <div class="mf-res"><div class="r-tit">Tu cuota vence <em>pronto</em></div>
-          <button type="button" class="marca" data-m="titulo">+ Insertar</button></div>
+    <div class="agregar" id="texto-tip">
+      <div class="ag-row">
+        <span class="ag-t">Agregar</span>
+        <button type="button" class="marca" data-m="titulo"><span class="ag-i">T</span>Título</button>
+        <button type="button" class="marca" data-m="cuadro"><span class="ag-i">▢</span>Recuadro</button>
+        <button type="button" class="marca" data-m="boton"><span class="ag-i">◉</span>Botón</button>
+        <button type="button" class="marca" data-m="linea"><span class="ag-i">⋯</span>Línea de tiempo</button>
       </div>
-      <div class="mf">
-        <div class="mf-txt">
-          <b>Recuadro destacado</b>
-          <pre><i>{{cuadro destacado}}</i>
+      <details class="como">
+        <summary>¿Cómo se escriben? <span>Puedes usar cada una las veces que quieras</span></summary>
+        <div class="como-g">
+          <div class="cm">
+            <pre><i>{{título}}</i> Tu cuota vence pronto</pre>
+            <div class="r-tit">Tu cuota vence <em>pronto</em></div>
+            <small>El 1.º es el título; los siguientes, subtítulos.</small>
+          </div>
+          <div class="cm">
+            <pre><i>{{cuadro destacado}}</i>
 Importante
-Tu pago puede tardar 48 horas.
+Tu pago tarda 48 horas.
 <i>{{cuadro destacado}}</i></pre>
+            <div class="r-box"><strong>Importante</strong>Tu pago tarda 48 horas.</div>
+          </div>
+          <div class="cm">
+            <pre><i>{{botón}}</i> Pagar mi cuota https://lexy.cl/</pre>
+            <span class="r-btn">Pagar mi cuota</span>
+          </div>
+          <div class="cm">
+            <pre><i>{{línea de tiempo}}</i>
+Solicitud presentada
+Admisibilidad *
+Liquidación
+<i>{{línea de tiempo}}</i></pre>
+            <div class="r-tl"><span class="d">📝</span><span class="l on"></span><span class="d c">✅</span><span class="l"></span><span class="d f">🏛️</span></div>
+            <small>El * marca la etapa actual. Los emojis se eligen solos.</small>
+          </div>
         </div>
-        <div class="mf-res"><div class="r-box"><strong>Importante</strong>Tu pago puede tardar 48 horas.</div>
-          <button type="button" class="marca" data-m="cuadro">+ Insertar</button></div>
-      </div>
-      <div class="mf">
-        <div class="mf-txt">
-          <b>Botón</b>
-          <pre><i>{{botón}}</i> Pagar mi cuota https://lexy.cl/</pre>
-        </div>
-        <div class="mf-res"><span class="r-btn">Pagar mi cuota</span>
-          <button type="button" class="marca" data-m="boton">+ Insertar</button></div>
-      </div>
+      </details>
     </div>
     <div class="go">
       <div class="opts">
@@ -399,6 +431,30 @@ Tu pago puede tardar 48 horas.
         <button class="btn" id="copiar" type="button"><span>Copiar HTML</span></button>
         <a class="btn ghost" href="https://email-tester-indol.vercel.app/" target="_blank" rel="noopener noreferrer">Probar mi correo ↗</a>
         <p class="hint">En el tester usa el código <code class="k">lexy123</code>, tu correo, el asunto y pega el HTML en Mensaje.</p>
+      </div>
+
+      <div class="card fmt" id="fmt">
+        <h3>Formato</h3>
+        <div class="fmt-g" role="toolbar" aria-label="Formato del texto">
+          <button type="button" data-f="bold" title="Negrita (selecciona el texto)"><b>B</b></button>
+          <button type="button" data-f="italic" title="Cursiva (selecciona el texto)"><i style="font-family:Georgia,serif">I</i></button>
+          <button type="button" data-f="menos" title="Letra más chica">A<sup>−</sup></button>
+          <button type="button" data-f="mas" title="Letra más grande">A<sup>+</sup></button>
+        </div>
+        <p class="hint" id="fmt-hint">Selecciona un texto del correo y aprieta un botón.</p>
+        <div id="fmt-color">
+          <span class="lbl" id="fmt-btn-lbl">Color del botón</span>
+          <div class="sw" role="group" aria-label="Color del botón">
+            <button type="button" data-c="#4429cc" style="background:#4429cc" title="Morado Lexy"></button>
+            <button type="button" data-c="#27198e" style="background:#27198e" title="Índigo"></button>
+            <button type="button" data-c="#0b013c" style="background:#0b013c" title="Azul noche"></button>
+            <button type="button" data-c="#9d90fc" data-t="#0b013c" style="background:#9d90fc" title="Lavanda"></button>
+            <button type="button" data-c="#1f9d55" style="background:#1f9d55" title="Verde"></button>
+            <button type="button" data-c="#f0a23b" data-t="#0b013c" style="background:#f0a23b" title="Naranjo"></button>
+            <button type="button" data-c="#c62f3a" style="background:#c62f3a" title="Rojo"></button>
+            <label class="sw-own" title="Otro color"><input type="color" id="fmt-own" value="#4429cc"><span>+</span></label>
+          </div>
+        </div>
       </div>
 
       <div class="card">
@@ -536,6 +592,13 @@ const EJEMPLO = `{{título}} El tribunal declaró admisible tu solicitud de liqu
 
 Antes ya habíamos presentado la solicitud. Ahora se publica en el Boletín Concursal y se designa al liquidador, lo que toma unos 30 días hábiles; después viene la resolución de liquidación.
 
+{{línea de tiempo}}
+Solicitud presentada
+Admisibilidad *
+Publicación en el Boletín
+Liquidación
+{{línea de tiempo}}
+
 {{cuadro destacado}}
 No tienes que hacer nada por ahora
 Te avisaremos por este medio apenas el tribunal dicte la resolución de liquidación. Mientras, puedes revisar el detalle de tu proceso.
@@ -593,10 +656,29 @@ const acentuar = t => {
   return marca(pal[pal.length - (pal.length <= 3 ? 1 : 2)].index, fin);
 };
 
+// Emoji de cada etapa: el que venga escrito al inicio, o uno según lo que diga la etapa.
+const EMOJIS = [
+  [/(present|solicit|ingres|envi)/, "📝"], [/(admisib|acog|aprob|acept)/, "✅"], [/(boletin|public)/, "📰"],
+  [/(liquidador|veedor|sindic)/, "👤"], [/(audiencia|junta)/, "🗓️"], [/(tribunal|juez|resoluci|sentencia|demanda)/, "⚖️"],
+  [/(renegoci|propuesta|acuerdo|negoci)/, "🤝"], [/(liquidaci|remate|venta|bienes)/, "🏛️"], [/(pag|cuota|abono|transfer)/, "💳"],
+  [/(firm|mandato|contrato)/, "✍️"], [/(document|antecedent|archivo|papel)/, "📄"], [/(reuni|llamad|entrevista|asesor)/, "📞"],
+  [/(revis|evalua|analis|estudi)/, "🔍"], [/(espera|plazo|dias|tramit)/, "⏳"], [/(termin|fin|cierre|listo|libre|extin|alta)/, "🎉"],
+  [/(inicio|bienven|comienz|registro)/, "🚀"]
+];
+function emojiEtapa(t) {
+  t = String(t || "").trim();
+  const m = t.match(/^(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)\s*/u);
+  if (m) return [m[1], t.slice(m[0].length)];
+  const n = norm(t);
+  const e = EMOJIS.find(([r]) => r.test(n));
+  return [e ? e[1] : "📌", t];
+}
+
 const E = {
   hi: n => '<p class="txt hi" style="margin:0 0 10px;font-size:20px;line-height:1.4;color:#4f5157;">Hola, '
     + `<span class="name" style="font-weight:700;color:#0b013c;border-bottom:3px solid #f0a23b;padding-bottom:1px;">${esc(n)}</span>:</p>`,
   h1: t => `<h1 class="h1" style="margin:0 0 14px;font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-0.5px;color:#0b013c;">${inline(acentuar(t))}</h1>`,
+  sub: t => `<h2 class="h2 lt" style="margin:28px 0 10px;font-size:21px;line-height:1.25;font-weight:700;letter-spacing:-0.3px;color:#0b013c;">${inline(acentuar(t))}</h2>`,
   p: t => `<p class="txt" style="margin:0 0 16px;color:#4f5157;">${inline(t)}</p>`,
   note: t => `<p class="txt" style="margin:0 0 16px;font-size:13px;color:#7a7d87;">${inline(t)}</p>`,
   box: (k, v, m) => {
@@ -631,13 +713,16 @@ const E = {
   // Línea de tiempo: horizontal hasta 5 etapas (cabe en celular), vertical si son más.
   timeline: items => {
     const cur = items.findIndex(x => x.cur);
-    const st = i => cur < 0 ? "fut" : i < cur ? "done" : i === cur ? "cur" : "fut";
+    const st = i => cur < 0 ? (i === 0 ? "cur" : "fut") : i < cur ? "done" : i === cur ? "cur" : "fut";
+    items = items.map(x => { const [emo, t] = emojiEtapa(x.t); return { ...x, emo, t }; });
+    const EMO = "font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;";
     const dot = (s, i) => ({
-      done: `<div class="num" style="width:28px;height:28px;line-height:28px;border-radius:50%;background:#f0f0fb;color:#4429cc;font-weight:700;font-size:13px;text-align:center;margin:0 auto;">&#10003;</div>`,
-      cur: `<div class="cur" style="width:28px;height:28px;line-height:28px;border-radius:50%;background:#4429cc;color:#ffffff;font-weight:700;font-size:13px;text-align:center;margin:0 auto;">${i + 1}</div>`,
-      fut: `<div class="fut" style="width:26px;height:26px;line-height:26px;border-radius:50%;border:1px solid #d6d6de;color:#9a9ca5;font-weight:700;font-size:12px;text-align:center;margin:0 auto;">${i + 1}</div>`
+      done: `<div class="num" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#f0f0fb;font-size:19px;text-align:center;margin:0 auto;${EMO}">${items[i].emo}</div>`,
+      cur: `<div class="cur" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#4429cc;border:3px solid #d9d4fb;font-size:19px;text-align:center;margin:0 auto;${EMO}">${items[i].emo}</div>`,
+      fut: `<div class="fut" style="width:38px;height:38px;line-height:38px;border-radius:50%;background:#f7f7f9;border:1px dashed #cfcfd8;font-size:18px;text-align:center;margin:0 auto;opacity:.6;${EMO}">${items[i].emo}</div>`
     })[s];
-    const label = '<td colspan="__N__" class="k" style="padding:0 0 12px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4429cc;text-align:left;">Tu proceso</td>';
+    const label = '<td colspan="__N__" class="k" style="padding:0 0 14px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4429cc;text-align:left;">Tu proceso</td>';
+    const etapa = (s, i) => `<div class="tl-e" style="padding:9px 2px 0;font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${s === "cur" ? "#4429cc" : "#9a9ca5"};">Etapa ${i + 1}</div>`;
 
     if (items.length <= 5) {
       const n = items.length, w = Math.floor(100 / n);
@@ -650,10 +735,11 @@ const E = {
         return `<td class="tl" width="${w}%" valign="top" style="width:${w}%;padding:0;vertical-align:top;text-align:center;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
               <td style="padding:0;vertical-align:middle;">${line(cur >= 0 && i <= cur, i > 0)}</td>
-              <td width="28" style="width:28px;padding:0;vertical-align:middle;">${dot(s, i)}</td>
+              <td width="46" style="width:46px;padding:0;vertical-align:middle;">${dot(s, i)}</td>
               <td style="padding:0;vertical-align:middle;">${line(cur >= 0 && i < cur, i < n - 1)}</td>
             </tr></table>
-            <div class="tl-t ${s === "fut" ? "ls" : "lt"}" style="padding:8px 4px 0;font-size:13px;line-height:1.3;font-weight:700;color:${tcol};">${inline(x.t)}</div>
+            ${etapa(s, i)}
+            <div class="tl-t ${s === "fut" ? "ls" : "lt"}" style="padding:3px 4px 0;font-size:13px;line-height:1.3;font-weight:700;color:${tcol};">${inline(x.t)}</div>
             ${s === "cur" ? '<div class="tl-s em" style="padding:2px 4px 0;font-size:12px;line-height:1.3;color:#4429cc;">Estamos aquí</div>' : ""}
           </td>`;
       }).join("");
@@ -668,7 +754,7 @@ const E = {
       const border = i === items.length - 1 ? "" : "border-bottom:1px solid #e3e3e8;";
       const sub = { done: "Completado", cur: "Estamos aquí", fut: "Próximo paso" }[s];
       return `<tr>
-          <td class="row" width="44" style="padding:10px 0;${border}vertical-align:middle;">${dot(s, i)}</td>
+          <td class="row" width="50" style="padding:10px 0;${border}vertical-align:middle;">${dot(s, i)}</td>
           <td class="row" style="padding:10px 0 10px 10px;${border}vertical-align:middle;">
             <div class="${s === "fut" ? "ls" : "lt"}" style="font-weight:700;color:${s === "fut" ? "#7a7d87" : "#202124"};">${inline(x.t)}</div>
             <div class="${s === "cur" ? "em" : "ls"}" style="font-size:13px;color:${s === "cur" ? "#4429cc" : "#7a7d87"};">${sub}</div>
@@ -731,6 +817,7 @@ const TPL = `<!DOCTYPE html>
     .pad{padding:28px 22px 8px !important;}
     .padf{padding:26px 22px !important;}
     .h1{font-size:24px !important;}
+    .h2{font-size:19px !important;}
     .hi{font-size:18px !important;}
     .v{font-size:28px !important;}
     .tl-t{font-size:11px !important;padding:6px 2px 0 !important;}
@@ -810,7 +897,7 @@ function parse(src) {
       if (key === "tipo") { const n = norm(v); d.tipo = /hito/.test(n) ? "hito" : /cta|accion/.test(n) ? "cta" : "informativo"; }
       else if (key === "asunto") d.asunto = v;
       else if (key === "pre") d.pre = v;
-      else if (key === "titulo") d.titulo = v;
+      else if (key === "titulo") { if (d.titulo) { if (v) d.blocks.push({ k: "sub", t: v }); } else d.titulo = v; }
       else if (key === "parrafo") { if (v) d.blocks.push({ k: "p", t: v }); }
       else if (key === "destacado" || (key === "dato" && !v.includes("|"))) { if (v) d.blocks.push({ k: "destacado", t: v }); }
       else if (key === "dato") { const [k, val, det] = parts(v); d.blocks.push({ k: "dato", r: k || "", v: val || "", m: det || "" }); }
@@ -852,6 +939,7 @@ const ACCIONES = [
 // Cada una queda como una línea «Destacado: …», «Botón: texto | link» o «Título: …».
 const tipoMarca = inner => {
   const n = norm(inner);
+  if (/^(linea de tiempo|linea del tiempo|timeline|etapas)\b/.test(n)) return "Línea de tiempo";
   if (/destac|cuadro/.test(n)) return "Destacado";
   if (/^(boton|button|cta)\b/.test(n)) return "Botón";
   if (/^(titulo|title)\b/.test(n)) return "Título";
@@ -867,8 +955,19 @@ const partirDestacado = t => {
   const m = lineas[0].match(/^(.{3,120}?[.!?:])\s+(\S.*)$/);
   return m ? m[1] + " | " + m[2].charAt(0).toUpperCase() + m[2].slice(1) : lineas[0];
 };
+// Línea de tiempo: una etapa por línea (o «A > B > C»). La etapa actual lleva * al final (o «(aquí)»).
+const etapasLinea = t => {
+  let items = t.replace(/^\s*l[ií]nea de tiempo\s*:\s*/i, "").split("\n").map(x => x.trim()).filter(Boolean);
+  if (items.length === 1) items = items[0].split(/\s*(?:>|\||→|»)\s*/);
+  if (items.length === 1 && items[0].includes(",")) items = items[0].split(/\s*,\s*/);
+  return items.map(x => x
+    .replace(/^(?:[-•]\s+|\d+[.)]\s+|etapa\s*\d+\s*[:.\-–]\s+(?=\S))/i, "")
+    .replace(/\s*(\*|\((?:aqu[ií]|actual|hoy|estamos aqu[ií])\)|←.*|<-.*)\s*$/i, "*").trim())
+    .filter(x => x && x !== "*").slice(0, 8).join(" | ");
+};
 const lineaMarca = (k, t) => {
   if (k === "Destacado") return `\n\nDestacado: ${partirDestacado(t)}\n\n`;
+  if (k === "Línea de tiempo") return `\n\nLínea de tiempo: ${etapasLinea(t)}\n\n`;
   t = t.replace(/\s*\n\s*/g, " ").replace(/^(destacado|boton|botón|titulo|título)\s*:\s*/i, "").trim();
   if (k === "Botón" && !t.includes("|")) {
     const u = (t.match(/https?:\/\/\S+|\{\{[^}]+\}\}/) || [])[0];
@@ -890,30 +989,36 @@ function recuadroConBoton(contenido) {
   return partirDestacado(resto) + (btn !== null ? ` [Botón: ${btn}]` : "");
 }
 function cerrarRecuadros(out) {
-  const ms = [...out.matchAll(/\{\{([^}]*)\}\}/g)]
-    .filter(m => tipoMarca(m[1].replace(/^\s*\//, "")) === "Destacado")
-    .map(m => ({ i: m.index, end: m.index + m[0].length, cierre: !out.slice(m.index + m[0].length).match(/^[^\n]*/)[0].trim() }));
-  const pares = [];
-  for (let k = 0; k < ms.length - 1; k++) {
-    if (ms[k + 1].cierre) { pares.push([ms[k], ms[k + 1]]); k++; }
+  for (const K of ["Destacado", "Línea de tiempo"]) {
+    const ms = [...out.matchAll(/\{\{([^}]*)\}\}/g)]
+      .filter(m => tipoMarca(m[1].replace(/^\s*\//, "")) === K)
+      .map(m => ({ i: m.index, end: m.index + m[0].length, cierre: !out.slice(m.index + m[0].length).match(/^[^\n]*/)[0].trim() }));
+    const pares = [];
+    for (let k = 0; k < ms.length - 1; k++) {
+      if (ms[k + 1].cierre) { pares.push([ms[k], ms[k + 1]]); k++; }
+    }
+    const armar = c => K === "Destacado" ? recuadroConBoton(c) : etapasLinea(c);
+    for (const [a, b] of pares.reverse())
+      out = out.slice(0, a.i) + `\n\n${K}: ${armar(out.slice(a.end, b.i))}\n\n` + out.slice(b.end);
   }
-  for (const [a, b] of pares.reverse())
-    out = out.slice(0, a.i) + `\n\nDestacado: ${recuadroConBoton(out.slice(a.end, b.i))}\n\n` + out.slice(b.end);
   return out;
 }
 // El saludo lo pone la plantilla: si alguien lo escribe igual al comienzo, se quita.
 const sinSaludo = t => t.replace(/^\s*(hola|estimad[oa]s?|querid[oa])\b[^\n]{0,40}?(\{\{[^}]*\}\}|[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\s*[:,!]?[ \t]*(\n|$)/i, "");
 // Marcas mal escritas: {cuadro destacado}, [botón], {{{título}}}, (( … )) → {{…}}
-const normalizarMarcas = t => t.replace(/[\[{(]{1,3}\s*(\/?\s*(?:cuadro destacado|recuadro destacado|cuadro|destacar|destacado|bot[oó]n|t[ií]tulo))\s*[\]})]{1,3}/gi,
+const normalizarMarcas = t => t.replace(/[\[{(]{1,3}\s*(\/?\s*(?:l[ií]nea de tiempo|cuadro destacado|recuadro destacado|cuadro|destacar|destacado|bot[oó]n|t[ií]tulo))\s*[\]})]{1,3}/gi,
   (m, a) => `{{${a.replace(/\s+/g, " ").trim()}}}`);
 function marcarDestacados(src) {
   let out = cerrarRecuadros(normalizarMarcas(sinSaludo(src.replace(/\r/g, ""))));
   out = out.replace(/\{\{([^}\/]*)\}\}([\s\S]*?)\{\{\s*\/[^}]*\}\}/g, (m, a, t) => tipoMarca(a) ? lineaMarca(tipoMarca(a), t) : m);
   out = out.replace(/\{\{([^}:]*):([^}]*)\}\}/g, (m, a, t) => tipoMarca(a) ? lineaMarca(tipoMarca(a), t) : m);
   const res = [];
-  let pendiente = null, bloque = null;
-  // Recuadro abierto sin cerrar: toma las líneas siguientes hasta una línea en blanco.
-  const cerrarBloque = () => { if (bloque && bloque.length) res.push(`\n\nDestacado: ${recuadroConBoton(bloque.join("\n"))}\n\n`); bloque = null; };
+  let pendiente = null, bloque = null, bloqueK = "";
+  // Recuadro o línea de tiempo abiertos sin cerrar: toman las líneas siguientes hasta una línea en blanco.
+  const cerrarBloque = () => {
+    if (bloque && bloque.length) res.push(bloqueK === "Destacado" ? `\n\nDestacado: ${recuadroConBoton(bloque.join("\n"))}\n\n` : lineaMarca(bloqueK, bloque.join("\n")));
+    bloque = null;
+  };
   for (const raw of out.split("\n")) {
     if (bloque) {
       const esOtraMarca = /\{\{([^}]*)\}\}/.test(raw) && !/\{\{\s*(bot[oó]n|button|cta)\b/i.test(raw) && [...raw.matchAll(/\{\{([^}]*)\}\}/g)].some(m => tipoMarca(m[1]));
@@ -923,7 +1028,7 @@ function marcarDestacados(src) {
     }
     let k = null;
     const line = raw.replace(/\{\{([^}]*)\}\}/g, (m, a) => tipoMarca(a) ? (k = k || tipoMarca(a), "") : m).trim();
-    if (k === "Destacado" && !line) { bloque = []; continue; }
+    if ((k === "Destacado" || k === "Línea de tiempo") && !line) { bloque = []; bloqueK = k; continue; }
     if (k && !line) { pendiente = k; continue; }
     if (pendiente && line && !k) { k = pendiente; pendiente = null; }
     if (k && line) res.push(lineaMarca(k, line));
@@ -941,12 +1046,17 @@ function basico(src) {
   if (/^\s*asunto\s*:/im.test(src)) return completarBotones(parse(src), src);
   // Título y botones pedidos con marca: se apartan antes de limpiar los links del texto.
   let titulo = "";
-  const botones = [], dests = [];
+  const botones = [], dests = [], subs = [], lineas = [];
   src = src.split("\n").map(l => {
+    const ln = l.match(/^\s*l[ií]nea de tiempo\s*:\s*(.*)$/i);
+    if (ln) { const b = parse("Línea de tiempo: " + ln[1]).blocks[0]; if (!b || !b.items.length) return ""; lineas.push(b); return `@@LINEA${lineas.length - 1}@@`; }
     const ds = l.match(/^\s*destacado\s*:\s*(.*)$/i);
     if (ds) { dests.push(ds[1].trim()); return `@@DEST${dests.length - 1}@@`; }
     const t = l.match(/^\s*t[ií]tulo\s*:\s*(.*)$/i);
-    if (t) { if (!titulo) titulo = t[1].trim(); return ""; }
+    if (t) {
+      if (!titulo) { titulo = t[1].trim(); return ""; }
+      subs.push(t[1].trim()); return `@@SUB${subs.length - 1}@@`;
+    }
     const b = l.match(/^\s*bot[oó]n\s*:\s*(.*)$/i);
     if (b) { const [x, u] = parts(b[1]); botones.push({ k: "boton", t: x || "", u: u || "" }); return `@@BOTON${botones.length - 1}@@`; }
     return l;
@@ -958,7 +1068,8 @@ function basico(src) {
   const paras = limpio.split(/\n\s*\n/).map(p => p.replace(/\s*\n\s*/g, " ").trim()).filter(Boolean);
   const esDest = p => /^@@DEST\d+@@$/.test(p);
   const esBtn = p => /^@@BOTON\d+@@$/.test(p);
-  const esTexto = p => !esDest(p) && !esBtn(p);
+  const esTexto = p => !/^@@(DEST|BOTON|SUB|LINEA)\d+@@$/.test(p);
+  const nro = p => +p.match(/\d+/)[0];
   const iT = titulo ? -1 : paras.findIndex(esTexto);
   if (iT >= 0) {
     const otros = paras.filter(esTexto).length;
@@ -972,9 +1083,12 @@ function basico(src) {
   const primero = paras.find(esTexto) || "";
   const d = { tipo: "informativo", asunto: tituloTxt.length <= 60 ? tituloTxt : tituloTxt.slice(0, 58).replace(/\s+\S*$/, "") + "…", pre: primero.split(/(?<=[.!?])\s/)[0].slice(0, 110), titulo,
     blocks: paras.map(t => esDest(t) ? { k: "destacado", t: dests[+t.match(/\d+/)[0]] }
-      : esBtn(t) ? botones[+t.match(/\d+/)[0]] : { k: "p", t }) };
+      : esBtn(t) ? botones[nro(t)]
+      : /^@@SUB\d+@@$/.test(t) ? { k: "sub", t: subs[nro(t)] }
+      : /^@@LINEA\d+@@$/.test(t) ? lineas[nro(t)] : { k: "p", t }) };
+  if (lineas.length) d.tipo = "hito";
   const acc = ACCIONES.find(([r]) => r.test(norm(src)));
-  if (acc) d.tipo = "cta";
+  if (acc && !lineas.length) d.tipo = "cta";
   const botonEnRecuadro = dests.some(x => /\[\s*bot[oó]n\s*:/i.test(x));
   if (!botones.length && !botonEnRecuadro && (url || acc)) d.blocks.push({ k: "boton", t: acc ? acc[1] : "Ver mi caso", u: url || "" });
   d.blocks.push({ k: "firma" });
@@ -998,6 +1112,7 @@ function bodyHtml(d) {
   if (d.titulo) out.push(E.h1(d.titulo));
   for (const b of d.blocks) {
     if (b.k === "p") out.push(E.p(b.t));
+    else if (b.k === "sub" && b.t) out.push(E.sub(b.t));
     else if (b.k === "dato") out.push(E.box(b.r, b.v, b.m));
     else if (b.k === "destacado" && b.t) out.push(E.destacado(b.t));
     else if (b.k === "boton" && b.t) out.push(E.button(b.t, b.u));
@@ -1048,7 +1163,7 @@ Botón: Texto del botón | link   (OBLIGATORIO cuando el cliente tiene que hacer
 Nota: (opcional, texto chico)
 Firma   (opcional: agrega «Tu equipo Lexy»)
 
-Si el texto trae una línea «Título:», ese es el título: úsalo tal cual y solo agrégale los *asteriscos*. Si trae una línea «Botón:», el correo lleva ese botón con ese texto y ese link (si viene sin texto, ponle uno según la acción; si viene sin link, FALTA_LINK).
+Si el texto trae varias líneas «Título:», la primera es el título y las demás son subtítulos: déjalas como líneas «Título:» en su lugar. Si trae una línea «Línea de tiempo:», mantenla igual (mismas etapas y el * en la actual). Si el texto trae una línea «Título:», ese es el título: úsalo tal cual y solo agrégale los *asteriscos*. Si trae una línea «Botón:», el correo lleva ese botón con ese texto y ese link (si viene sin texto, ponle uno según la acción; si viene sin link, FALTA_LINK).
 
 Texto del correo:
 ${texto}`;
@@ -1085,7 +1200,7 @@ function segPress(sel, attr, val) {
 }
 
 /* ===================== Vista previa editable ===================== */
-const EDITABLE = "h1.h1, p.txt:not(.hi), div.k, td.k, div.v, div.m, div.lt, div.ls, div.em, div.tl-t, .btn a";
+const EDITABLE = "h1.h1, h2.h2, p.txt:not(.hi), div.k, td.k, div.v, div.m, div.lt, div.ls, div.em, div.tl-t, .btn a";
 const EDIT_CSS = `[contenteditable]{cursor:text;border-radius:4px;transition:outline-color .1s}
 [contenteditable]:hover{outline:1.5px dashed #9d90fc;outline-offset:3px}
 [contenteditable]:focus{outline:2px solid #27198E;outline-offset:3px}
@@ -1146,6 +1261,7 @@ $("frame").addEventListener("load", () => {
   doc.querySelectorAll(EDITABLE).forEach(n => { n.setAttribute("contenteditable", "true"); n.setAttribute("spellcheck", "true"); });
 
   doc.addEventListener("input", () => { ultimoTexto = Date.now(); revisarLink(); sync(); });
+  doc.addEventListener("focusin", e => { if (e.target.isContentEditable) ultimoEditable = e.target; });
   borrados = [];
   doc.addEventListener("keydown", teclaDeshacer);
   activarBorrar(doc);
@@ -1264,10 +1380,69 @@ function teclaDeshacer(e) {
   deshacerBorrado();
 }
 document.addEventListener("keydown", teclaDeshacer);
+/* ---- Formato: negrita, cursiva, tamaño y color del botón ---- */
+let ultimoEditable = null;
+const fmtMsg = (t, err) => { const h = $("fmt-hint"); h.textContent = t; h.style.color = err ? "#b42318" : ""; };
+document.querySelectorAll("#fmt button, #fmt label").forEach(b => b.addEventListener("mousedown", e => { if (b.tagName === "BUTTON") e.preventDefault(); }));
+function editableActual() {
+  if (!doc) return null;
+  const sel = doc.getSelection();
+  const n = sel && sel.anchorNode;
+  const el = n && (n.nodeType === 1 ? n : n.parentElement);
+  const ed = el && el.closest && el.closest("[contenteditable]");
+  return ed || (ultimoEditable && doc.contains(ultimoEditable) ? ultimoEditable : null);
+}
+document.querySelectorAll("#fmt [data-f]").forEach(b => b.onclick = () => {
+  const ed = editableActual();
+  if (!ed) { fmtMsg("Primero haz clic en un texto del correo.", true); return; }
+  fmtMsg("Selecciona un texto del correo y aprieta un botón.");
+  const f = b.dataset.f;
+  if (f === "bold" || f === "italic") {
+    $("frame").contentWindow.focus();
+    const sel = doc.getSelection();
+    if (sel.isCollapsed) { const r = doc.createRange(); r.selectNodeContents(ed); sel.removeAllRanges(); sel.addRange(r); }
+    doc.execCommand(f, false, null);
+  } else {
+    const px = parseFloat(doc.defaultView.getComputedStyle(ed).fontSize) || 16;
+    const nuevo = Math.max(10, Math.min(44, px + (f === "mas" ? 2 : -2)));
+    ed.style.fontSize = nuevo + "px";
+    if (ed.matches("h1, h2")) ed.style.lineHeight = "1.2";
+  }
+  syncAhora(); setTimeout(fitFrame, 30);
+});
+function pintarBoton(c, t) {
+  const a = botonActivo();
+  if (!a) { fmtMsg("Este correo no tiene botón.", true); return; }
+  const td = a.closest("td.btn") || a.parentElement;
+  td.style.background = c;
+  a.style.color = t || "#ffffff";
+  document.querySelectorAll(".sw [data-c]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.c === c)));
+  syncAhora();
+}
+document.querySelectorAll(".sw [data-c]").forEach(b => b.onclick = () => pintarBoton(b.dataset.c, b.dataset.t));
+$("fmt-own").addEventListener("input", e => {
+  const c = e.target.value, n = parseInt(c.slice(1), 16);
+  const luz = ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000;
+  pintarBoton(c, luz > 160 ? "#0b013c" : "#ffffff");
+});
+function revisarColor() {
+  const a = botonActivo();
+  $("fmt-color").hidden = !a;
+  if (!a) return;
+  const n = doc.querySelectorAll(".btn a").length;
+  $("fmt-btn-lbl").textContent = n > 1 ? `Color del botón «${a.textContent.trim()}»` : "Color del botón";
+  const bg = ((a.closest("td.btn") || {}).style || {}).background || "";
+  const hex = (bg.match(/#[0-9a-f]{6}/i) || [""])[0].toLowerCase();
+  const rgb = bg.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  const actual = hex || (rgb ? "#" + rgb.slice(1).map(x => (+x).toString(16).padStart(2, "0")).join("") : "");
+  document.querySelectorAll(".sw [data-c]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.c === actual)));
+}
+
 // Devuelve true si el botón del correo todavía no tiene un link que funcione.
 let btnActivo = null;
 const botonActivo = () => doc && (btnActivo && doc.contains(btnActivo) ? btnActivo : doc.querySelector(".btn a"));
 function revisarLink() {
+  revisarColor();
   const a = botonActivo();
   $("link-hint").hidden = !!a;
   $("link-lbl").textContent = a ? `Link del botón «${a.textContent.trim()}»` : "Link del correo";
@@ -1367,7 +1542,9 @@ document.querySelectorAll(".marca").forEach(b => b.onclick = () => {
   const sel = v.slice(i, j), antes = v.slice(0, i), nl = antes && !antes.endsWith("\n") ? "\n" : "";
   const m = b.dataset.m;
   const ins = m === "cuadro" ? `${nl}{{cuadro destacado}}\n${sel || "Título del recuadro\nTexto del recuadro"}\n{{cuadro destacado}}\n`
-    : m === "titulo" ? `${nl}{{título}} ${sel}` : `${nl}{{botón}} ${sel || "Texto del botón https://"}`;
+    : m === "titulo" ? `${nl}{{título}} ${sel}`
+    : m === "linea" ? `${nl}{{línea de tiempo}}\n${sel || "Etapa 1\nEtapa 2 *\nEtapa 3"}\n{{línea de tiempo}}\n`
+    : `${nl}{{botón}} ${sel || "Texto del botón https://"}`;
   escribirEnTexto(ins, i, j);
 });
 // Escribe en el cuadro como si fuera tecleado, para que Ctrl+Z / ⌘Z lo pueda deshacer.
@@ -1421,6 +1598,11 @@ $("disenar").onclick = async () => {
           if (bPedidos[0].u) bC[0].u = bPedidos[0].u;
         }
         completarBotones(d, marcado);
+      }
+      const lPedida = parse(marcado).blocks.find(b => b.k === "linea");
+      if (lPedida && !d.blocks.some(b => b.k === "linea")) {
+        const i = d.blocks.findIndex(b => b.k === "p");
+        d.blocks.splice(i < 0 ? 0 : i + 1, 0, lPedida);
       }
       if (!d.titulo && !d.blocks.length) d = null;
     } catch (e) { aviso = msgError(e) + " Lo armé con tu texto tal cual."; }
