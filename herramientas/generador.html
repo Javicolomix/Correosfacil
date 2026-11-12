@@ -655,21 +655,33 @@ const acentuar = t => {
 };
 
 // Emoji de cada etapa: el que venga escrito al inicio, o uno según lo que diga la etapa.
+// Dentro de una misma línea de tiempo nunca se repite: si ya se usó, toma la siguiente coincidencia o uno de reserva.
 const EMOJIS = [
-  [/(present|solicit|ingres|envi)/, "📝"], [/(admisib|acog|aprob|acept)/, "✅"], [/(boletin|public)/, "📰"],
-  [/(liquidador|veedor|sindic)/, "👤"], [/(audiencia|junta)/, "🗓️"], [/(tribunal|juez|resoluci|sentencia|demanda)/, "⚖️"],
-  [/(renegoci|propuesta|acuerdo|negoci)/, "🤝"], [/(liquidaci|remate|venta|bienes)/, "🏛️"], [/(pag|cuota|abono|transfer)/, "💳"],
-  [/(firm|mandato|contrato)/, "✍️"], [/(document|antecedent|archivo|papel)/, "📄"], [/(reuni|llamad|entrevista|asesor)/, "📞"],
-  [/(revis|evalua|analis|estudi)/, "🔍"], [/(espera|plazo|dias|tramit)/, "⏳"], [/(termin|fin|cierre|listo|libre|extin|alta)/, "🎉"],
-  [/(inicio|bienven|comienz|registro)/, "🚀"]
+  [/(admisib|acog|aprob|acept|autoriz)/, "✅"], [/(rechaz|deneg|inadmis)/, "❌"], [/(boletin|public|diario)/, "📰"],
+  [/(liquidador|veedor|sindic)/, "👤"], [/(acreedor|banco|financ)/, "🏦"], [/(audiencia|junta|comparec)/, "🗓️"],
+  [/(tribunal|juez|juzgado|resoluci|sentencia|demanda)/, "⚖️"], [/(renegoci|propuesta|acuerdo|negoci|conveni)/, "🤝"],
+  [/(liquidaci|remate|bienes|subasta)/, "🏛️"], [/(pag|cuota|abono|transfer|deposit)/, "💳"], [/(deuda|monto|dinero|cobr)/, "💰"],
+  [/(firm|mandato|contrato|poder)/, "✍️"], [/(escrito|recurso|apelaci|presentaci de escrito)/, "📜"],
+  [/(mand|envi|despach|remit)/, "📨"], [/(correo|mail|mensaje)/, "📧"], [/(notific|aviso|alert)/, "🔔"],
+  [/(document|antecedent|archivo|papel|certific|comprobante)/, "📄"], [/(present|solicit|ingres|formulario|ficha)/, "📝"],
+  [/(reuni|entrevista|asesor|consulta)/, "💬"], [/(llam|telefon|contact)/, "📞"], [/(cita|agend|fecha|calendario)/, "📅"],
+  [/(revis|evalua|analis|estudi|verific)/, "🔍"], [/(espera|plazo|dias|tramit|proceso)/, "⏳"], [/(entreg|envio|recib)/, "📦"],
+  [/(embargo|bloque|suspens)/, "🚫"], [/(inform|reporte|resumen)/, "📊"], [/(inscri|registr|alta)/, "🖊️"],
+  [/(cocin|comida|almuerz|cena)/, "🍳"], [/(viaj|vuelo|traslad)/, "✈️"], [/(casa|hogar|propiedad|inmueble)/, "🏠"],
+  [/(auto|vehicul)/, "🚗"], [/(trabajo|emple|sueldo|remunerac)/, "💼"], [/(salud|medic)/, "🩺"], [/(estudi|curso|clase)/, "📚"],
+  [/(termin|fin|cierre|listo|libre|extin|complet|exito)/, "🎉"], [/(inicio|bienven|comienz|empez|arranc)/, "🚀"],
+  [/(nuev|vida|futuro)/, "🌱"]
 ];
-function emojiEtapa(t) {
+const EMOJI_RESERVA = ["📌", "⭐", "🧩", "🎯", "💡", "🧭", "🔑", "🏁", "📍", "✨"];
+function emojiEtapa(t, usados) {
   t = String(t || "").trim();
-  const m = t.match(/^(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)\s*/u);
-  if (m) return [m[1], t.slice(m[0].length)];
+  const m = t.match(/^(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*)\s*/u);
+  if (m) { usados && usados.add(m[1]); return [m[1], t.slice(m[0].length)]; }
   const n = norm(t);
-  const e = EMOJIS.find(([r]) => r.test(n));
-  return [e ? e[1] : "📌", t];
+  const opciones = EMOJIS.filter(([r]) => r.test(n)).map(x => x[1]).concat(EMOJI_RESERVA);
+  const e = opciones.find(x => !usados || !usados.has(x)) || "📌";
+  usados && usados.add(e);
+  return [e, t];
 }
 
 const E = {
@@ -712,15 +724,16 @@ const E = {
   timeline: items => {
     const cur = items.findIndex(x => x.cur);
     const st = i => cur < 0 ? (i === 0 ? "cur" : "fut") : i < cur ? "done" : i === cur ? "cur" : "fut";
-    items = items.map(x => { const [emo, t] = emojiEtapa(x.t); return { ...x, emo, t }; });
+    const usados = new Set(items.map(x => (String(x.t).match(/^\p{Extended_Pictographic}/u) || [])[0]).filter(Boolean));
+    items = items.map(x => { const [emo, t] = emojiEtapa(x.t, usados); return { ...x, emo, t }; });
     const EMO = "font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;";
     const dot = (s, i) => ({
-      done: `<div class="num" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#f0f0fb;font-size:19px;text-align:center;margin:0 auto;${EMO}">${items[i].emo}</div>`,
+      done: `<div class="num" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#f0f0fb;border:3px solid #ffffff;font-size:19px;text-align:center;margin:0 auto;${EMO}">${items[i].emo}</div>`,
       cur: `<div class="cur" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#4429cc;border:3px solid #d9d4fb;font-size:19px;text-align:center;margin:0 auto;${EMO}">${items[i].emo}</div>`,
-      fut: `<div class="fut" style="width:38px;height:38px;line-height:38px;border-radius:50%;background:#f7f7f9;border:1px dashed #cfcfd8;font-size:18px;text-align:center;margin:0 auto;opacity:.6;${EMO}">${items[i].emo}</div>`
+      fut: `<div class="fut" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#f4f4f6;border:3px solid #ffffff;font-size:18px;text-align:center;margin:0 auto;${EMO}"><span style="opacity:.4;filter:grayscale(1);-webkit-filter:grayscale(1);">${items[i].emo}</span></div>`
     })[s];
     const label = '<td colspan="__N__" class="k" style="padding:0 0 14px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4429cc;text-align:left;">Tu proceso</td>';
-    const etapa = (s, i) => `<div class="tl-e" style="padding:9px 2px 0;font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${s === "cur" ? "#4429cc" : "#9a9ca5"};">Etapa ${i + 1}</div>`;
+    const etapa = (s, i) => `<div class="tl-e" style="padding:9px 2px 0;font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${s === "cur" ? "#4429cc" : "#9a9ca5"};">${s === "fut" ? `<span style="${EMO}letter-spacing:0;">🔒</span> ` : ""}Etapa ${i + 1}</div>`;
 
     if (items.length <= 5) {
       const n = items.length, w = Math.floor(100 / n);
@@ -750,7 +763,7 @@ const E = {
     const rows = items.map((x, i) => {
       const s = st(i);
       const border = i === items.length - 1 ? "" : "border-bottom:1px solid #e3e3e8;";
-      const sub = { done: "Completado", cur: "Estamos aquí", fut: "Próximo paso" }[s];
+      const sub = { done: "Completado", cur: "Estamos aquí", fut: "🔒 Pendiente" }[s];
       return `<tr>
           <td class="row" width="50" style="padding:10px 0;${border}vertical-align:middle;">${dot(s, i)}</td>
           <td class="row" style="padding:10px 0 10px 10px;${border}vertical-align:middle;">
@@ -834,7 +847,9 @@ const TPL = `<!DOCTYPE html>
     .m{color:#cdc8f0 !important;}
     .row{border-color:#2b2a32 !important;}
     .cur{background:#9d90fc !important;color:#0b013c !important;}
-    .fut{border-color:#3a3942 !important;color:#8e8d98 !important;}
+    .fut{background:#232228 !important;border-color:#141317 !important;color:#8e8d98 !important;}
+    .num{border-color:#141317 !important;}
+    .cur{border-color:#3b2f8f !important;}
     .tl-on{background:#9d90fc !important;}
     .tl-off{background:#2b2a32 !important;}
     .btn{background:#9d90fc !important;}
