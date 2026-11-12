@@ -704,7 +704,7 @@ function emojiEtapa(t, usados) {
 
 const E = {
   // Saludo editable: las variables {{…}} van destacadas con el subrayado naranjo.
-  hi: t => '<p class="txt hi" style="margin:0 0 10px;font-size:20px;line-height:1.4;color:#4f5157;">'
+  hi: t => '<p class="txt hi" style="margin:0 0 10px;font-size:20px;line-height:1.4;color:#0b013c;">'
     + esc(t).replace(/\{\{[^}]+\}\}/g, v => `<span class="name" style="font-weight:700;color:#0b013c;border-bottom:3px solid #f0a23b;padding-bottom:1px;">${v}</span>`) + '</p>',
   h1: t => `<h1 class="h1" style="margin:0 0 14px;font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-0.5px;color:#0b013c;">${inline(acentuar(t))}</h1>`,
   sub: t => `<h2 class="h2 lt" style="margin:18px 0 8px;font-size:19px;line-height:1.3;font-weight:700;letter-spacing:-0.2px;color:#27198e;">${inline(t)}</h2>`,
@@ -857,7 +857,7 @@ const TPL = `<!DOCTYPE html>
   @media (prefers-color-scheme: dark){
     .bg{background:#000000 !important;}
     .card{background:#141317 !important;}
-    .h1,.name,.lt{color:#ffffff !important;}
+    .h1,.name,.lt,.hi{color:#ffffff !important;}
     .em,.lk{color:#9d90fc !important;}
     .txt,.ls{color:#c3c2cc !important;}
     .box,.num{background:#221b4a !important;}
@@ -1594,16 +1594,17 @@ $("texto").addEventListener("input", () => { store.set("texto", $("texto").value
 
 // Saludo: viene por defecto, pero se puede cambiar o quitar.
 const SALUDO_DEF = "Hola, {{nombre cliente}}:";
-let saludoOn = store.get("saludo-on") !== "0";
-$("saludo").value = store.get("saludo") ?? SALUDO_DEF;
+// Cada correo nuevo parte con el saludo por defecto.
+let saludoOn = true;
+$("saludo").value = SALUDO_DEF;
 function saludoTexto() { return saludoOn ? ($("saludo").value.trim()) : ""; }
 function pintarSaludo() {
   $("saludo").hidden = !saludoOn; $("saludo-x").hidden = !saludoOn; $("saludo-on").hidden = saludoOn;
 }
-$("saludo").addEventListener("input", () => { store.set("saludo", $("saludo").value); vivoPronto(); });
-$("saludo-x").onclick = () => { saludoOn = false; store.set("saludo-on", "0"); pintarSaludo(); vivoAhora(); };
+$("saludo").addEventListener("input", vivoPronto);
+$("saludo-x").onclick = () => { saludoOn = false; pintarSaludo(); vivoAhora(); };
 $("saludo-on").onclick = () => {
-  saludoOn = true; store.set("saludo-on", "1");
+  saludoOn = true;
   if (!$("saludo").value.trim()) $("saludo").value = SALUDO_DEF;
   pintarSaludo(); vivoAhora(); $("saludo").focus();
 };
@@ -1744,6 +1745,7 @@ $("disenar").onclick = async () => {
 $("nuevo").onclick = () => {
   vista("pc");
   $("paso-editar").hidden = true; $("paso-escribir").hidden = false;
+  saludoOn = true; $("saludo").value = SALUDO_DEF; pintarSaludo();
   vivoUltimo = ""; vivoAhora();
   $("texto").focus(); window.scrollTo(0, 0);
 };
