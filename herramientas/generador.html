@@ -1,0 +1,1217 @@
+<title>Guía de correos Lexy Deudor</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: banda navy con la navegación (y el botón al tester siempre visible); debajo, una sección a la vez.
+   «Crear correo» = 1) un solo campo de texto + Diseñar; 2) el correo editable en la vista previa + panel corto al lado. */
+:root{
+  --ink:#2F2F2F; --navy:#0B013C; --btn:#27198E; --btn-h:#1d1270;
+  --lav:#9d90fc; --soft:#f0f0fb; --paper:#f5f5f8; --card:#ffffff;
+  --line:#e4e3ec; --muted:#6b6a78; --ok:#1d7a4d; --ok-bg:#e6f4ec; --err:#a3261b;
+  --code-bg:#15122b; --code-fg:#e6e3fb;
+  --font:Tahoma,Geneva,sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --shadow:0 1px 2px rgba(11,1,60,.05),0 8px 24px rgba(11,1,60,.06);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5}
+[hidden]{display:none!important}
+h1,h2,h3,h4{color:var(--navy);margin:0;text-wrap:balance;line-height:1.25}
+h2{font-size:22px}
+h3{font-size:19px}
+p{margin:0}
+a{color:var(--btn)}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--btn);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* ---------- barra superior ---------- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+.top{background:var(--navy);color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.top .wrap{display:flex;align-items:center;gap:12px 24px;flex-wrap:wrap;padding-block:12px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+.brand svg{flex:none}
+.brand b{font-size:17px;color:#fff;white-space:nowrap}
+.brand small{display:block;color:#bdb5f5;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tabs a{color:#d9d4fb;text-decoration:none;padding:8px 14px;border-radius:999px;font-size:15px}
+.tabs a:hover{background:rgba(255,255,255,.08);color:#fff}
+.tabs a[aria-current="page"]{background:#fff;color:var(--navy);font-weight:700}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--btn);color:#fff;border:0;border-radius:10px;padding:12px 22px;font-weight:700;text-decoration:none;cursor:pointer;line-height:1.2;text-align:center}
+.btn:hover{background:var(--btn-h)}
+.btn.ok{background:var(--ok)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.light{background:#fff;color:var(--btn)}
+.btn.light:hover{background:var(--soft)}
+.btn.ghost{background:transparent;color:var(--btn);border:1.5px solid var(--btn)}
+.btn.ghost:hover{background:var(--soft)}
+.btn.sm{padding:9px 14px;font-size:14px;border-radius:8px}
+.btn.big{font-size:19px;padding:16px 34px;border-radius:12px}
+.link{background:none;border:0;padding:0;color:var(--btn);text-decoration:underline;cursor:pointer;font-size:14px}
+.top .btn{padding:9px 16px;font-size:15px}
+
+main{padding-block:28px 64px}
+.intro{display:grid;gap:6px;margin-bottom:22px;max-width:70ch}
+.intro p{color:var(--muted)}
+.card{background:var(--card);border-radius:14px;box-shadow:var(--shadow)}
+.status{font-size:14px;color:var(--muted);min-height:1.2em}
+.status.err{color:var(--err)}
+.status.ok{color:var(--ok)}
+label.lbl{display:block;font-weight:700;color:var(--navy);font-size:14px;margin-bottom:6px}
+textarea,input[type=text],input[type=url]{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;resize:vertical}
+textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--btn);outline:none}
+.seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:7px 14px;border-radius:999px;font-size:14px;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+
+/* ---------- 1) escribir ---------- */
+.compose{max-width:760px;margin:12px auto 0;padding:28px;display:grid;gap:16px}
+.compose h2{font-size:26px}
+.compose > p{color:var(--muted)}
+#texto{min-height:260px;font-size:17px;line-height:1.6;padding:16px 18px;border-radius:12px}
+.compose .go{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.compose .opts{display:grid;gap:6px}
+.compose .opts span{font-size:13px;color:var(--muted)}
+.compose .foot{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.compose .foot .status:empty{display:none}
+
+/* ---------- 2) editar ---------- */
+.editor{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.pbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.pbar .tip{font-size:14px;color:var(--muted)}
+.pbar .tip b{color:var(--navy)}
+.inbox{padding:14px 18px;border-bottom:1px solid var(--line);display:grid;gap:2px}
+.inbox b{color:var(--navy);font-size:15px;overflow-wrap:anywhere}
+.inbox span{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.stage{background:#ececf1;padding:16px;display:flex;justify-content:center;border-radius:0 0 14px 14px;overflow:hidden}
+.stage iframe{display:block;border:0;background:#f1f1f3;width:100%;max-width:640px;height:900px}
+.stage.phone iframe{max-width:375px;border-radius:22px;box-shadow:0 0 0 8px #1b1a22}
+.stage.code{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+.stage.code .codebox{order:-1;position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
+.stage.code iframe{max-width:none}
+.code-tip{font-size:13px;color:var(--muted)}
+.code-wrap{position:relative}
+.code-wrap textarea{padding-right:64px}
+.code-copy{position:absolute;top:10px;right:10px;z-index:1;display:inline-flex;align-items:center;gap:6px;background:var(--code-bg);border:1px solid rgba(230,227,251,.25);color:var(--code-fg);border-radius:8px;padding:7px;cursor:pointer;font-size:13px;font-weight:700}
+.code-copy:hover{border-color:var(--lav);color:#fff}
+.code-copy.ok{border-color:#7ee2a8;color:#7ee2a8}
+.code-copy svg{display:block;flex:none}
+.code-copy span:empty{display:none}
+.side{display:grid;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
+.side .card{padding:18px;display:grid;gap:12px}
+.side h3{font-size:16px}
+.side .status:empty{display:none}
+.side .hint{font-size:13px;color:var(--muted)}
+.side .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.side .seg{width:100%}
+.side .seg button{flex:1}
+#cambio{min-height:84px}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--btn);background:var(--soft);border-radius:999px;padding:3px 10px}
+.falta{color:var(--err);font-size:13px;font-weight:700;margin-top:6px}
+input.sin-link{border-color:var(--err);background:#fff6f5}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#aviso{margin:-4px 0 10px}
+#aviso:empty{display:none}
+.seg .ico{display:inline-flex;align-items:center;justify-content:center;padding:7px 12px}
+.seg .ico svg{display:block}
+.codebox{width:100%;display:grid;gap:10px}
+.codebox textarea{width:100%;height:900px;resize:vertical;font-family:var(--mono);font-size:12.5px;line-height:1.55;white-space:pre;overflow:auto;tab-size:2;
+  background:var(--code-bg);color:var(--code-fg);border:0;border-radius:12px;padding:16px}
+.codebox textarea:focus{outline:2px solid var(--lav)}
+.codebox .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* ---------- guía (Objetivos básicos) ----------
+   Franja navy con las 3 preguntas; tipos de correo en pestañas (uno a la vez, con el esquema del correo);
+   paso a paso en fila y la checklist aparte con barra de avance. */
+.guide{display:grid;gap:22px}
+.g-eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--btn)}
+.g-sec{padding:28px;display:grid;gap:22px}
+.g-head{display:grid;gap:8px;max-width:72ch}
+.g-head p{color:var(--muted)}
+
+.g-hero{background:var(--navy);color:#e9e6fd;border-radius:18px;padding:32px;display:grid;gap:22px;position:relative;overflow:hidden}
+.g-hero::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;pointer-events:none;opacity:.14;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 260' fill='none' stroke='%239d90fc' stroke-width='1.5'%3E%3Cpath d='M0 0L130 130L0 260M260 0L130 130L260 260M130 0L0 130L130 260L260 130Z'/%3E%3C/svg%3E") center/contain no-repeat}
+.g-hero .g-eyebrow{color:var(--lav)}
+.g-hero h2{color:#fff;font-size:26px}
+.g-hero .g-head p{color:#d9d4fb}
+.g-hero .g-close{max-width:none}
+.g-hero > p{max-width:70ch}
+.g-qs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;position:relative;z-index:1}
+.g-qs li{background:rgba(255,255,255,.06);border:1px solid rgba(157,144,252,.35);border-radius:14px;padding:18px;display:grid;gap:10px;align-content:start}
+.g-qs small{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lav)}
+.g-qs b{color:#fff;font-size:19px;line-height:1.35;font-weight:700}
+.g-hero .g-close{color:#cfc9f5;border-top:1px solid rgba(157,144,252,.3);padding-top:16px;position:relative;z-index:1}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{background:var(--soft);color:var(--navy);border-radius:999px;padding:7px 15px;font-size:15px;font-weight:700}
+
+.g-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.g-tab{display:grid;gap:2px;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer}
+.g-tab:hover{border-color:#c9c3f3}
+.g-tab b{color:var(--navy);font-size:16px}
+.g-tab span{color:var(--muted);font-size:14px}
+.g-tab span em{font-style:normal;font-weight:700;color:var(--btn)}
+.g-tab[aria-selected="true"]{background:var(--navy);border-color:var(--navy)}
+.g-tab[aria-selected="true"] b{color:#fff}
+.g-tab[aria-selected="true"] span{color:#cfc9f5}
+.g-tab[aria-selected="true"] span em{color:var(--lav)}
+
+.g-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr);gap:28px;align-items:start;border:1px solid var(--line);border-radius:14px;padding:24px}
+.g-col{display:grid;gap:12px;align-content:start;min-width:0}
+.g-obj{font-size:19px;line-height:1.4;color:var(--navy);font-weight:700}
+.g-ex{display:flex;flex-wrap:wrap;gap:6px}
+.g-ex span{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px}
+
+/* esquema del correo con la estructura recomendada */
+.g-mail{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fafafc}
+.g-mail .hd{height:30px;background:var(--navy);position:relative}
+.g-mail .hd::after{content:"";position:absolute;right:12px;top:10px;width:34px;height:10px;border-radius:3px;background:var(--lav)}
+.g-mail ol{list-style:none;margin:0;padding:14px;display:grid;gap:8px;counter-reset:m}
+.g-mail li{counter-increment:m;display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:center;font-size:15px}
+.g-mail li::before{content:counter(m);width:24px;height:24px;border-radius:7px;background:var(--soft);color:var(--btn);font-weight:700;font-size:12px;display:grid;place-items:center}
+.g-mail li span{background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.g-mail li.is-btn span{background:var(--btn);border-color:var(--btn);color:#fff;font-weight:700;justify-self:start;padding:7px 16px}
+.g-mail li.is-line span{background:linear-gradient(90deg,var(--btn) 0 40%,var(--line) 40%) no-repeat left 10px bottom 6px/calc(100% - 20px) 2px,#fff;padding-bottom:13px}
+.g-mail .ft{height:16px;border-top:1px solid var(--line);background:#f1f1f4}
+
+.g-rules{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.g-rules li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:10px;font-size:15px;line-height:1.4}
+.g-rules li::before{content:"";width:12px;height:7px;border-left:2px solid var(--btn);border-bottom:2px solid var(--btn);transform:rotate(-45deg);margin:5px 0 0 3px}
+.g-sub{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+.g-sum{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 18px;align-items:baseline;background:var(--soft);border-radius:12px;padding:16px 18px}
+.g-sum b{color:var(--navy)}
+.g-sum p{color:var(--ink)}
+
+.g-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.g-step{border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:10px;align-content:start;min-width:0}
+.g-step .n{font-size:40px;line-height:1;font-weight:700;color:var(--lav)}
+.g-step h3{font-size:19px}
+.g-step p,.g-step li{font-size:15px}
+.g-step ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.g-step .btn{justify-self:start;margin-top:4px}
+.link-up{background:none;border:0;padding:0;color:var(--btn);text-decoration:underline;cursor:pointer;font-size:15px;justify-self:start}
+.tester-steps{counter-reset:t;list-style:none;margin:0;padding:0!important;display:grid;gap:8px}
+.tester-steps li{counter-increment:t;display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start}
+.tester-steps li::before{content:counter(t);width:26px;height:26px;border-radius:8px;background:var(--soft);color:var(--btn);font-weight:700;display:grid;place-items:center;font-size:13px}
+code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:1px 6px;border-radius:6px}
+
+.g-check{background:var(--soft);border-radius:14px;padding:22px;display:grid;gap:14px}
+.g-check header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.g-check h3{font-size:19px}
+.g-prog{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.g-prog .bar{width:140px;height:8px;border-radius:999px;background:#fff;overflow:hidden}
+.g-prog .bar i{display:block;height:100%;width:0;background:var(--btn);border-radius:999px;transition:width .2s}
+.checklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.checklist label{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1.5px solid transparent;border-radius:10px;cursor:pointer;background:#fff}
+.checklist label:has(input:checked){border-color:var(--ok);background:var(--ok-bg)}
+.checklist input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--btn);flex:none}
+.done{background:var(--ok-bg);color:var(--ok);border-radius:10px;padding:14px 16px;font-weight:700;font-size:19px}
+
+@media (max-width:900px){
+  .g-qs,.g-steps{grid-template-columns:minmax(0,1fr)}
+  .g-panel{grid-template-columns:minmax(0,1fr);gap:22px}
+  .g-sum{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:640px){
+  .g-hero,.g-sec{padding:20px}
+  .g-hero h2{font-size:22px}
+  .g-tabs{grid-template-columns:minmax(0,1fr)}
+  .g-panel{padding:16px}
+  .checklist{grid-template-columns:minmax(0,1fr)}
+}
+
+@media (max-width:980px){
+  .stage.code{grid-template-columns:minmax(0,1fr)}
+  .stage.code .codebox{position:static}
+  .codebox textarea{height:420px}
+  .editor{grid-template-columns:minmax(0,1fr)}
+  .side{position:static}
+}
+@media (max-width:560px){
+  .tabs{order:3;width:100%}
+  .tabs a{padding:7px 12px;font-size:14px}
+  .brand small{display:none}
+  .compose{padding:20px}
+  .compose h2{font-size:22px}
+  .compose .go .btn{width:100%}
+  .stage{padding:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="3" y="11" width="24" height="8" rx="1.5" transform="rotate(45 15 15)" fill="#fff"/><rect x="3" y="11" width="24" height="8" rx="1.5" transform="rotate(-45 15 15)" fill="#9d90fc"/></svg>
+      <div><b>Guía de correos</b><small>Lexy Deudor</small></div>
+    </div>
+    <nav class="tabs" aria-label="Secciones">
+      <a href="#crear" data-view="crear">Crear correo</a>
+      <a href="#objetivos" data-view="objetivos">Objetivos básicos</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ======================= CREAR CORREO ======================= -->
+<section id="v-crear" data-v="crear">
+
+  <!-- 1) Escribir -->
+  <div class="card compose" id="paso-escribir">
+    <h2>Escribe el texto de tu correo</h2>
+    <p>Cuéntalo como te salga: qué pasó, qué tiene que hacer el cliente, montos, fechas y links. Al apretar Diseñar queda con el formato y el diseño de Lexy.</p>
+    <label class="lbl" for="texto" hidden>Texto del correo</label>
+    <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
+    <p class="hint" id="texto-tip" style="font-size:14px;color:var(--muted)">Escribe al inicio de una frase <code class="k">{{destacar}}</code> para dejarla en un recuadro destacado, <code class="k">{{título}}</code> para usarla de título o <code class="k">{{botón}}</code> para convertirla en botón (con su link al lado).</p>
+    <div class="go">
+      <div class="opts">
+        <span>Header</span>
+        <div class="seg" role="group" aria-label="Header">
+          <button type="button" data-h="navy" aria-pressed="true">Oscuro · generales</button>
+          <button type="button" data-h="claro" aria-pressed="false">Claro · tramitación</button>
+        </div>
+      </div>
+      <button class="btn big" id="disenar" type="button">Diseñar</button>
+    </div>
+    <div class="foot">
+      <span class="status" id="estado" role="status"></span>
+      <button class="link" type="button" id="ejemplo">Probar con un ejemplo</button>
+    </div>
+  </div>
+
+  <!-- 2) Editar -->
+  <div class="editor" id="paso-editar" hidden>
+    <div>
+      <div class="pbar">
+        <p class="tip" id="tip"><b>Haz clic en cualquier texto del correo para cambiarlo.</b></p>
+        <div class="tools">
+        <div class="seg" role="group" aria-label="Tamaño de pantalla">
+          <button type="button" id="ver-pc" aria-pressed="true">Computador</button>
+          <button type="button" id="ver-cel" aria-pressed="false">Celular</button>
+          <button type="button" id="ver-code" class="ico" aria-pressed="false" aria-label="Código HTML" title="Código HTML"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/></svg></button>
+        </div>
+        </div>
+      </div>
+      <p class="status" id="aviso" role="status"></p>
+      <div class="card">
+        <div class="inbox"><b id="p-asunto"></b></div>
+        <div class="stage" id="stage"><iframe id="frame" title="Correo diseñado (editable)"></iframe>
+          <div class="codebox" id="codebox" hidden>
+            <label class="lbl" for="codigo" hidden>HTML completo del correo</label>
+            <p class="code-tip">Edita el código y el correo se actualiza al lado.</p>
+            <div class="code-wrap">
+              <button class="code-copy" id="copiar-code" type="button" aria-label="Copiar HTML" title="Copiar HTML"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7H4.5A1.5 1.5 0 0 0 3 8.5v12A1.5 1.5 0 0 0 4.5 22h9a1.5 1.5 0 0 0 1.5-1.5V20"/><path d="M8 3.5A1.5 1.5 0 0 1 9.5 2H16l5 5v11.5a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 8 18.5z"/><path d="M16 2v3.5A1.5 1.5 0 0 0 17.5 7H21"/><path d="M11.5 11h6M11.5 14.5h6"/></svg><span></span></button>
+              <textarea id="codigo" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+            </div>
+          </div></div>
+      </div>
+    </div>
+
+    <aside class="side">
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><h3>Tu correo</h3><span class="tag" id="tipo-tag"></span></div>
+        <button class="btn" id="copiar" type="button"><span>Copiar HTML</span></button>
+        <a class="btn ghost" href="https://email-tester-indol.vercel.app/" target="_blank" rel="noopener noreferrer">Probar mi correo ↗</a>
+        <p class="hint">En el tester usa el código <code class="k">lexy123</code>, tu correo, el asunto y pega el HTML en Mensaje.</p>
+      </div>
+
+      <div class="card">
+        <div><label class="lbl" for="asunto">Asunto</label><input type="text" id="asunto"></div>
+        <div id="campo-link"><label class="lbl" for="link" id="link-lbl">Link del botón</label><input type="url" id="link" placeholder="https://">
+          <p class="hint" id="link-hint" hidden style="margin-top:6px">El correo no tiene botón: al pegar el link se agrega uno («Ver mi caso»), y su texto se cambia haciendo clic sobre él.</p><p class="falta" id="falta-link" hidden>Falta el link: pégalo aquí para que el botón funcione.</p></div>
+      </div>
+
+      <div class="row">
+        <button class="btn ghost sm" id="nuevo" type="button">Escribir otro correo</button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================= OBJETIVOS BÁSICOS ======================= -->
+<section id="v-objetivos" data-v="objetivos" hidden>
+  <div class="guide">
+
+    <div class="g-hero" id="g-rector">
+      <div class="g-head">
+        <span class="g-eyebrow">Objetivos básicos</span>
+        <h2>🥇 Principio rector</h2>
+        <p>Antes de comenzar a escribir, detente un momento y responde estas preguntas clave:</p>
+      </div>
+      <ol class="g-qs">
+        <li><small>Entender</small><b>¿Qué quiero que el cliente entienda con este correo?</b></li>
+        <li><small>Hacer</small><b>¿Qué quiero que el cliente haga después de leerlo?</b></li>
+        <li><small>Sentir</small><b>¿Qué emoción quiero disminuir o activar en el cliente?</b></li>
+      </ol>
+      <p class="g-close">Tener claridad sobre estas respuestas te ayudará a construir mensajes más simples, directos y efectivos, centrados en las necesidades del cliente y en una mejor experiencia de comunicación.</p>
+    </div>
+
+    <div class="card g-sec">
+      <div class="g-head">
+        <h2>🗣️ Tono y voz según objetivo comunicacional</h2>
+      </div>
+      <div class="g-col">
+        <span class="g-sub">Tono y voz general</span>
+        <div class="chips"><span>Claro</span><span>Cercano</span><span>Directo</span><span>Sin tecnicismos innecesarios</span><span>Sin frases legales redundantes</span></div>
+      </div>
+      <div class="g-col">
+        <span class="g-sub">Tipos de correo según objetivo comunicacional</span>
+        <div class="g-tabs" role="tablist" aria-label="Tipos de correo" id="g-tabs"></div>
+      </div>
+      <div class="g-panel" role="tabpanel" id="g-panel" aria-live="polite"></div>
+      <div class="g-sum">
+        <b>Resumen estratégico</b>
+        <p>Cada tipo de correo tiene un rol distinto en la experiencia del cliente. Estandarizar esto reduce ansiedad, mejora conversión y fortalece la marca.</p>
+      </div>
+    </div>
+
+    <div class="card g-sec">
+      <div class="g-head">
+        <h2>🔢 Paso a paso para construir tu correo</h2>
+      </div>
+      <ol class="g-steps">
+        <li class="g-step">
+          <span class="n">1</span>
+          <h3>Piensa en el objetivo de tu correo</h3>
+          <p>Responde las 3 preguntas del principio rector: qué quieres que el cliente entienda, qué quieres que haga y qué emoción quieres disminuir o activar.</p>
+          <button class="link-up" type="button" id="ver-preguntas">Ver las preguntas</button>
+        </li>
+        <li class="g-step">
+          <span class="n">2</span>
+          <h3>Diseña tu correo</h3>
+          <p>La forma más rápida es <b>Crear correo</b>: escribes el texto y queda con el header, el pie y el diseño de Lexy.</p>
+          <a class="btn sm" href="#crear">Crear correo</a>
+          <p>Si trabajas directamente con HTML, edita la plantilla usando:</p>
+          <ul><li>WordHTML → <a href="https://wordtohtml.net/" target="_blank" rel="noopener noreferrer">wordtohtml.net</a></li><li>Visual Studio Code → <a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">code.visualstudio.com</a></li></ul>
+          <p>Mantén una estructura ordenada: header (imagen superior), saludo, contenido principal, bloques destacados con colores consistentes y un footer con los datos del estudio. Diseño limpio y que se vea bien en computador y celular.</p>
+        </li>
+        <li class="g-step">
+          <span class="n">3</span>
+          <h3>Prueba tu correo</h3>
+          <p>Prueba cómo se verá en Gmail en el tester. Cómo se usa:</p>
+          <ol class="tester-steps">
+            <li><span><b>Código de verificación:</b> <code class="k">lexy123</code></span></li>
+            <li><span><b>Correo electrónico:</b> el correo al que quieres que llegue la prueba.</span></li>
+            <li><span><b>Asunto:</b> el asunto de tu correo.</span></li>
+            <li><span><b>Mensaje:</b> copia y pega tu HTML (antes de copiarlo, pásalo por <a href="https://wordtohtml.net/" target="_blank" rel="noopener noreferrer">WordHTML</a>).</span></li>
+          </ol>
+          <a class="btn sm" href="https://email-tester-indol.vercel.app/" target="_blank" rel="noopener noreferrer">Probar mi correo ↗</a>
+        </li>
+      </ol>
+
+      <div class="g-check">
+        <header>
+          <h3>✅ Paso 4 · Checklist final antes de enviar para montar</h3>
+          <div class="g-prog"><div class="bar"><i id="ck-bar"></i></div><span id="ck-n">0 de 5</span></div>
+        </header>
+        <div class="checklist" id="checklist">
+          <label><input type="checkbox" id="ck1">El correo es claro y cumple con el objetivo buscado.</label>
+          <label><input type="checkbox" id="ck2">El lenguaje es claro (sin información redundante ni tecnicismos innecesarios).</label>
+          <label><input type="checkbox" id="ck3">El correo está cuadrado y se visualiza de forma correcta.</label>
+          <label><input type="checkbox" id="ck4">Está optimizado para móvil.</label>
+          <label><input type="checkbox" id="ck5">Fue probado previamente.</label>
+        </div>
+        <p class="done" id="listo" hidden>¡Listo para montar! ✅</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+</main>
+
+<script>
+/* ===================== Datos de la guía ===================== */
+const TIPOS = {
+  informativo: {
+    nombre: "Informativo simple",
+    objetivo: "Entregar información clara sin exigir acción inmediata.",
+    ejemplos: ["Recordatorio", "Confirmación de recepción"],
+    estructura: ["Saludo", "Qué ocurrió", "Qué significa", "Qué sigue (si aplica)", "Cierre breve"],
+    reglas: ["Máximo 2 secciones", "Sin bloques largos", "No explicar en exceso", "No generar ansiedad innecesaria", "No incluir 2 acciones distintas"]
+  },
+  cta: {
+    nombre: "Llamado a la acción (CTA)",
+    objetivo: "Mover al cliente a realizar una acción concreta.",
+    ejemplos: ["Completar ficha", "Subir documentos", "Firmar mandato", "Pagar cuota"],
+    estructura: ["Beneficio de la acción", "Qué debe hacer", "Botón", "Qué pasa después"],
+    reglasBoton: ["Visible antes del segundo scroll en móvil", "Debe destacar visualmente, con suficiente espacio en blanco alrededor para aislarlo del resto del contenido", "Acción escrita en primera persona y con un verbo claro (ej: \"Completar mi ficha\")"],
+    reglas: ["Un solo CTA principal", "Explicar fricciones antes de que aparezcan", "Máximo 2 cajas informativas", "No dar instrucciones demasiado técnicas"]
+  },
+  hito: {
+    nombre: "Hito del proceso",
+    objetivo: "Reducir incertidumbre y reforzar confianza.",
+    ejemplos: ["Presentación de excepciones", "Admisibilidad", "Resolución de Liquidación"],
+    estructura: ["Línea de tiempo", "Qué pasó (hito claro)", "Qué significa para el cliente", "Qué viene ahora", "Plazo estimado"],
+    reglas: ["Explicar impacto, no solo el evento", "Traducir lenguaje jurídico", "Siempre incluir plazo estimado", "Siempre incluir una frase contenedora (ej: \"estamos acompañándote\")", "No informar el hito sin contexto"]
+  }
+};
+
+const EJEMPLO = "El tribunal declaró admisible la solicitud de liquidación del cliente. Antes ya habíamos presentado la solicitud. Ahora se publica en el Boletín Concursal y se designa al liquidador, lo que toma unos 30 días hábiles; después viene la resolución de liquidación. El cliente no tiene que hacer nada por ahora. Puede ver su caso en https://lexy.cl/";
+
+/* ===================== Plantilla del correo (mismo diseño que build_emails.py) ===================== */
+const FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+const S3 = "https://imagenes-perfi-abg-eje.s3.us-east-1.amazonaws.com/";
+const HEADERS = {
+  navy:  { nombre: "Correos generales",      src: S3 + "Header_Correos_Generales_LEXY.png" },
+  claro: { nombre: "Correos de tramitación", src: S3 + "Header_blanco_marcado_tramitacion.png" }
+};
+const BREVO = "https://creative-assets.mailinblue.com/editor/social-icons/rounded_colored/";
+const SOCIAL = [
+  ["instagram", "Instagram", "https://instagram.com/lexydeudor"],
+  ["facebook", "Facebook", "https://web.facebook.com/profile.php?id=100089769037935"],
+  ["website", "Sitio Web", "https://lexy.cl/"]
+];
+// Solo para la vista previa: las imágenes externas no cargan dentro de Claude, así que se muestran copias incrustadas.
+// Al copiar el HTML se vuelven a poner los links reales.
+const PREVIEW_IMG = {
+  [HEADERS.navy.src]: "__IMG_NAVY__",
+  [HEADERS.claro.src]: "__IMG_CLARO__",
+  [BREVO + "instagram_32px.png"]: "__IMG_IG__",
+  [BREVO + "facebook_32px.png"]: "__IMG_FB__",
+  [BREVO + "website_32px.png"]: "__IMG_WEB__"
+};
+const NOMBRE = "{{nombre cliente}}";
+
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const inline = s => esc(s)
+  .replace(/\*\*(.+?)\*\*/g, '<strong class="lt" style="color:#0b013c;">$1</strong>')
+  .replace(/\*(.+?)\*/g, '<span class="em" style="color:#4429cc;">$1</span>');
+const LINK_OK = /^(https?:\/\/\S+|mailto:\S+|\{\{.+\}\})$/i;
+const safeUrl = u => LINK_OK.test((u || "").trim()) ? u.trim() : "#";
+
+// El título siempre lleva una parte en morado (*así*). Si no viene marcada, se elige sola:
+// 1) una fecha, monto o plazo; 2) lo que sigue a tu/la/el/de… (1 a 4 palabras); 3) las dos últimas palabras.
+const acentuar = t => {
+  t = String(t || "").trim();
+  if (!t || /(^|[^*])\*[^*\s][^*]*\*/.test(t)) return t;
+  const marca = (a, b) => t.slice(0, a) + "*" + t.slice(a, b) + "*" + t.slice(b);
+  const fin = t.replace(/[.!?:]+$/, "").length;
+  const MES = "enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre";
+  const dato = new RegExp(`\\d{1,2} de (${MES})( de \\d{4})?|\\$\\s?[\\d.,]+|\\d+ (días|meses|semanas|horas)( hábiles)?|\\d+ de \\d+|\\d+\\s?%`, "i").exec(t);
+  if (dato) return marca(dato.index, dato.index + dato[0].length);
+  const pal = [...t.slice(0, fin).matchAll(/\S+/g)];
+  if (pal.length < 2) return marca(0, fin);
+  const ART = /^(tu|tus|su|sus|la|las|el|los|un|una|de|del|al|en|con|para|a)$/i;
+  for (let i = 1; i < pal.length - 1; i++) {
+    const resto = pal.length - 1 - i;
+    if (ART.test(pal[i][0]) && resto >= 1 && resto <= 4 && !ART.test(pal[i + 1][0])) return marca(pal[i + 1].index, fin);
+  }
+  return marca(pal[pal.length - 2].index, fin);
+};
+
+const E = {
+  hi: n => '<p class="txt hi" style="margin:0 0 10px;font-size:20px;line-height:1.4;color:#4f5157;">Hola, '
+    + `<span class="name" style="font-weight:700;color:#0b013c;border-bottom:3px solid #f0a23b;padding-bottom:1px;">${esc(n)}</span>:</p>`,
+  h1: t => `<h1 class="h1" style="margin:0 0 14px;font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-0.5px;color:#0b013c;">${inline(acentuar(t))}</h1>`,
+  p: t => `<p class="txt" style="margin:0 0 16px;color:#4f5157;">${inline(t)}</p>`,
+  note: t => `<p class="txt" style="margin:0 0 16px;font-size:13px;color:#7a7d87;">${inline(t)}</p>`,
+  box: (k, v, m) => {
+    const size = String(v).length > 12 ? "20px" : "32px";
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0;">
+        <tr><td class="box" style="background:#f0f0fb;border-radius:12px;padding:18px 20px;">
+          <div class="k" style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4429cc;">${inline(k)}</div>
+          <div class="v" style="font-size:${size};font-weight:700;line-height:1.25;color:#0b013c;margin:2px 0;">${inline(v)}</div>
+          ${m ? `<div class="m" style="font-size:14px;color:#4f5157;">${inline(m)}</div>` : ""}
+        </td></tr>
+      </table>`;
+  },
+  button: (label, href) => `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 20px;">
+        <tr><td class="btn" style="background:#4429cc;border-radius:10px;">
+          <a href="${esc(safeUrl(href))}" style="display:inline-block;padding:13px 24px;font-family:${FONT};font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">${inline(label)}</a>
+        </td></tr>
+      </table>`,
+  steps: items => '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 22px;">'
+    + items.map(([t, s], i) => {
+      const border = i === items.length - 1 ? "" : "border-bottom:1px solid #e3e3e8;";
+      return `<tr>
+          <td class="row" width="48" style="padding:12px 0;${border}vertical-align:middle;">
+            <div class="num" style="width:36px;height:36px;line-height:36px;border-radius:10px;background:#f0f0fb;color:#4429cc;font-weight:700;font-size:14px;text-align:center;">${i + 1}</div>
+          </td>
+          <td class="row" style="padding:12px 0;${border}vertical-align:middle;">
+            <div class="lt" style="font-weight:700;color:#202124;">${inline(t)}</div>
+            ${s ? `<div class="ls" style="font-size:14px;color:#7a7d87;">${inline(s)}</div>` : ""}
+          </td>
+        </tr>`;
+    }).join("") + "</table>",
+
+  // Línea de tiempo: horizontal hasta 5 etapas (cabe en celular), vertical si son más.
+  timeline: items => {
+    const cur = items.findIndex(x => x.cur);
+    const st = i => cur < 0 ? "fut" : i < cur ? "done" : i === cur ? "cur" : "fut";
+    const dot = (s, i) => ({
+      done: `<div class="num" style="width:28px;height:28px;line-height:28px;border-radius:50%;background:#f0f0fb;color:#4429cc;font-weight:700;font-size:13px;text-align:center;margin:0 auto;">&#10003;</div>`,
+      cur: `<div class="cur" style="width:28px;height:28px;line-height:28px;border-radius:50%;background:#4429cc;color:#ffffff;font-weight:700;font-size:13px;text-align:center;margin:0 auto;">${i + 1}</div>`,
+      fut: `<div class="fut" style="width:26px;height:26px;line-height:26px;border-radius:50%;border:1px solid #d6d6de;color:#9a9ca5;font-weight:700;font-size:12px;text-align:center;margin:0 auto;">${i + 1}</div>`
+    })[s];
+    const label = '<td colspan="__N__" class="k" style="padding:0 0 12px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4429cc;text-align:left;">Tu proceso</td>';
+
+    if (items.length <= 5) {
+      const n = items.length, w = Math.floor(100 / n);
+      const line = (on, show) => show
+        ? `<div class="${on ? "tl-on" : "tl-off"}" style="height:2px;line-height:2px;font-size:0;background:${on ? "#4429cc" : "#e3e3e8"};">&nbsp;</div>`
+        : `<div style="height:2px;line-height:2px;font-size:0;">&nbsp;</div>`;
+      const cols = items.map((x, i) => {
+        const s = st(i);
+        const tcol = s === "fut" ? "#7a7d87" : "#202124";
+        return `<td class="tl" width="${w}%" valign="top" style="width:${w}%;padding:0;vertical-align:top;text-align:center;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+              <td style="padding:0;vertical-align:middle;">${line(cur >= 0 && i <= cur, i > 0)}</td>
+              <td width="28" style="width:28px;padding:0;vertical-align:middle;">${dot(s, i)}</td>
+              <td style="padding:0;vertical-align:middle;">${line(cur >= 0 && i < cur, i < n - 1)}</td>
+            </tr></table>
+            <div class="tl-t ${s === "fut" ? "ls" : "lt"}" style="padding:8px 4px 0;font-size:13px;line-height:1.3;font-weight:700;color:${tcol};">${inline(x.t)}</div>
+            ${s === "cur" ? '<div class="tl-s em" style="padding:2px 4px 0;font-size:12px;line-height:1.3;color:#4429cc;">Estamos aquí</div>' : ""}
+          </td>`;
+      }).join("");
+      return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0 26px;table-layout:fixed;">
+        <tr>${label.replace("__N__", n)}</tr>
+        <tr>${cols}</tr>
+      </table>`;
+    }
+
+    const rows = items.map((x, i) => {
+      const s = st(i);
+      const border = i === items.length - 1 ? "" : "border-bottom:1px solid #e3e3e8;";
+      const sub = { done: "Completado", cur: "Estamos aquí", fut: "Próximo paso" }[s];
+      return `<tr>
+          <td class="row" width="44" style="padding:10px 0;${border}vertical-align:middle;">${dot(s, i)}</td>
+          <td class="row" style="padding:10px 0 10px 10px;${border}vertical-align:middle;">
+            <div class="${s === "fut" ? "ls" : "lt"}" style="font-weight:700;color:${s === "fut" ? "#7a7d87" : "#202124"};">${inline(x.t)}</div>
+            <div class="${s === "cur" ? "em" : "ls"}" style="font-size:13px;color:${s === "cur" ? "#4429cc" : "#7a7d87"};">${sub}</div>
+          </td>
+        </tr>`;
+    }).join("");
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 22px;">
+        <tr>${label.replace("__N__", 2)}</tr>${rows}</table>`;
+  },
+  destacado: t => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0;">
+        <tr><td class="box" style="background:#f0f0fb;border-radius:12px;padding:18px 20px;">
+          <div class="lt" style="font-size:16px;line-height:1.55;font-weight:700;color:#0b013c;">${inline(t)}</div>
+        </td></tr>
+      </table>`,
+  sign: () => '<p class="txt" style="margin:8px 0 28px;font-size:15px;color:#4f5157;">'
+    + '<strong class="lt" style="display:block;color:#202124;">Tu equipo Lexy</strong>'
+    + 'Si tienes dudas, escríbenos por WhatsApp.</p>',
+  footer: () => {
+    const icons = SOCIAL.map(([k, name, href]) =>
+      `<a href="${href}" target="_blank" style="display:inline-block;text-decoration:none;margin:0 6px;">`
+      + `<img src="${BREVO}${k}_32px.png" width="24" height="24" alt="${name}" style="width:24px;height:24px;border:0;"></a>`).join("");
+    return `<tr><td class="foot" align="center" style="background:#fafafa;border-top:1px solid #eeeeee;padding:28px 20px;font-family:${FONT};font-size:12px;color:#888888;text-align:center;">
+      <div style="text-align:center;margin-bottom:16px;">${icons}</div>
+      <p style="margin:0;color:#999999;font-size:11px;">Lexy - Todos los derechos reservados</p>
+    </td></tr>`;
+  }
+};
+
+const TPL = `<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="format-detection" content="telephone=no,address=no,email=no,date=no">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>__TITLE__</title>
+<!--[if mso]><style>body,table,td,p,a,h1{font-family:Arial,sans-serif !important;}</style><![endif]-->
+<style>
+  body{margin:0;padding:0;width:100% !important;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
+  table{border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0;}
+  img{border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;}
+  a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;}
+  /* Celular */
+  @media only screen and (max-width:620px){
+    .outer{padding:0 !important;}
+    .pad{padding:28px 22px 8px !important;}
+    .padf{padding:26px 22px !important;}
+    .h1{font-size:24px !important;}
+    .hi{font-size:18px !important;}
+    .v{font-size:28px !important;}
+    .tl-t{font-size:11px !important;padding:6px 2px 0 !important;}
+    .tl-s{font-size:10px !important;padding:2px 2px 0 !important;}
+  }
+  /* Modo oscuro (Mail de iPhone y Mac, Outlook de Mac) */
+  @media (prefers-color-scheme: dark){
+    .bg{background:#000000 !important;}
+    .card{background:#141317 !important;}
+    .h1,.name,.lt{color:#ffffff !important;}
+    .em,.lk{color:#9d90fc !important;}
+    .txt,.ls{color:#c3c2cc !important;}
+    .box,.num{background:#221b4a !important;}
+    .k,.num{color:#9d90fc !important;}
+    .v{color:#ffffff !important;}
+    .m{color:#cdc8f0 !important;}
+    .row{border-color:#2b2a32 !important;}
+    .cur{background:#9d90fc !important;color:#0b013c !important;}
+    .fut{border-color:#3a3942 !important;color:#8e8d98 !important;}
+    .tl-on{background:#9d90fc !important;}
+    .tl-off{background:#2b2a32 !important;}
+    .btn{background:#9d90fc !important;}
+    .btn a{color:#0b013c !important;}
+    .foot{background:#0c0b0f !important;color:#8e8d98 !important;}
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background:#f1f1f3;">
+<!-- Texto de vista previa en la bandeja -->
+<div class="preheader" style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">__PRE__</div>
+<table role="presentation" class="bg" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f1f1f3;">
+<tr><td class="outer" align="center" style="padding:24px 12px;">
+  <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td><![endif]-->
+  <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;background:#ffffff;">
+    <!-- HEADER: __HNAME__ -->
+    <tr><td style="padding:0;font-size:0;line-height:0;">
+      <img src="__SRC__" width="600" alt="Lexy Deudor" style="display:block;width:100%;max-width:600px;height:auto;">
+    </td></tr>
+    <!-- CUERPO -->
+    <tr><td class="pad" style="padding:40px 48px 12px;font-family:__FONT__;font-size:16px;line-height:1.6;color:#4f5157;">
+      __BODY__
+    </td></tr>
+    <!-- PIE -->
+    __FOOT__
+  </table>
+  <!--[if mso]></td></tr></table><![endif]-->
+</td></tr>
+</table>
+</body>
+</html>
+`;
+
+/* ===================== Borrador → bloques ===================== */
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+const KEYS = {
+  "tipo": "tipo", "asunto": "asunto", "vista previa": "pre", "preheader": "pre",
+  "titulo": "titulo", "dato": "dato", "recuadro": "dato", "dato clave": "dato",
+  "linea de tiempo": "linea", "etapas": "linea", "boton": "boton", "nota": "nota",
+  "pasos": "pasos", "firma": "firma", "parrafo": "parrafo",
+  "destacado": "destacado", "destacar": "destacado", "cuadro destacado": "destacado", "recuadro destacado": "destacado"
+};
+const parts = v => v.split("|").map(s => s.trim());
+
+function parse(src) {
+  const d = { tipo: "", asunto: "", pre: "", titulo: "", blocks: [] };
+  let para = [];
+  const flush = () => { if (para.length) { d.blocks.push({ k: "p", t: para.join(" ") }); para = []; } };
+  for (const raw of src.replace(/\r/g, "").split("\n")) {
+    const t = raw.trim();
+    if (!t) { flush(); continue; }
+    if (norm(t) === "firma") { flush(); d.blocks.push({ k: "firma" }); continue; }
+    const m = t.match(/^([^:|*]{3,22}):\s*(.*)$/);
+    const key = m && KEYS[norm(m[1])];
+    if (key) {
+      flush();
+      const v = m[2].trim();
+      if (key === "tipo") { const n = norm(v); d.tipo = /hito/.test(n) ? "hito" : /cta|accion/.test(n) ? "cta" : "informativo"; }
+      else if (key === "asunto") d.asunto = v;
+      else if (key === "pre") d.pre = v;
+      else if (key === "titulo") d.titulo = v;
+      else if (key === "parrafo") { if (v) d.blocks.push({ k: "p", t: v }); }
+      else if (key === "destacado" || (key === "dato" && !v.includes("|"))) { if (v) d.blocks.push({ k: "destacado", t: v }); }
+      else if (key === "dato") { const [k, val, det] = parts(v); d.blocks.push({ k: "dato", r: k || "", v: val || "", m: det || "" }); }
+      else if (key === "boton") { const [l, u] = parts(v); d.blocks.push({ k: "boton", t: l || "", u: u || "" }); }
+      else if (key === "nota") d.blocks.push({ k: "nota", t: v });
+      else if (key === "firma") d.blocks.push({ k: "firma" });
+      else if (key === "pasos") d.blocks.push({ k: "pasos", items: [] });
+      else if (key === "linea") d.blocks.push({ k: "linea", items: v.split(/\s*[|>]\s*/).filter(Boolean).map(x => ({ t: x.replace(/\*\s*$/, "").trim(), cur: /\*\s*$/.test(x) })) });
+      continue;
+    }
+    const li = t.match(/^(?:[-•]|\d+[.)])\s+(.*)$/);
+    if (li) {
+      flush();
+      const last = d.blocks[d.blocks.length - 1];
+      const [a, b] = parts(li[1]);
+      if (last && last.k === "pasos") last.items.push([a, b || ""]);
+      else d.blocks.push({ k: "pasos", items: [[a, b || ""]] });
+      continue;
+    }
+    para.push(t);
+  }
+  flush();
+  return d;
+}
+
+// Acciones que piden botón, con su texto en primera persona.
+const ACCIONES = [
+  [/\b(pagar|paga|pague|pagues)\b/, "Pagar mi cuota"],
+  [/\b(subir|sube|suba|subas|adjuntar|adjunta)\b/, "Subir mis documentos"],
+  [/\b(completar|completa|complete|completes|llenar|llena)\b/, "Completar mi ficha"],
+  [/\b(firmar|firme|firmes)\b/, "Firmar mi mandato"],
+  [/\b(agendar|agenda|agende|reservar|reserva)\b/, "Agendar mi reunión"],
+  [/\b(revisar|revisa|revise|ingresar|ingresa|entrar|entra)\b/, "Ver mi caso"]
+];
+
+// Marcas en el texto: {{destacar}} → recuadro destacado, {{botón}} → botón, {{título}} → título.
+// (No toca {{nombre cliente}} ni otras variables.) Formas: «{{marca}} texto», «texto {{marca}}»,
+// {{marca}} sola (usa la línea siguiente), «{{marca}}texto{{/marca}}» y «{{marca: texto}}».
+// Cada una queda como una línea «Destacado: …», «Botón: texto | link» o «Título: …».
+const tipoMarca = inner => {
+  const n = norm(inner);
+  if (/destac|cuadro/.test(n)) return "Destacado";
+  if (/^(boton|button|cta)\b/.test(n)) return "Botón";
+  if (/^(titulo|title)\b/.test(n)) return "Título";
+  return null;
+};
+const esMarca = inner => !!tipoMarca(inner);
+const lineaMarca = (k, t) => {
+  t = t.replace(/\s*\n\s*/g, " ").replace(/^(destacado|boton|botón|titulo|título)\s*:\s*/i, "").trim();
+  if (k === "Botón" && !t.includes("|")) {
+    const u = (t.match(/https?:\/\/\S+|\{\{[^}]+\}\}/) || [])[0];
+    if (u) t = t.replace(u, "").replace(/[\s:,-]+$/, "").trim() + " | " + u;
+  }
+  return `\n\n${k}: ${t}\n\n`;
+};
+function marcarDestacados(src) {
+  let out = src.replace(/\r/g, "");
+  out = out.replace(/\{\{([^}\/]*)\}\}([\s\S]*?)\{\{\s*\/[^}]*\}\}/g, (m, a, t) => tipoMarca(a) ? lineaMarca(tipoMarca(a), t) : m);
+  out = out.replace(/\{\{([^}:]*):([^}]*)\}\}/g, (m, a, t) => tipoMarca(a) ? lineaMarca(tipoMarca(a), t) : m);
+  const res = [];
+  let pendiente = null;
+  for (const raw of out.split("\n")) {
+    let k = null;
+    const line = raw.replace(/\{\{([^}]*)\}\}/g, (m, a) => tipoMarca(a) ? (k = k || tipoMarca(a), "") : m).trim();
+    if (k && !line) { pendiente = k; continue; }
+    if (pendiente && line && !k) { k = pendiente; pendiente = null; }
+    if (k && line) res.push(lineaMarca(k, line));
+    else res.push(raw);
+  }
+  if (pendiente === "Botón") res.push("\n\nBotón: \n\n");
+  return res.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+const cuentaDestacados = t => (t.match(/^\s*destacado\s*:/gim) || []).length;
+
+// Sin Claude: arma lo básico a partir del texto tal cual (título, párrafos, botón con el primer link).
+function basico(src) {
+  src = marcarDestacados(src);
+  if (/^\s*asunto\s*:/im.test(src)) return completarBotones(parse(src), src);
+  // Título y botones pedidos con marca: se apartan antes de limpiar los links del texto.
+  let titulo = "";
+  const botones = [];
+  src = src.split("\n").map(l => {
+    const t = l.match(/^\s*t[ií]tulo\s*:\s*(.*)$/i);
+    if (t) { if (!titulo) titulo = t[1].trim(); return ""; }
+    const b = l.match(/^\s*bot[oó]n\s*:\s*(.*)$/i);
+    if (b) { const [x, u] = parts(b[1]); botones.push({ k: "boton", t: x || "", u: u || "" }); return `@@BOTON${botones.length - 1}@@`; }
+    return l;
+  }).join("\n");
+  const url = (src.match(/https?:\/\/[^\s)]+/) || [])[0];
+  const limpio = src
+    .replace(/\s+(en|a)\s+https?:\/\/[^\s)]+/gi, (m, w) => w.toLowerCase() === "a" ? " al botón de abajo" : " en el botón de abajo")
+    .replace(/\s*:?\s*https?:\/\/[^\s)]+/g, "").replace(/[ \t]+/g, " ");
+  const paras = limpio.split(/\n\s*\n/).map(p => p.replace(/\s*\n\s*/g, " ").trim()).filter(Boolean);
+  const esDest = p => /^destacado\s*:/i.test(p);
+  const esBtn = p => /^@@BOTON\d+@@$/.test(p);
+  const esTexto = p => !esDest(p) && !esBtn(p);
+  const iT = titulo ? -1 : paras.findIndex(esTexto);
+  if (iT >= 0) {
+    const otros = paras.filter(esTexto).length;
+    if (paras[iT].length <= 90 && otros > 1) titulo = paras.splice(iT, 1)[0].replace(/[.:]$/, "");
+    else {
+      const m = paras[iT].match(/^(.{10,90}?[.!?])\s+(.*)$/);
+      if (m) { titulo = m[1].replace(/\.$/, ""); paras[iT] = m[2]; } else { titulo = paras.splice(iT, 1)[0]; }
+    }
+  }
+  const tituloTxt = titulo.replace(/\*/g, "");
+  const primero = paras.find(esTexto) || "";
+  const d = { tipo: "informativo", asunto: tituloTxt.length <= 60 ? tituloTxt : tituloTxt.slice(0, 58).replace(/\s+\S*$/, "") + "…", pre: primero.split(/(?<=[.!?])\s/)[0].slice(0, 110), titulo,
+    blocks: paras.map(t => esDest(t) ? { k: "destacado", t: t.replace(/^destacado\s*:\s*/i, "") }
+      : esBtn(t) ? botones[+t.match(/\d+/)[0]] : { k: "p", t }) };
+  const acc = ACCIONES.find(([r]) => r.test(norm(src)));
+  if (acc) d.tipo = "cta";
+  if (!botones.length && (url || acc)) d.blocks.push({ k: "boton", t: acc ? acc[1] : "Ver mi caso", u: url || "" });
+  d.blocks.push({ k: "firma" });
+  return completarBotones(d, src);
+}
+
+// Botones pedidos sin texto o sin link: texto según la acción del correo, link el primero que traiga el texto.
+function completarBotones(d, src) {
+  const acc = ACCIONES.find(([r]) => r.test(norm(src)));
+  const url = (src.match(/https?:\/\/[^\s)|]+/) || [])[0] || "";
+  for (const b of d.blocks) if (b.k === "boton") {
+    if (!b.t) b.t = acc ? acc[1] : "Ver mi caso";
+    if (!LINK_OK.test((b.u || "").trim()) && url) b.u = url;
+    d.tipo = d.tipo === "hito" ? "hito" : "cta";
+  }
+  return d;
+}
+
+function bodyHtml(d) {
+  const out = ["\n      " + E.hi(NOMBRE)];
+  if (d.titulo) out.push(E.h1(d.titulo));
+  for (const b of d.blocks) {
+    if (b.k === "p") out.push(E.p(b.t));
+    else if (b.k === "dato") out.push(E.box(b.r, b.v, b.m));
+    else if (b.k === "destacado" && b.t) out.push(E.destacado(b.t));
+    else if (b.k === "boton" && b.t) out.push(E.button(b.t, b.u));
+    else if (b.k === "nota" && b.t) out.push(E.note(b.t));
+    else if (b.k === "firma") out.push(E.sign());
+    else if (b.k === "pasos" && b.items.length) out.push(E.steps(b.items));
+    else if (b.k === "linea" && b.items.length) out.push(E.timeline(b.items));
+  }
+  return out.join("\n      ");
+}
+
+function emailHtml(d, header) {
+  const h = HEADERS[header];
+  return TPL.replace("__TITLE__", esc(d.asunto || "Correo Lexy"))
+    .replace("__PRE__", esc(d.pre))
+    .replace("__HNAME__", h.nombre)
+    .replace("__SRC__", h.src)
+    .replace("__FONT__", FONT)
+    .replace("__BODY__", () => bodyHtml(d))
+    .replace("__FOOT__", () => E.footer());
+}
+
+/* ===================== Instrucciones para Claude ===================== */
+const guiaTipos = () => Object.entries(TIPOS).map(([k, t]) =>
+  `- ${k} («${t.nombre}»): ${t.objetivo} Estructura: ${t.estructura.join(", ")}. ${t.reglasBoton ? "Botón: " + t.reglasBoton.join("; ") + ". " : ""}Reglas: ${t.reglas.join("; ")}.`).join("\n");
+const VOZ = "Tono y voz: español de Chile, tuteando al cliente. Claro, cercano y directo. Sin tecnicismos innecesarios ni frases legales redundantes; si aparece un término jurídico, tradúcelo a lo que significa para el cliente. Frases cortas.";
+
+function promptDisenar(texto) {
+  return `Eres quien redacta los correos a clientes de Lexy Deudor, un estudio jurídico chileno que acompaña a personas con deudas en procesos de renegociación y liquidación (Ley 20.720).
+
+Convierte el texto de abajo en un correo listo. Primero elige el tipo de correo que mejor calza:
+${guiaTipos()}
+
+${VOZ} Respeta los datos del texto (montos, fechas, plazos, links, nombres de etapas); no inventes ninguno. Si falta uno indispensable, escríbelo entre corchetes, por ejemplo [fecha].
+El saludo («Hola, {{nombre cliente}}:»), el header y el pie se agregan solos: no los escribas.
+
+Responde SOLO con el borrador, sin explicaciones ni bloques de código, una instrucción por línea, en este formato:
+Tipo: informativo | cta | hito
+Asunto: (menos de 60 caracteres)
+Vista previa: (una frase que complemente el asunto)
+Título: (una sola idea; OBLIGATORIO: pon entre *asteriscos* la parte clave, de 1 a 4 palabras, que irá en morado; por ejemplo «Tu cuota vence el *10 de diciembre*» o «Ya tienes tu *Portal del Cliente*»)
+(párrafos de texto libre, separados por una línea en blanco; **doble asterisco** para negrita, úsalo poco)
+Línea de tiempo: Etapa 1 | Etapa 2* | Etapa 3   (en hitos, siempre; de 3 a 5 etapas con nombres cortos de 1 a 4 palabras; el asterisco marca la etapa actual)
+Dato: Rótulo | Dato clave | Detalle   (opcional: recuadro con un monto, fecha o plazo; máximo 2)
+Destacado: texto   (recuadro destacado. OBLIGATORIO para cada línea del texto que empiece con «Destacado:»: mantenla como línea «Destacado:» en el mismo lugar del relato; puedes pulir la redacción, pero sin quitarle datos)
+- Título del paso | detalle   (opcional: pasos numerados, uno por línea)
+Botón: Texto del botón | link   (OBLIGATORIO cuando el cliente tiene que hacer algo: pagar, subir, completar, firmar, agendar, revisar o entrar a algún lado. Un solo botón. El texto empieza con un verbo y va en primera persona, por ejemplo «Pagar mi cuota», «Subir mis documentos», «Completar mi ficha». Usa el link del texto que corresponde a esa acción; si el texto no trae link, escribe FALTA_LINK. Si no hay ninguna acción, no pongas botón.)
+Nota: (opcional, texto chico)
+Firma   (opcional: agrega «Tu equipo Lexy»)
+
+Si el texto trae una línea «Título:», ese es el título: úsalo tal cual y solo agrégale los *asteriscos*. Si trae una línea «Botón:», el correo lleva ese botón con ese texto y ese link (si viene sin texto, ponle uno según la acción; si viene sin link, FALTA_LINK).
+
+Texto del correo:
+${texto}`;
+}
+
+/* ===================== Estado y utilidades ===================== */
+const $ = id => document.getElementById(id);
+const store = {
+  get(k) { try { return localStorage.getItem("lexy-correos:" + k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem("lexy-correos:" + k, v); } catch (e) {} }
+};
+let headerSel = store.get("header") === "claro" ? "claro" : "navy";
+let tipoActual = "";
+let doc = null;
+
+const samplePromise = (async () => {
+  try { return window.claude && window.claude.use ? await window.claude.use("sample") : null; } catch (e) { return null; }
+})();
+
+const ERRORES = {
+  not_granted: "No se dio permiso para usar Claude en esta página.",
+  sampling_disabled: "Claude no está disponible para esta cuenta.",
+  rate_limited: "Se hicieron muchas solicitudes seguidas. Espera un momento y vuelve a intentarlo.",
+  session_expired: "Tu sesión expiró. Vuelve a iniciar sesión en Claude.",
+  refused: "Claude no pudo trabajar con este texto. Cámbialo y vuelve a intentarlo.",
+  empty_completion: "Claude no devolvió nada. Vuelve a intentarlo."
+};
+const msgError = e => ERRORES[e && e.code] || "No se pudo completar. Vuelve a intentarlo en un momento.";
+
+function setStatus(el, txt, cls = "") { el.className = "status " + cls; el.textContent = txt; }
+
+function segPress(sel, attr, val) {
+  document.querySelectorAll(sel).forEach(b => b.setAttribute("aria-pressed", String(b.getAttribute(attr) === val)));
+}
+
+/* ===================== Vista previa editable ===================== */
+const EDITABLE = "h1.h1, p.txt:not(.hi), div.k, td.k, div.v, div.m, div.lt, div.ls, div.em, div.tl-t, .btn a";
+const EDIT_CSS = `[contenteditable]{cursor:text;border-radius:4px;transition:outline-color .1s}
+[contenteditable]:hover{outline:1.5px dashed #9d90fc;outline-offset:3px}
+[contenteditable]:focus{outline:2px solid #27198E;outline-offset:3px}`;
+
+function previewHtml(h) {
+  let out = h;
+  for (const [u, data] of Object.entries(PREVIEW_IMG)) out = out.split(u).join(data);
+  return out;
+}
+
+function exportHtml() {
+  if (!doc) return "";
+  const root = doc.documentElement.cloneNode(true);
+  root.querySelectorAll("#edit-ui").forEach(n => n.remove());
+  root.querySelectorAll("[contenteditable]").forEach(n => { n.removeAttribute("contenteditable"); n.removeAttribute("spellcheck"); });
+  let out = "<!DOCTYPE html>\n" + root.outerHTML + "\n";
+  for (const [u, data] of Object.entries(PREVIEW_IMG)) out = out.split(data).join(u);
+  return out;
+}
+
+function fitFrame() {
+  const f = $("frame");
+  try { if (doc && doc.body) f.style.height = Math.max(400, doc.documentElement.scrollHeight) + "px"; } catch (e) {}
+}
+
+let syncT = 0;
+function syncAhora() {
+  clearTimeout(syncT);
+  const html = exportHtml();
+  $("codigo").value = html;
+  store.set("html", html);
+  fitFrame();
+}
+function sync() {
+  clearTimeout(syncT);
+  syncT = setTimeout(syncAhora, 250);
+}
+
+function cargar(html) {
+  $("paso-escribir").hidden = true;
+  $("paso-editar").hidden = false;
+  $("frame").srcdoc = previewHtml(html);
+  $("codigo").value = html;
+  store.set("html", html);
+  window.scrollTo(0, 0);
+}
+
+$("frame").addEventListener("load", () => {
+  doc = $("frame").contentDocument;
+  if (!doc || !doc.body) return;
+  const st = doc.createElement("style"); st.id = "edit-ui"; st.textContent = EDIT_CSS; doc.head.appendChild(st);
+  doc.querySelectorAll(EDITABLE).forEach(n => { n.setAttribute("contenteditable", "true"); n.setAttribute("spellcheck", "true"); });
+
+  doc.addEventListener("input", () => { revisarLink(); sync(); });
+  doc.addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
+  doc.addEventListener("paste", e => {
+    e.preventDefault();
+    const t = (e.clipboardData || window.clipboardData).getData("text/plain").replace(/\s*\n\s*/g, " ");
+    doc.execCommand("insertText", false, t);
+  });
+  doc.addEventListener("click", e => {
+    const a = e.target.closest("a");
+    if (a) e.preventDefault();
+    if (a && a.closest(".btn")) { $("link").focus({ preventScroll: true }); $("link").select(); }
+  });
+
+  // panel lateral
+  $("asunto").value = doc.title || "";
+  $("p-asunto").textContent = doc.title || "(sin asunto)";
+  const btn = doc.querySelector(".btn a");
+  if (btn) { const h = btn.getAttribute("href") || ""; $("link").value = LINK_OK.test(h) ? h : ""; }
+  else $("link").value = "";
+  revisarLink();
+  $("tipo-tag").textContent = tipoActual ? TIPOS[tipoActual].nombre : "";
+  $("tipo-tag").hidden = !tipoActual;
+  setTimeout(fitFrame, 50);
+});
+window.addEventListener("resize", () => requestAnimationFrame(fitFrame));
+
+$("asunto").addEventListener("input", () => { if (!doc) return; doc.title = $("asunto").value; $("p-asunto").textContent = $("asunto").value || "(sin asunto)"; sync(); });
+// Devuelve true si el botón del correo todavía no tiene un link que funcione.
+function revisarLink() {
+  const a = doc && doc.querySelector(".btn a");
+  $("link-hint").hidden = !!a;
+  $("link-lbl").textContent = a ? `Link del botón «${a.textContent.trim()}»` : "Link del correo";
+  if (!a) { $("falta-link").hidden = true; $("link").classList.remove("sin-link"); return false; }
+  const falta = !LINK_OK.test((a.getAttribute("href") || "").trim());
+  $("falta-link").hidden = !falta;
+  $("link").classList.toggle("sin-link", falta);
+  return falta;
+}
+// El link se escribe en el HTML apenas se pega. Si el correo no tiene botón, se agrega uno antes de la firma.
+$("link").addEventListener("input", () => {
+  if (!doc) return;
+  const url = $("link").value.trim();
+  let a = doc.querySelector(".btn a");
+  if (!a && LINK_OK.test(url)) {
+    const firma = [...doc.querySelectorAll("p.txt")].find(p => /Tu equipo Lexy/.test(p.textContent));
+    const cuerpo = doc.querySelector("td.pad");
+    if (firma) firma.insertAdjacentHTML("beforebegin", E.button("Ver mi caso", url));
+    else if (cuerpo) cuerpo.insertAdjacentHTML("beforeend", E.button("Ver mi caso", url));
+    a = doc.querySelector(".btn a");
+    if (a) { a.setAttribute("contenteditable", "true"); a.setAttribute("spellcheck", "true"); }
+  }
+  if (a) a.setAttribute("href", url || "#");
+  revisarLink();
+  syncAhora();
+});
+
+// Vista del correo: computador, celular o el HTML completo.
+function vista(modo) {
+  const code = modo === "code";
+  if (code) $("codigo").value = exportHtml();
+  $("codebox").hidden = !code;
+  $("stage").classList.toggle("code", code);
+  $("tip").hidden = code;
+  $("stage").classList.toggle("phone", modo === "cel");
+  segPress("#ver-pc,#ver-cel,#ver-code", "id", "ver-" + modo);
+  setTimeout(fitFrame, 100);
+}
+// Código editable: al dejar de escribir medio segundo, el correo se vuelve a dibujar con ese HTML.
+let codeT = 0;
+$("codigo").addEventListener("input", () => {
+  clearTimeout(codeT);
+  codeT = setTimeout(() => {
+    const h = $("codigo").value;
+    store.set("html", h);
+    $("frame").srcdoc = previewHtml(h);
+  }, 500);
+});
+$("ver-pc").onclick = () => vista("pc");
+$("ver-cel").onclick = () => vista("cel");
+$("ver-code").onclick = () => vista("code");
+
+/* ===================== 1) Escribir → Diseñar ===================== */
+segPress("[data-h]", "data-h", headerSel);
+document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", () => {
+  headerSel = b.dataset.h; store.set("header", headerSel); segPress("[data-h]", "data-h", headerSel);
+}));
+$("texto").value = store.get("texto") || "";
+$("texto").addEventListener("input", () => store.set("texto", $("texto").value));
+$("ejemplo").onclick = () => {
+  $("texto").value = EJEMPLO; store.set("texto", EJEMPLO);
+  headerSel = "claro"; store.set("header", "claro"); segPress("[data-h]", "data-h", "claro");
+  $("texto").focus();
+};
+
+$("disenar").onclick = async () => {
+  const texto = $("texto").value.trim();
+  if (!texto) { setStatus($("estado"), "Escribe primero el texto del correo.", "err"); $("texto").focus(); return; }
+  $("disenar").disabled = true;
+  setStatus($("estado"), "Diseñando tu correo… puede tardar unos segundos.");
+  let d = null, aviso = "";
+  const sample = await samplePromise;
+  if (sample) {
+    try {
+      const marcado = marcarDestacados(texto);
+      const { text } = await sample(promptDisenar(marcado), { cache: false });
+      d = parse(text.replace(/^```\w*\n?|```\s*$/g, ""));
+      // Si Claude dejó fuera algún recuadro pedido, se agregan los del texto original después del primer párrafo.
+      if (cuentaDestacados(marcado) > d.blocks.filter(b => b.k === "destacado").length) {
+        d.blocks = d.blocks.filter(b => b.k !== "destacado");
+        const dest = parse(marcado).blocks.filter(b => b.k === "destacado");
+        const i = d.blocks.findIndex(b => b.k === "p");
+        d.blocks.splice(i < 0 ? 0 : i + 1, 0, ...dest);
+      }
+      // Título pedido con {{título}}: se respeta (Claude solo puede agregarle los *asteriscos*).
+      const tPedido = (marcado.match(/^\s*t[ií]tulo\s*:\s*(.+)$/im) || [])[1];
+      if (tPedido && norm(d.titulo.replace(/\*/g, "")) !== norm(tPedido.replace(/\*/g, ""))) d.titulo = tPedido.trim();
+      // Botón pedido con {{botón}}: si Claude no lo puso, se agrega antes de la firma; su texto y link mandan.
+      const bPedidos = parse(marcado).blocks.filter(b => b.k === "boton");
+      if (bPedidos.length) {
+        const bC = d.blocks.filter(b => b.k === "boton");
+        if (!bC.length) {
+          const iF = d.blocks.findIndex(b => b.k === "firma");
+          d.blocks.splice(iF < 0 ? d.blocks.length : iF, 0, ...bPedidos);
+        } else {
+          if (bPedidos[0].t) bC[0].t = bPedidos[0].t;
+          if (bPedidos[0].u) bC[0].u = bPedidos[0].u;
+        }
+        completarBotones(d, marcado);
+      }
+      if (!d.titulo && !d.blocks.length) d = null;
+    } catch (e) { aviso = msgError(e) + " Lo armé con tu texto tal cual."; }
+  } else {
+    aviso = "Aquí no está la redacción con Claude: lo armé con tu texto tal cual. Puedes ajustarlo en el correo.";
+  }
+  if (!d) d = basico(texto);
+  tipoActual = d.tipo || ""; store.set("tipo", tipoActual);
+  cargar(emailHtml(d, headerSel));
+  $("disenar").disabled = false;
+  setStatus($("estado"), "");
+  setStatus($("aviso"), aviso);
+};
+
+$("nuevo").onclick = () => {
+  vista("pc");
+  $("paso-editar").hidden = true; $("paso-escribir").hidden = false;
+  $("texto").focus(); window.scrollTo(0, 0);
+};
+
+/* ===================== 2) Copiar ===================== */
+// Copia el HTML (en la vista de código, tal cual está escrito) y avisa si el botón del correo no tiene link.
+let copiadoT = 0;
+async function copiarHtml(b, idle, hecho) {
+  const falta = revisarLink();
+  const html = $("stage").classList.contains("code") ? $("codigo").value : exportHtml();
+  let ok = true;
+  try { await navigator.clipboard.writeText(html); }
+  catch (e) { ok = false; vista("code"); const c = $("codigo"); c.focus(); c.select(); }
+  clearTimeout(copiadoT);
+  document.querySelectorAll("#copiar,#copiar-code").forEach(x => { x.classList.remove("ok"); x.querySelector("span").textContent = x.id === "copiar" ? "Copiar HTML" : ""; });
+  b.classList.toggle("ok", ok);
+  b.querySelector("span").textContent = ok ? hecho : idle;
+  setStatus($("aviso"), falta ? "Ojo: el botón del correo todavía no tiene link. Pégalo en «Link del botón»."
+    : ok ? "" : "Quedó seleccionado en el código: cópialo con Cmd+C o Ctrl+C.", falta ? "err" : "");
+  if (falta) $("link").focus({ preventScroll: true });
+  copiadoT = setTimeout(() => { b.classList.remove("ok"); b.querySelector("span").textContent = idle; if (!falta) setStatus($("aviso"), ""); }, 2500);
+}
+$("copiar").onclick = () => copiarHtml($("copiar"), "Copiar HTML", "Copiado ✓");
+$("copiar-code").onclick = () => copiarHtml($("copiar-code"), "", "Copiado");
+
+/* ===================== Guía ===================== */
+const CLAVE = { informativo: "claridad", cta: "acción", hito: "contención + traducción" };
+const tabsG = Object.entries(TIPOS);
+$("g-tabs").innerHTML = tabsG.map(([k, t], i) =>
+  `<button class="g-tab" role="tab" type="button" id="gt-${k}" aria-controls="g-panel" aria-selected="${i === 0}" data-k="${k}">
+     <b>${t.nombre}</b><span>${t.nombre.split(" ")[0] === "Llamado" ? "CTA" : t.nombre.split(" ")[0]} → <em>${CLAVE[k]}</em></span></button>`).join("");
+
+function panelTipo(k) {
+  const t = TIPOS[k];
+  const reglas = (titulo, items) => `<span class="g-sub">${titulo}</span><ul class="g-rules">${items.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+  $("g-panel").innerHTML = `
+    <div class="g-col">
+      <span class="g-sub">Objetivo</span>
+      <p class="g-obj">${t.objetivo}</p>
+      <span class="g-sub">Ejemplos</span>
+      <div class="g-ex">${t.ejemplos.map(x => `<span>${x}</span>`).join("")}</div>
+    </div>
+    <div class="g-col">
+      <span class="g-sub">Estructura recomendada</span>
+      <div class="g-mail" aria-label="Esquema del correo">
+        <div class="hd"></div>
+        <ol>${t.estructura.map(x => `<li class="${x === "Botón" ? "is-btn" : x === "Línea de tiempo" ? "is-line" : ""}"><span>${x}</span></li>`).join("")}</ol>
+        <div class="ft"></div>
+      </div>
+    </div>
+    <div class="g-col">
+      ${t.reglasBoton ? reglas("Reglas del botón", t.reglasBoton) : ""}
+      ${reglas(t.reglasBoton ? "Reglas generales" : "Reglas", t.reglas)}
+    </div>`;
+  document.querySelectorAll(".g-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.k === k)));
+}
+document.querySelectorAll(".g-tab").forEach(b => b.addEventListener("click", () => panelTipo(b.dataset.k)));
+$("g-tabs").addEventListener("keydown", e => {
+  if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+  const ks = tabsG.map(([k]) => k), cur = ks.indexOf(document.querySelector('.g-tab[aria-selected="true"]').dataset.k);
+  const nxt = ks[(cur + (e.key === "ArrowRight" ? 1 : ks.length - 1)) % ks.length];
+  panelTipo(nxt); $("gt-" + nxt).focus();
+});
+panelTipo("informativo");
+
+$("ver-preguntas").onclick = () => $("g-rector").scrollIntoView({ behavior: "smooth", block: "start" });
+
+const cks = [...document.querySelectorAll("#checklist input")];
+const avance = () => {
+  const n = cks.filter(c => c.checked).length;
+  $("ck-n").textContent = `${n} de ${cks.length}`;
+  $("ck-bar").style.width = (100 * n / cks.length) + "%";
+  $("listo").hidden = n !== cks.length;
+};
+cks.forEach(c => c.addEventListener("change", avance));
+
+/* ===================== Navegación ===================== */
+function mostrar() {
+  const v = (location.hash || "#crear").slice(1);
+  const vista = ["crear", "objetivos"].includes(v) ? v : "crear";
+  document.querySelectorAll("section[data-v]").forEach(s => { s.hidden = s.dataset.v !== vista; });
+  document.querySelectorAll(".tabs a").forEach(a => { if (a.dataset.view === vista) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (vista === "crear") requestAnimationFrame(fitFrame);
+}
+window.addEventListener("hashchange", () => { mostrar(); window.scrollTo(0, 0); });
+mostrar();
+</script>
