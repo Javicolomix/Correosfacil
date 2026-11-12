@@ -197,6 +197,17 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .tester-steps{counter-reset:t;list-style:none;margin:0;padding:0!important;display:grid;gap:8px}
 .tester-steps li{counter-increment:t;display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start}
 .tester-steps li::before{content:counter(t);width:26px;height:26px;border-radius:8px;background:var(--soft);color:var(--btn);font-weight:700;display:grid;place-items:center;font-size:13px}
+.marcas{margin:10px 0 4px}
+.marcas-t{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--navy)}
+.marcas-t span{font-weight:400;color:var(--muted)}
+.marcas-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.marca{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;font:inherit;cursor:pointer;
+  background:#fff;border:1px solid #e3e1f3;border-radius:10px;padding:10px 12px;transition:border-color .15s,background .15s}
+.marca:hover{border-color:var(--lav);background:var(--soft)}
+.marca:focus-visible{outline:2px solid var(--btn);outline-offset:2px}
+.marca code{font-family:var(--mono);font-size:13px;background:var(--soft);color:var(--btn);padding:2px 7px;border-radius:6px;white-space:nowrap}
+.marca span{font-size:12.5px;line-height:1.45;color:var(--muted)}
+@media (max-width:620px){.marcas-g{grid-template-columns:1fr}.marca{flex-direction:row;align-items:baseline}.marca code{flex:none}}
 code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:1px 6px;border-radius:6px}
 
 .g-check{background:var(--soft);border-radius:14px;padding:22px;display:grid;gap:14px}
@@ -267,7 +278,23 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
     <p>Cuéntalo como te salga: qué pasó, qué tiene que hacer el cliente, montos, fechas y links. Al apretar Diseñar queda con el formato y el diseño de Lexy.</p>
     <label class="lbl" for="texto" hidden>Texto del correo</label>
     <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
-    <p class="hint" id="texto-tip" style="font-size:14px;color:var(--muted)">Para un recuadro destacado, abre con <code class="k">{{cuadro destacado}}</code> y ciérralo con <code class="k">{{cuadro destacado}}</code>: la primera línea sale como su título y el resto como texto normal. Escribe al inicio de una frase <code class="k">{{título}}</code> para usarla de título o <code class="k">{{botón}}</code> para convertirla en botón (con su link al lado).</p>
+    <div class="marcas" id="texto-tip">
+      <p class="marcas-t">Marcas opcionales <span>· toca una para insertarla donde está el cursor</span></p>
+      <div class="marcas-g">
+        <button type="button" class="marca" data-m="titulo">
+          <code>{{título}}</code>
+          <span>Esa frase queda como título del correo.</span>
+        </button>
+        <button type="button" class="marca" data-m="cuadro">
+          <code>{{cuadro destacado}}</code>
+          <span>Ábrelo y ciérralo con la misma marca. La 1.ª línea es su título; el resto, texto normal.</span>
+        </button>
+        <button type="button" class="marca" data-m="boton">
+          <code>{{botón}}</code>
+          <span>La frase se vuelve botón. Pon el link al lado.</span>
+        </button>
+      </div>
+    </div>
     <div class="go">
       <div class="opts">
         <span>Header</span>
@@ -451,7 +478,16 @@ const TIPOS = {
   }
 };
 
-const EJEMPLO = "El tribunal declaró admisible la solicitud de liquidación del cliente. Antes ya habíamos presentado la solicitud. Ahora se publica en el Boletín Concursal y se designa al liquidador, lo que toma unos 30 días hábiles; después viene la resolución de liquidación. El cliente no tiene que hacer nada por ahora. Puede ver su caso en https://lexy.cl/";
+const EJEMPLO = `{{título}} El tribunal declaró admisible tu solicitud de liquidación
+
+Antes ya habíamos presentado la solicitud. Ahora se publica en el Boletín Concursal y se designa al liquidador, lo que toma unos 30 días hábiles; después viene la resolución de liquidación.
+
+{{cuadro destacado}}
+No tienes que hacer nada por ahora
+Te avisaremos por este medio apenas el tribunal dicte la resolución de liquidación.
+{{cuadro destacado}}
+
+{{botón}} Ver mi caso https://lexy.cl/`;
 
 /* ===================== Plantilla del correo (mismo diseño que build_emails.py) ===================== */
 const FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif";
@@ -865,7 +901,7 @@ function completarBotones(d, src) {
   for (const b of d.blocks) if (b.k === "boton") {
     if (!b.t) b.t = acc ? acc[1] : "Ver mi caso";
     if (!LINK_OK.test((b.u || "").trim()) && url) b.u = url;
-    d.tipo = d.tipo === "hito" ? "hito" : "cta";
+    if (acc && d.tipo !== "hito") d.tipo = "cta";
   }
   return d;
 }
@@ -1104,6 +1140,18 @@ document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", (
 }));
 $("texto").value = store.get("texto") || "";
 $("texto").addEventListener("input", () => store.set("texto", $("texto").value));
+// Insertar una marca donde está el cursor (el recuadro envuelve lo seleccionado).
+document.querySelectorAll(".marca").forEach(b => b.onclick = () => {
+  const ta = $("texto"), v = ta.value, i = ta.selectionStart ?? v.length, j = ta.selectionEnd ?? v.length;
+  const sel = v.slice(i, j), antes = v.slice(0, i), nl = antes && !antes.endsWith("\n") ? "\n" : "";
+  const m = b.dataset.m;
+  const ins = m === "cuadro" ? `${nl}{{cuadro destacado}}\n${sel || "Título del recuadro\nTexto del recuadro"}\n{{cuadro destacado}}\n`
+    : m === "titulo" ? `${nl}{{título}} ${sel}` : `${nl}{{botón}} ${sel || "Texto del botón https://"}`;
+  ta.value = antes + ins + v.slice(j);
+  const pos = (antes + ins).length;
+  ta.focus(); ta.setSelectionRange(pos, pos);
+  store.set("texto", ta.value);
+});
 $("ejemplo").onclick = () => {
   $("texto").value = EJEMPLO; store.set("texto", EJEMPLO);
   headerSel = "claro"; store.set("header", "claro"); segPress("[data-h]", "data-h", "claro");
