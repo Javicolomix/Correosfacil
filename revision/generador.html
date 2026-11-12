@@ -267,7 +267,7 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
     <p>Cuéntalo como te salga: qué pasó, qué tiene que hacer el cliente, montos, fechas y links. Al apretar Diseñar queda con el formato y el diseño de Lexy.</p>
     <label class="lbl" for="texto" hidden>Texto del correo</label>
     <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
-    <p class="hint" id="texto-tip" style="font-size:14px;color:var(--muted)">Escribe al inicio de una frase <code class="k">{{destacar}}</code> para dejarla en un recuadro destacado, <code class="k">{{título}}</code> para usarla de título o <code class="k">{{botón}}</code> para convertirla en botón (con su link al lado).</p>
+    <p class="hint" id="texto-tip" style="font-size:14px;color:var(--muted)">Para un recuadro destacado, abre con <code class="k">{{cuadro destacado}}</code> y ciérralo con <code class="k">{{cuadro destacado}}</code>: la primera línea sale como su título y el resto como texto normal. Escribe al inicio de una frase <code class="k">{{título}}</code> para usarla de título o <code class="k">{{botón}}</code> para convertirla en botón (con su link al lado).</p>
     <div class="go">
       <div class="opts">
         <span>Header</span>
@@ -589,11 +589,17 @@ const E = {
     return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 22px;">
         <tr>${label.replace("__N__", 2)}</tr>${rows}</table>`;
   },
-  destacado: t => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0;">
+  // «Título | texto»: el título va en navy y negrita; el resto, como texto normal dentro del mismo recuadro.
+  destacado: t => {
+    const [tit, ...r] = String(t).split(/\s*\|\s*/);
+    const cuerpo = r.join(" ").trim();
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0;">
         <tr><td class="box" style="background:#f0f0fb;border-radius:12px;padding:18px 20px;">
-          <div class="lt" style="font-size:16px;line-height:1.55;font-weight:700;color:#0b013c;">${inline(t)}</div>
+          <div class="lt" style="font-size:16px;line-height:1.5;font-weight:700;color:#0b013c;">${inline(tit)}</div>${cuerpo ? `
+          <div class="ls" style="margin-top:6px;font-size:15px;line-height:1.6;font-weight:400;color:#4f5157;">${inline(cuerpo)}</div>` : ""}
         </td></tr>
-      </table>`,
+      </table>`;
+  },
   sign: () => '<p class="txt" style="margin:8px 0 28px;font-size:15px;color:#4f5157;">'
     + '<strong class="lt" style="display:block;color:#202124;">Tu equipo Lexy</strong>'
     + 'Si tienes dudas, escríbenos por WhatsApp.</p>',
@@ -758,7 +764,17 @@ const tipoMarca = inner => {
   return null;
 };
 const esMarca = inner => !!tipoMarca(inner);
+// Recuadro destacado: la primera línea (o la primera frase) es su título; lo demás va como texto normal.
+const partirDestacado = t => {
+  const lineas = t.replace(/^\s*destacado\s*:\s*/i, "").split("\n").map(x => x.trim()).filter(Boolean);
+  if (!lineas.length) return "";
+  if (lineas.length > 1) return lineas[0] + " | " + lineas.slice(1).join(" ");
+  if (lineas[0].includes("|")) return lineas[0];
+  const m = lineas[0].match(/^(.{3,120}?[.!?:])\s+(\S.*)$/);
+  return m ? m[1] + " | " + m[2].charAt(0).toUpperCase() + m[2].slice(1) : lineas[0];
+};
 const lineaMarca = (k, t) => {
+  if (k === "Destacado") return `\n\nDestacado: ${partirDestacado(t)}\n\n`;
   t = t.replace(/\s*\n\s*/g, " ").replace(/^(destacado|boton|botón|titulo|título)\s*:\s*/i, "").trim();
   if (k === "Botón" && !t.includes("|")) {
     const u = (t.match(/https?:\/\/\S+|\{\{[^}]+\}\}/) || [])[0];
@@ -766,8 +782,22 @@ const lineaMarca = (k, t) => {
   }
   return `\n\n${k}: ${t}\n\n`;
 };
+// Recuadro abierto con {{destacar}} / {{cuadro destacado}} y cerrado con otra marca igual al final de una línea:
+// todo lo que queda entre ambas va dentro del mismo recuadro.
+function cerrarRecuadros(out) {
+  const ms = [...out.matchAll(/\{\{([^}]*)\}\}/g)]
+    .filter(m => tipoMarca(m[1].replace(/^\s*\//, "")) === "Destacado")
+    .map(m => ({ i: m.index, end: m.index + m[0].length, cierre: !out.slice(m.index + m[0].length).match(/^[^\n]*/)[0].trim() }));
+  const pares = [];
+  for (let k = 0; k < ms.length - 1; k++) {
+    if (ms[k + 1].cierre) { pares.push([ms[k], ms[k + 1]]); k++; }
+  }
+  for (const [a, b] of pares.reverse())
+    out = out.slice(0, a.i) + `\n\nDestacado: ${partirDestacado(out.slice(a.end, b.i))}\n\n` + out.slice(b.end);
+  return out;
+}
 function marcarDestacados(src) {
-  let out = src.replace(/\r/g, "");
+  let out = cerrarRecuadros(src.replace(/\r/g, ""));
   out = out.replace(/\{\{([^}\/]*)\}\}([\s\S]*?)\{\{\s*\/[^}]*\}\}/g, (m, a, t) => tipoMarca(a) ? lineaMarca(tipoMarca(a), t) : m);
   out = out.replace(/\{\{([^}:]*):([^}]*)\}\}/g, (m, a, t) => tipoMarca(a) ? lineaMarca(tipoMarca(a), t) : m);
   const res = [];
@@ -889,7 +919,7 @@ Título: (una sola idea; OBLIGATORIO: pon entre *asteriscos* la parte clave, de 
 (párrafos de texto libre, separados por una línea en blanco; **doble asterisco** para negrita, úsalo poco)
 Línea de tiempo: Etapa 1 | Etapa 2* | Etapa 3   (en hitos, siempre; de 3 a 5 etapas con nombres cortos de 1 a 4 palabras; el asterisco marca la etapa actual)
 Dato: Rótulo | Dato clave | Detalle   (opcional: recuadro con un monto, fecha o plazo; máximo 2)
-Destacado: texto   (recuadro destacado. OBLIGATORIO para cada línea del texto que empiece con «Destacado:»: mantenla como línea «Destacado:» en el mismo lugar del relato; puedes pulir la redacción, pero sin quitarle datos)
+Destacado: Título corto | texto   (recuadro destacado: antes de « | » va su título, que sale en negrita; después, el texto normal. OBLIGATORIO para cada línea del texto que empiece con «Destacado:»: mantenla como línea «Destacado:» en el mismo lugar del relato, con el mismo título y texto separados por « | »; puedes pulir la redacción, pero sin quitarle datos)
 - Título del paso | detalle   (opcional: pasos numerados, uno por línea)
 Botón: Texto del botón | link   (OBLIGATORIO cuando el cliente tiene que hacer algo: pagar, subir, completar, firmar, agendar, revisar o entrar a algún lado. Un solo botón. El texto empieza con un verbo y va en primera persona, por ejemplo «Pagar mi cuota», «Subir mis documentos», «Completar mi ficha». Usa el link del texto que corresponde a esa acción; si el texto no trae link, escribe FALTA_LINK. Si no hay ninguna acción, no pongas botón.)
 Nota: (opcional, texto chico)
