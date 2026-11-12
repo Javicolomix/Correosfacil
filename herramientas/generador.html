@@ -1642,19 +1642,41 @@ document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", (
 samplePromise.then(sm => { if (sm) $("vivo-nota").textContent = "Vista rápida · con Diseñar, Claude pule la redacción"; });
 vivoAhora();
 // Insertar una marca donde está el cursor (el recuadro envuelve lo seleccionado).
+// Dónde insertar una marca: nunca a mitad de línea ni dentro de otro bloque.
+// Si el cursor está dentro de un recuadro o una línea de tiempo, se inserta después de su cierre
+// (salvo un botón dentro de un recuadro, que sí puede ir adentro).
+function puntoInsercion(v, pos, m) {
+  const fin = v.indexOf("\n", pos);
+  pos = fin < 0 ? v.length : fin + 1;
+  for (const [rx, K] of [[/\{\{\s*l[ií]nea de tiempo\s*\}\}/gi, "linea"], [/\{\{\s*(?:cuadro destacado|recuadro destacado|destacar)\s*\}\}/gi, "cuadro"]]) {
+    if (m === "boton" && K === "cuadro") continue;
+    const marcas = [...v.matchAll(rx)].map(x => x.index);
+    const antes = marcas.filter(x => x < pos);
+    if (antes.length % 2 === 1) {
+      const cierre = marcas.find(x => x >= pos);
+      if (cierre !== undefined) { const f = v.indexOf("\n", cierre); pos = f < 0 ? v.length : f + 1; }
+    }
+  }
+  return pos;
+}
+const esRelleno = t => /^(Escribe|Pega) aquí/.test(t.trim());
 document.querySelectorAll(".marca").forEach(b => b.onclick = () => {
-  const ta = $("texto"), v = ta.value, i = ta.selectionStart ?? v.length, j = ta.selectionEnd ?? v.length;
-  const sel = v.slice(i, j), antes = v.slice(0, i), nl = antes && !antes.endsWith("\n") ? "\n" : "";
-  const m = b.dataset.m;
+  const ta = $("texto"), v = ta.value, m = b.dataset.m;
+  let i = ta.selectionStart ?? v.length, j = ta.selectionEnd ?? v.length;
+  let sel = v.slice(i, j);
+  // Texto propio seleccionado (en una sola línea): se envuelve con la marca. Si no, se inserta en un lugar seguro.
+  if (!sel.trim() || esRelleno(sel) || (sel.includes("\n") && m !== "cuadro" && m !== "linea")) {
+    sel = ""; i = j = puntoInsercion(v, Math.max(i, j), m);
+  }
+  const antes = v.slice(0, i), nl = antes && !antes.endsWith("\n") ? "\n" : "";
   // Lo que va entre ⟦ ⟧ queda seleccionado: se escribe encima y reemplaza el «Escribe aquí…».
-  // Texto libre: un párrafo nuevo, separado por una línea en blanco.
   const nl2 = !antes.trim() ? "" : antes.endsWith("\n\n") ? "" : antes.endsWith("\n") ? "\n" : "\n\n";
   let ins = m === "texto" ? `${nl2}${sel || "⟦Escribe aquí tu texto⟧"}\n`
     : m === "cuadro" ? `${nl}{{cuadro destacado}}\n${sel || "⟦Escribe aquí el título del recuadro⟧\nEscribe aquí el texto del recuadro"}\n{{cuadro destacado}}\n`
-    : m === "titulo" ? `${nl}{{título}} ${sel || "⟦Escribe aquí el título⟧"}`
-    : m === "subtitulo" ? `${nl}{{subtítulo}} ${sel || "⟦Escribe aquí el subtítulo⟧"}`
+    : m === "titulo" ? `${nl}{{título}} ${sel || "⟦Escribe aquí el título⟧"}\n`
+    : m === "subtitulo" ? `${nl}{{subtítulo}} ${sel || "⟦Escribe aquí el subtítulo⟧"}\n`
     : m === "linea" ? `${nl}{{línea de tiempo}}\n${sel || "⟦Escribe aquí la etapa 1⟧\nEscribe aquí la etapa 2 *\nEscribe aquí la etapa 3"}\n{{línea de tiempo}}\n`
-    : `${nl}{{botón}} ${sel || "⟦Escribe aquí el texto del botón⟧ | Pega aquí el link"}`;
+    : `${nl}{{botón}} ${sel || "⟦Escribe aquí el texto del botón⟧ | Pega aquí el link"}\n`;
   const a0 = ins.indexOf("⟦"), a1 = ins.indexOf("⟧") - 1;
   ins = ins.replace("⟦", "").replace("⟧", "");
   escribirEnTexto(ins, i, j);
