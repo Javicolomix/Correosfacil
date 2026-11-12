@@ -66,6 +66,18 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 
 /* ---------- 1) escribir ---------- */
 .compose{max-width:760px;margin:12px auto 0;padding:28px;display:grid;gap:16px}
+/* Escribir + vista previa en vivo, lado a lado */
+.crear{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start;margin-top:12px}
+.crear[hidden]{display:none}
+.crear .compose{max-width:none;margin:0}
+.vivo{position:sticky;top:16px;padding:16px;display:grid;gap:10px}
+.vivo-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.vivo-h b{color:var(--navy);font-size:15px}
+.vivo-h span{font-size:12.5px;color:var(--muted)}
+.vivo-box{background:#eef0f3;border-radius:10px;overflow-x:hidden;overflow-y:auto;max-height:calc(100vh - 100px)}
+.vivo-esc{overflow:hidden}
+#vivo{display:block;width:660px;height:600px;border:0;transform-origin:0 0;pointer-events:none;background:#eef0f3}
+@media (max-width:980px){.crear{grid-template-columns:1fr}.vivo{position:static}.vivo-box{max-height:none}}
 .compose h2{font-size:26px}
 .compose > p{color:var(--muted)}
 /* Caja de escritura: el saludo va fijo arriba (se agrega solo) y el texto debajo */
@@ -210,7 +222,7 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
   background:#fff;border:1px solid #e3e1f3;border-radius:10px;padding:10px 12px;transition:border-color .15s,background .15s}
 .marca:hover{border-color:var(--lav);background:var(--soft)}
 .marca:focus-visible{outline:2px solid var(--btn);outline-offset:2px}
-.marca code{font-family:var(--mono);font-size:13px;background:var(--soft);color:var(--btn);padding:2px 7px;border-radius:6px;white-space:nowrap}
+.marca code{font-family:var(--mono);font-size:12.5px;background:var(--soft);color:var(--btn);padding:2px 7px;border-radius:6px;max-width:100%;overflow-wrap:anywhere}
 .marca span{font-size:12.5px;line-height:1.45;color:var(--muted)}
 .marca span b{font-family:var(--mono);font-weight:400;color:var(--btn)}
 @media (max-width:620px){.marcas-g{grid-template-columns:1fr}.marca{flex-direction:row;align-items:baseline}.marca code{flex:none}}
@@ -279,9 +291,10 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
 <section id="v-crear" data-v="crear">
 
   <!-- 1) Escribir -->
-  <div class="card compose" id="paso-escribir">
+  <div class="crear" id="paso-escribir">
+  <div class="card compose">
     <h2>Escribe el texto de tu correo</h2>
-    <p>Cuéntalo como te salga: qué pasó, qué tiene que hacer el cliente, montos, fechas y links. Al apretar Diseñar queda con el formato y el diseño de Lexy.</p>
+    <p>Cuéntalo como te salga: qué pasó, qué tiene que hacer el cliente, montos, fechas y links. Mientras escribes ves cómo va quedando; con Diseñar lo terminas de editar sobre el correo y copias el HTML.</p>
     <label class="lbl" for="texto" hidden>Texto del correo</label>
     <div class="redactar">
       <div class="saludo" aria-hidden="true"><span>Hola, <b>{{nombre cliente}}</b>:</span><small>El saludo se agrega solo · no lo repitas</small></div>
@@ -318,6 +331,11 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
       <span class="status" id="estado" role="status"></span>
       <button class="link" type="button" id="ejemplo">Probar con un ejemplo</button>
     </div>
+  </div>
+  <aside class="card vivo" aria-label="Vista previa del correo">
+    <div class="vivo-h"><b>Así va quedando</b><span id="vivo-nota">Se actualiza mientras escribes</span></div>
+    <div class="vivo-box" id="vivo-box"><div class="vivo-esc" id="vivo-esc"><iframe id="vivo" title="Vista previa del correo" tabindex="-1"></iframe></div></div>
+  </aside>
   </div>
 
   <!-- 2) Editar -->
@@ -1268,7 +1286,40 @@ document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", (
   headerSel = b.dataset.h; store.set("header", headerSel); segPress("[data-h]", "data-h", headerSel);
 }));
 $("texto").value = store.get("texto") || "";
-$("texto").addEventListener("input", () => store.set("texto", $("texto").value));
+$("texto").addEventListener("input", () => { store.set("texto", $("texto").value); vivoPronto(); });
+
+// Vista previa en vivo: arma el correo con el texto tal cual (sin Claude) mientras se escribe.
+const VIVO_W = 660;
+let vivoT = 0, vivoUltimo = "";
+function vivoEscala() {
+  const f = $("vivo"), esc = $("vivo-esc"), box = $("vivo-box");
+  // En pantallas angostas se muestra a su ancho real (versión celular del correo) en vez de achicarla.
+  const w = box.clientWidth < 520 ? box.clientWidth : VIVO_W;
+  f.style.width = w + "px";
+  const k = Math.min(1, box.clientWidth / w);
+  let h = 600;
+  try { h = f.contentDocument.documentElement.scrollHeight || h; } catch (e) {}
+  f.style.height = h + "px";
+  f.style.transform = `scale(${k})`;
+  esc.style.height = Math.ceil(h * k) + "px";
+}
+function vivoAhora() {
+  clearTimeout(vivoT);
+  if ($("paso-escribir").hidden) return;
+  const texto = $("texto").value.trim();
+  const d = texto ? basico(texto) : { tipo: "", asunto: "", pre: "", titulo: "Tu título aparecerá aquí",
+    blocks: [{ k: "p", t: "Escribe a la izquierda y aquí verás cómo va quedando tu correo." }, { k: "firma" }] };
+  const html = previewHtml(emailHtml(d, headerSel));
+  if (html === vivoUltimo) return;
+  vivoUltimo = html;
+  $("vivo").srcdoc = html;
+}
+function vivoPronto() { clearTimeout(vivoT); vivoT = setTimeout(vivoAhora, 250); }
+$("vivo").addEventListener("load", () => { vivoEscala(); setTimeout(vivoEscala, 120); });
+window.addEventListener("resize", () => requestAnimationFrame(vivoEscala));
+document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", () => setTimeout(vivoAhora, 0)));
+samplePromise.then(sm => { if (sm) $("vivo-nota").textContent = "Vista rápida · con Diseñar, Claude pule la redacción"; });
+vivoAhora();
 // Insertar una marca donde está el cursor (el recuadro envuelve lo seleccionado).
 document.querySelectorAll(".marca").forEach(b => b.onclick = () => {
   const ta = $("texto"), v = ta.value, i = ta.selectionStart ?? v.length, j = ta.selectionEnd ?? v.length;
@@ -1280,11 +1331,13 @@ document.querySelectorAll(".marca").forEach(b => b.onclick = () => {
   const pos = (antes + ins).length;
   ta.focus(); ta.setSelectionRange(pos, pos);
   store.set("texto", ta.value);
+  vivoAhora();
 });
 $("ejemplo").onclick = () => {
   $("texto").value = EJEMPLO; store.set("texto", EJEMPLO);
   headerSel = "claro"; store.set("header", "claro"); segPress("[data-h]", "data-h", "claro");
   $("texto").focus();
+  vivoAhora();
 };
 
 $("disenar").onclick = async () => {
@@ -1340,6 +1393,7 @@ $("disenar").onclick = async () => {
 $("nuevo").onclick = () => {
   vista("pc");
   $("paso-editar").hidden = true; $("paso-escribir").hidden = false;
+  vivoUltimo = ""; vivoAhora();
   $("texto").focus(); window.scrollTo(0, 0);
 };
 
