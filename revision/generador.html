@@ -216,18 +216,29 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .tester-steps{counter-reset:t;list-style:none;margin:0;padding:0!important;display:grid;gap:8px}
 .tester-steps li{counter-increment:t;display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start}
 .tester-steps li::before{content:counter(t);width:26px;height:26px;border-radius:8px;background:var(--soft);color:var(--btn);font-weight:700;display:grid;place-items:center;font-size:13px}
-.marcas{margin:10px 0 4px}
-.marcas-t{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--navy)}
-.marcas-t span{font-weight:400;color:var(--muted)}
-.marcas-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.marca{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;font:inherit;cursor:pointer;
-  background:#fff;border:1px solid #e3e1f3;border-radius:10px;padding:10px 12px;transition:border-color .15s,background .15s}
-.marca:hover{border-color:var(--lav);background:var(--soft)}
+.pasos-c{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:p}
+.pasos-c li{display:flex;gap:10px;align-items:baseline;color:var(--muted);font-size:15px;line-height:1.45}
+.pasos-c li::before{counter-increment:p;content:counter(p);flex:none;width:22px;height:22px;line-height:22px;border-radius:50%;
+  background:var(--soft);color:var(--btn);font-size:12px;font-weight:700;text-align:center;transform:translateY(-1px)}
+.pasos-c b{color:var(--navy)}
+.marcas{margin:6px 0 2px;border:1px solid #e3e1f3;border-radius:12px;overflow:hidden}
+.marcas-t{margin:0;padding:12px 14px;background:var(--soft);font-size:14px;font-weight:700;color:var(--navy);line-height:1.4}
+.marcas-t span{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+.mf{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:8px 16px;align-items:center;padding:14px;border-top:1px solid #e3e1f3}
+.mf-txt b{display:block;color:var(--navy);font-size:14px;margin-bottom:2px}
+.mf-txt p{margin:0 0 8px;font-size:13px;line-height:1.45;color:var(--muted)}
+.mf-txt pre{margin:0;font-family:var(--mono);font-size:12px;line-height:1.5;background:#15122b;color:#e6e3fb;padding:8px 10px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.mf-txt pre i{font-style:normal;color:#b9aefe}
+.mf-res{display:grid;gap:8px;justify-items:start}
+.mf-lbl{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.r-tit{font:700 17px/1.2 Arial,sans-serif;color:#0b013c}.r-tit em{font-style:normal;color:#4429cc}
+.r-box{background:#f0f0fb;border-radius:8px;padding:9px 11px;font:13px/1.4 Arial,sans-serif;color:#4f5157;width:100%}
+.r-box strong{display:block;color:#0b013c}
+.r-btn{display:inline-block;background:#4429cc;color:#fff;border-radius:7px;padding:7px 13px;font:700 13px Arial,sans-serif}
+.marca{font:inherit;font-size:12.5px;font-weight:700;color:var(--btn);background:#fff;border:1px solid var(--lav);border-radius:999px;padding:4px 11px;cursor:pointer}
+.marca:hover{background:var(--soft)}
 .marca:focus-visible{outline:2px solid var(--btn);outline-offset:2px}
-.marca code{font-family:var(--mono);font-size:12.5px;background:var(--soft);color:var(--btn);padding:2px 7px;border-radius:6px;max-width:100%;overflow-wrap:anywhere}
-.marca span{font-size:12.5px;line-height:1.45;color:var(--muted)}
-.marca span b{font-family:var(--mono);font-weight:400;color:var(--btn)}
-@media (max-width:620px){.marcas-g{grid-template-columns:1fr}.marca{flex-direction:row;align-items:baseline}.marca code{flex:none}}
+@media (max-width:620px){.mf{grid-template-columns:1fr}}
 code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:1px 6px;border-radius:6px}
 
 .g-check{background:var(--soft);border-radius:14px;padding:22px;display:grid;gap:14px}
@@ -296,27 +307,48 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
   <div class="crear" id="paso-escribir">
   <div class="card compose">
     <h2>Escribe el texto de tu correo</h2>
-    <p>Cuéntalo como te salga: qué pasó, qué tiene que hacer el cliente, montos, fechas y links. Mientras escribes ves cómo va quedando; con Diseñar lo terminas de editar sobre el correo y copias el HTML.</p>
+    <ol class="pasos-c">
+      <li><span><b>Escribe</b> lo que le quieres contar al cliente: qué pasó, qué tiene que hacer, montos, fechas y links.</span></li>
+      <li><span><b>Mira</b> cómo va quedando el correo, al lado.</span></li>
+      <li><span><b>Aprieta Diseñar</b> para retocarlo sobre el mismo correo y copiar el HTML.</span></li>
+    </ol>
     <label class="lbl" for="texto" hidden>Texto del correo</label>
     <div class="redactar">
       <div class="saludo" aria-hidden="true"><span>Hola, <b>{{nombre cliente}}</b>:</span><small>El saludo se agrega solo · no lo repitas</small></div>
       <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
     </div>
     <div class="marcas" id="texto-tip">
-      <p class="marcas-t">Marcas opcionales <span>· toca una para insertarla donde está el cursor</span></p>
-      <div class="marcas-g">
-        <button type="button" class="marca" data-m="titulo">
-          <code>{{título}}</code>
-          <span>Esa frase queda como título del correo.</span>
-        </button>
-        <button type="button" class="marca" data-m="cuadro">
-          <code>{{cuadro destacado}}</code>
-          <span>Ábrelo y ciérralo con la misma marca. La 1.ª línea es su título; el resto, texto normal. Puede llevar un <b>{{botón}}</b> adentro.</span>
-        </button>
-        <button type="button" class="marca" data-m="boton">
-          <code>{{botón}}</code>
-          <span>La frase se vuelve botón. Pon el link al lado.</span>
-        </button>
+      <p class="marcas-t">¿Quieres elegir tú el título, un recuadro o un botón? (opcional)
+        <span>Escribe la marca en el texto, tal como en el ejemplo, o aprieta «Insertar» y se pone donde está el cursor.</span></p>
+      <div class="mf">
+        <div class="mf-txt">
+          <b>Título</b>
+          <p>Pon <code class="k">{{título}}</code> antes de la frase que quieres como título.</p>
+          <pre><i>{{título}}</i> Tu cuota vence pronto</pre>
+        </div>
+        <div class="mf-res"><span class="mf-lbl">Así sale</span><div class="r-tit">Tu cuota vence <em>pronto</em></div>
+          <button type="button" class="marca" data-m="titulo">+ Insertar</button></div>
+      </div>
+      <div class="mf">
+        <div class="mf-txt">
+          <b>Recuadro destacado</b>
+          <p>Pon <code class="k">{{cuadro destacado}}</code> en la línea de arriba y en la de abajo del texto. La primera línea sale en negrita.</p>
+          <pre><i>{{cuadro destacado}}</i>
+Importante
+Tu pago puede tardar 48 horas.
+<i>{{cuadro destacado}}</i></pre>
+        </div>
+        <div class="mf-res"><span class="mf-lbl">Así sale</span><div class="r-box"><strong>Importante</strong>Tu pago puede tardar 48 horas.</div>
+          <button type="button" class="marca" data-m="cuadro">+ Insertar</button></div>
+      </div>
+      <div class="mf">
+        <div class="mf-txt">
+          <b>Botón</b>
+          <p>Pon <code class="k">{{botón}}</code>, el texto del botón y su link. También puede ir dentro de un recuadro.</p>
+          <pre><i>{{botón}}</i> Pagar mi cuota https://lexy.cl/</pre>
+        </div>
+        <div class="mf-res"><span class="mf-lbl">Así sale</span><span class="r-btn">Pagar mi cuota</span>
+          <button type="button" class="marca" data-m="boton">+ Insertar</button></div>
       </div>
     </div>
     <div class="go">
@@ -1287,7 +1319,8 @@ segPress("[data-h]", "data-h", headerSel);
 document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", () => {
   headerSel = b.dataset.h; store.set("header", headerSel); segPress("[data-h]", "data-h", headerSel);
 }));
-$("texto").value = store.get("texto") || "";
+// Se recupera el borrador, pero nunca el ejemplo: la caja parte vacía.
+{ const g = store.get("texto") || ""; $("texto").value = /^(\{\{título\}\} )?El tribunal declaró admisible (tu|la) solicitud/.test(g) || g === EJEMPLO ? "" : g; }
 $("texto").addEventListener("input", () => { store.set("texto", $("texto").value); vivoPronto(); });
 
 // Vista previa en vivo: arma el correo con el texto tal cual (sin Claude) mientras se escribe.
@@ -1329,17 +1362,21 @@ document.querySelectorAll(".marca").forEach(b => b.onclick = () => {
   const m = b.dataset.m;
   const ins = m === "cuadro" ? `${nl}{{cuadro destacado}}\n${sel || "Título del recuadro\nTexto del recuadro"}\n{{cuadro destacado}}\n`
     : m === "titulo" ? `${nl}{{título}} ${sel}` : `${nl}{{botón}} ${sel || "Texto del botón https://"}`;
-  ta.value = antes + ins + v.slice(j);
-  const pos = (antes + ins).length;
-  ta.focus(); ta.setSelectionRange(pos, pos);
+  escribirEnTexto(ins, i, j);
+});
+// Escribe en el cuadro como si fuera tecleado, para que Ctrl+Z / ⌘Z lo pueda deshacer.
+function escribirEnTexto(txt, i, j) {
+  const ta = $("texto");
+  ta.focus(); ta.setSelectionRange(i, j);
+  let ok = false;
+  try { ok = document.execCommand("insertText", false, txt); } catch (e) {}
+  if (!ok) { ta.setRangeText(txt, i, j, "end"); }
   store.set("texto", ta.value);
   vivoAhora();
-});
+}
 $("ejemplo").onclick = () => {
-  $("texto").value = EJEMPLO; store.set("texto", EJEMPLO);
   headerSel = "claro"; store.set("header", "claro"); segPress("[data-h]", "data-h", "claro");
-  $("texto").focus();
-  vivoAhora();
+  escribirEnTexto(EJEMPLO, 0, $("texto").value.length);
 };
 
 $("disenar").onclick = async () => {
