@@ -93,8 +93,22 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .saludo-x:hover{color:var(--btn)}
 .saludo b{color:var(--navy);border-bottom:3px solid #f0a23b;padding-bottom:1px}
 .saludo small{font-size:12px;color:var(--muted);background:var(--soft);padding:3px 9px;border-radius:999px}
-#texto{min-height:240px;font-size:17px;line-height:1.6;padding:8px 18px 16px;border:0;border-radius:0 0 12px 12px}
+/* Resaltado de marcas: el texto real va en el textarea (transparente) y debajo se dibuja una copia con colores. */
+.ta-wrap{position:relative}
+#texto,.ta-bg{font-family:var(--font);font-size:17px;line-height:1.6;padding:8px 18px 16px;letter-spacing:normal;word-spacing:normal;tab-size:4;
+  white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;box-sizing:border-box}
+#texto{position:relative;display:block;width:100%;min-height:240px;border:0;border-radius:0 0 12px 12px;background:transparent;color:transparent;caret-color:#2f2f2f}
+#texto::placeholder{color:#9a9ca5}
+#texto::selection{background:rgba(68,41,204,.22);color:transparent}
 #texto:focus{outline:none}
+.ta-bg{position:absolute;top:0;left:0;overflow:hidden;pointer-events:none;color:#2f2f2f;border:0}
+.ta-bg mark{color:inherit;background:none;border-radius:4px}
+.ta-bg .hm{color:#4429cc;background:#ecebfd}
+.ta-bg .hp{color:#8a6d00;background:#fff3c4}
+.ta-bg .hs{color:#d9822b}
+.leyenda{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
+.leyenda i{font-style:normal;border-radius:4px;padding:0 4px}
+.leyenda .lm{color:#4429cc;background:#ecebfd}.leyenda .lp{color:#8a6d00;background:#fff3c4}
 .compose .go{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
 .opts-top{display:flex !important;align-items:center;gap:10px 12px;flex-wrap:wrap;grid-column:1/-1;margin-bottom:-4px}
 .opts-top > span{font-weight:700;color:var(--navy) !important}
@@ -258,7 +272,8 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .sw-own{position:relative;display:grid;place-items:center;background:conic-gradient(#f44,#fd4,#4d8,#4af,#a4f,#f44);overflow:hidden}
 .sw-own span{font-weight:700;color:#fff;text-shadow:0 0 3px #0008;pointer-events:none}
 .sw-own input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.limpiar-row{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:-8px 2px -6px}
+.limpiar-row{display:flex;justify-content:space-between;align-items:center;gap:6px 10px;flex-wrap:wrap;margin:-8px 2px -6px}
+#limpiar-msg:empty{display:none}
 .limpiar{font:inherit;font-size:12.5px;color:var(--muted);background:none;border:0;padding:2px 4px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .limpiar:hover{color:var(--btn)}
 #limpiar-msg{font-size:12px;color:var(--muted)}
@@ -399,9 +414,12 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
         <button type="button" class="saludo-x" id="saludo-x" title="Quitar el saludo">Quitar</button>
         <button type="button" class="saludo-x" id="saludo-on" hidden>+ Agregar saludo</button>
       </div>
-      <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
+      <div class="ta-wrap">
+        <div class="ta-bg" id="texto-bg" aria-hidden="true"></div>
+        <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
+      </div>
     </div>
-    <div class="limpiar-row"><span id="limpiar-msg" role="status"></span><button type="button" class="limpiar" id="limpiar" title="Borra todo el texto (el saludo se mantiene)">Limpiar</button></div>
+    <div class="limpiar-row"><span class="leyenda"><span><i class="lm">{{marca}}</i> no se borra</span><span><i class="lp">Escribe aquí…</i> reemplázalo por tu texto</span></span><span id="limpiar-msg" role="status"></span><button type="button" class="limpiar" id="limpiar" title="Borra todo el texto (el saludo se mantiene)">Limpiar</button></div>
     <div class="agregar" id="texto-tip">
       <div class="ag-row">
         <span class="ag-t">Agregar</span>
@@ -1931,7 +1949,20 @@ document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", (
 // Se recupera el borrador, pero nunca el ejemplo: la caja parte vacía.
 // Cada persona recupera lo suyo (se guarda solo en su navegador). Alguien nuevo parte vacío.
 $("texto").value = store.get("texto") || "";
-$("texto").addEventListener("input", () => { store.set("texto", $("texto").value); vivoPronto(); });
+$("texto").addEventListener("input", () => { store.set("texto", $("texto").value); vivoPronto(); pintarTexto(); });
+
+// Resalta en el cuadro: {{marcas}} en morado, «Escribe aquí…» (texto por reemplazar) en amarillo y separadores (| --- *) en naranjo.
+const RX_RESALTE = /(\{\{[^}\n]*\}\})|((?:Escribe|Pega) aquí[^\n|*]*?(?=\s\*|\s\||\shttps?:\/\/|\n|$)|\bColumna \d+\b|\bDato \d+\.\d+\b)|(^-{3,}$| \| |\s\*$)/gm;
+function pintarTexto() {
+  const ta = $("texto"), bg = $("texto-bg");
+  bg.innerHTML = esc(ta.value).replace(RX_RESALTE, (m, a, b) =>
+    a ? `<mark class="hm">${m}</mark>` : b ? `<mark class="hp">${m}</mark>` : `<span class="hs">${m}</span>`) + "\n ";
+  bg.style.width = ta.clientWidth + "px";
+  bg.style.height = ta.clientHeight + "px";
+  bg.scrollTop = ta.scrollTop;
+}
+$("texto").addEventListener("scroll", () => { $("texto-bg").scrollTop = $("texto").scrollTop; });
+new ResizeObserver(pintarTexto).observe($("texto"));
 
 // Saludo: viene por defecto, pero se puede cambiar o quitar.
 const SALUDO_DEF = "Hola, {{nombre cliente}}:";
@@ -1967,6 +1998,7 @@ function vivoEscala() {
   esc.style.height = Math.ceil(h * k) + "px";
 }
 function vivoAhora() {
+  pintarTexto();
   clearTimeout(vivoT);
   if ($("paso-escribir").hidden) return;
   const texto = $("texto").value.trim();
