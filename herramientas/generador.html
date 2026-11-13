@@ -662,7 +662,8 @@ Liquidación
 
       <div class="card">
         <div><label class="lbl" for="asunto">Asunto</label><input type="text" id="asunto"></div>
-        <div id="campo-link"><label class="lbl" for="link" id="link-lbl">Link del botón</label><input type="url" id="link" placeholder="https://">
+        <div id="campo-link"><label class="lbl" for="btn-txt">Texto del botón</label><input type="text" id="btn-txt" style="margin-bottom:10px">
+          <label class="lbl" for="link" id="link-lbl">Link del botón</label><input type="url" id="link" placeholder="https://">
           <p class="hint" id="link-hint" hidden style="margin-top:6px">El correo no tiene botón: al pegar el link se agrega uno («Ver mi caso»), y su texto se cambia haciendo clic sobre él.</p><p class="falta" id="falta-link" hidden>Falta el link: pégalo aquí para que el botón funcione.</p></div>
       </div>
 
@@ -1631,7 +1632,7 @@ $("frame").addEventListener("load", () => {
       btnActivo = a;
       const h = a.getAttribute("href") || ""; $("link").value = LINK_OK.test(h) ? h : "";
       revisarLink();
-      $("link").focus({ preventScroll: true }); $("link").select();
+      // El cursor se queda en el botón para poder cambiar su texto ahí mismo.
     }
   });
 
@@ -2109,6 +2110,7 @@ function revisarLink() {
   $("campo-link").hidden = !a;
   $("link-hint").hidden = !!a;
   $("link-lbl").textContent = a ? `Link del botón «${a.textContent.trim()}»` : "Link del correo";
+  if (a && document.activeElement !== $("btn-txt")) $("btn-txt").value = a.textContent.trim();
   if (!a) { $("falta-link").hidden = true; $("link").classList.remove("sin-link"); return false; }
   const falta = !LINK_OK.test((a.getAttribute("href") || "").trim());
   $("falta-link").hidden = !falta;
@@ -2116,6 +2118,14 @@ function revisarLink() {
   return falta;
 }
 // El link se escribe en el HTML apenas se pega. Si el correo no tiene botón, se agrega uno antes de la firma.
+// Texto del botón desde el panel (también se puede escribir directo sobre el botón).
+$("btn-txt").addEventListener("input", () => {
+  const a = botonActivo(); if (!a) return;
+  guardar("texto");
+  a.textContent = $("btn-txt").value;
+  $("link-lbl").textContent = `Link del botón «${a.textContent.trim()}»`;
+  syncAhora();
+});
 $("link").addEventListener("input", () => {
   if (!doc) return;
   guardar("link");
