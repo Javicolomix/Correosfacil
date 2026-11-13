@@ -117,7 +117,8 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .leyenda{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
 .leyenda i{font-style:normal;border-radius:4px;padding:0 4px}
 .leyenda .lm{color:#4429cc;background:#ecebfd}.leyenda .lx{display:inline-grid;place-items:center;width:16px;height:16px;padding:0;border-radius:50%;background:#ecebf3;color:#6b6880;font-weight:700}.leyenda .lp{color:#8a6d00;background:#fff3c4}
-.compose .go{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
+.compose .go{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.compose .foot:has(.status:empty){display:none}
 .opts-top{display:flex !important;align-items:center;gap:10px 12px;flex-wrap:wrap;grid-column:1/-1;margin-bottom:-4px}
 .opts-top > span{font-weight:700;color:var(--navy) !important}
 .compose .opts{display:grid;gap:6px}
@@ -261,6 +262,9 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .fmt-g button{height:38px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:16px;cursor:pointer}
 .fmt-g button:hover{background:var(--soft);border-color:var(--lav)}
 .fmt-g sup{font-size:10px;margin-left:1px}
+.fmt-al{grid-template-columns:repeat(3,1fr);margin-top:6px}
+.fmt-al button{display:grid;place-items:center}
+.fmt-al button[aria-pressed="true"]{border-color:var(--btn);box-shadow:0 0 0 1px var(--btn);color:var(--btn)}
 .sw{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
 .fmt-sec{display:grid;gap:2px;padding-top:10px;border-top:1px solid var(--line)}
 .fmt-sec[hidden]{display:none}
@@ -540,11 +544,11 @@ Liquidación
       </details>
     </div>
     <div class="go">
+      <button class="link" type="button" id="ejemplo">Probar con un ejemplo</button>
       <button class="btn big" id="disenar" type="button">Diseñar</button>
     </div>
     <div class="foot">
       <span class="status" id="estado" role="status"></span>
-      <button class="link" type="button" id="ejemplo">Probar con un ejemplo</button>
     </div>
   </div>
   <aside class="card vivo" aria-label="Vista previa del correo">
@@ -599,6 +603,14 @@ Liquidación
           <button type="button" data-f="mas" title="Letra más grande">A<sup>+</sup></button>
         </div>
         <p class="hint" id="fmt-hint">Selecciona un texto del correo y aprieta un botón.</p>
+        </div>
+        <div class="fmt-sec" id="fmt-alin">
+          <span class="lbl">Alineación</span>
+          <div class="fmt-g fmt-al" role="group" aria-label="Alineación">
+            <button type="button" data-al="left" title="A la izquierda"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h14M3 9h9M3 13h14M3 17h9"/></svg></button>
+            <button type="button" data-al="center" title="Al centro"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h14M5.5 9h9M3 13h14M5.5 17h9"/></svg></button>
+            <button type="button" data-al="right" title="A la derecha"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h14M8 9h9M3 13h14M8 17h9"/></svg></button>
+          </div>
         </div>
         <div class="fmt-sec" id="fmt-tcol">
           <span class="lbl">Color del texto</span>
@@ -1572,7 +1584,7 @@ $("frame").addEventListener("load", () => {
 
   doc.addEventListener("beforeinput", () => guardar("texto"));
   doc.addEventListener("input", () => { revisarLink(); sync(); });
-  doc.addEventListener("focusin", e => { if (e.target.isContentEditable) ultimoEditable = e.target; });
+  doc.addEventListener("focusin", e => { if (e.target.isContentEditable) { ultimoEditable = e.target; marcarAlin(e.target); } });
   historial = []; ultimoTipo = "";
   doc.addEventListener("keydown", teclaDeshacer);
   activarBorrar(doc);
@@ -1805,6 +1817,33 @@ document.querySelectorAll("#fmt [data-f]").forEach(b => b.onclick = () => {
   }
   syncAhora(); setTimeout(fitFrame, 30);
 });
+// Alineación: el texto donde está el cursor, o el botón elegido (se mueve su tabla, apto para correo).
+document.querySelectorAll("#fmt-alin [data-al]").forEach(b => {
+  b.addEventListener("mousedown", e => e.preventDefault());
+  b.onclick = () => {
+    const ed = editableActual();
+    const v = b.dataset.al;
+    const enBoton = ed && ed.closest(".btn") ? ed : (!ed && contextoActual === "boton" ? botonActivo() : null);
+    if (!ed && !enBoton) { fmtMsg("Primero haz clic en un texto o un botón del correo.", true); return; }
+    guardar("alinear");
+    if (enBoton) {
+      const t = enBoton.closest("table");
+      t.setAttribute("align", v);
+      t.style.marginLeft = v === "left" ? "0" : "auto";
+      t.style.marginRight = v === "right" ? "0" : "auto";
+      if (v === "left") t.style.marginRight = "";
+    } else ed.style.textAlign = v;
+    document.querySelectorAll("#fmt-alin [data-al]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    syncAhora();
+  };
+});
+
+function marcarAlin(ed) {
+  const t = ed.closest(".btn") && ed.closest("table");
+  const v = t ? (t.getAttribute("align") || "left") : (doc.defaultView.getComputedStyle(ed).textAlign.replace("start", "left").replace("end", "right"));
+  document.querySelectorAll("#fmt-alin [data-al]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.al === v)));
+}
+
 // Paletas del design system Lexy (primero) + estados: éxito, advertencia y cuidado.
 const PAL_TEXTO = [["#0b013c", "Navy"], ["#2f2f2f", "Tinta"], ["#4f5157", "Gris"], ["#4429cc", "Morado Lexy"], ["#27198e", "Índigo"],
   ["#1f9d55", "Éxito"], ["#b7791f", "Advertencia"], ["#c62f3a", "Cuidado"]];
@@ -2023,13 +2062,15 @@ function revisarColor() {
 // Panel según lo que se toca: solo las opciones de ese bloque. Fuera de un bloque, todas.
 const CONTEXTOS = {
   linea: ["Línea de tiempo", ["fmt-emo"]],
-  boton: ["Botón", ["fmt-color"]],
-  tabla: ["Tabla", ["fmt-txt", "fmt-tcol", "fmt-tabla"]],
-  recuadro: ["Recuadro", ["fmt-txt", "fmt-tcol", "fmt-box"]],
-  texto: ["Texto", ["fmt-txt", "fmt-tcol"]]
+  boton: ["Botón", ["fmt-color", "fmt-alin"]],
+  tabla: ["Tabla", ["fmt-txt", "fmt-alin", "fmt-tcol", "fmt-tabla"]],
+  recuadro: ["Recuadro", ["fmt-txt", "fmt-alin", "fmt-tcol", "fmt-box"]],
+  texto: ["Texto", ["fmt-txt", "fmt-alin", "fmt-tcol"]]
 };
-const SECCIONES = ["fmt-txt", "fmt-tcol", "fmt-color", "fmt-emo", "fmt-tabla", "fmt-box"];
+const SECCIONES = ["fmt-alin", "fmt-txt", "fmt-tcol", "fmt-color", "fmt-emo", "fmt-tabla", "fmt-box"];
+let contextoActual = null;
 function aplicarContexto(ctx, extra = []) {
+  contextoActual = ctx;
   const c = CONTEXTOS[ctx];
   SECCIONES.forEach(id => $(id).classList.toggle("ctx-off", !!c && !c[1].concat(extra).includes(id)));
   $("fmt-titulo").textContent = c ? `Formato · ${c[0]}` : "Formato";
