@@ -518,7 +518,7 @@ Liquidación
           </div>
           <div class="cm cm-tip">
             <b class="cm-t">Después de Diseñar</b>
-            <small>Haz clic en cualquier texto para cambiarlo. En el panel <b>Formato</b> puedes poner negrita o cursiva, cambiar el tamaño y los colores del texto, del botón y del recuadro, achicar un recuadro, cambiar emojis y eliminar secciones (Ctrl+Z para deshacer).</small>
+            <small>Haz clic en cualquier texto para cambiarlo. En el panel <b>Formato</b> puedes poner negrita o cursiva, cambiar el tamaño y los colores del texto, del botón y del recuadro, achicar un recuadro, cambiar emojis y eliminar secciones. Con Ctrl+Z (⌘Z en Mac) deshaces cualquier cambio, uno por uno.</small>
           </div>
         </div>
       </details>
@@ -1546,9 +1546,10 @@ $("frame").addEventListener("load", () => {
   const st = doc.createElement("style"); st.id = "edit-ui"; st.textContent = EDIT_CSS; doc.head.appendChild(st);
   doc.querySelectorAll(EDITABLE).forEach(n => { n.setAttribute("contenteditable", "true"); n.setAttribute("spellcheck", "true"); });
 
-  doc.addEventListener("input", () => { ultimoTexto = Date.now(); revisarLink(); sync(); });
+  doc.addEventListener("beforeinput", () => guardar("texto"));
+  doc.addEventListener("input", () => { revisarLink(); sync(); });
   doc.addEventListener("focusin", e => { if (e.target.isContentEditable) ultimoEditable = e.target; });
-  borrados = [];
+  historial = []; ultimoTipo = "";
   doc.addEventListener("keydown", teclaDeshacer);
   activarBorrar(doc);
   activarTamano(doc);
@@ -1598,15 +1599,15 @@ $("asunto").addEventListener("input", () => { if (!doc) return; doc.title = $("a
 // Eliminar secciones: al pasar el mouse por un bloque del cuerpo aparece «Eliminar».
 // Bloques: todo lo que va directo en el cuerpo, y el botón que va dentro de un recuadro.
 function activarBorrar(d) {
-  const cuerpo = d.querySelector("td.pad");
-  if (!cuerpo) return;
+  if (!d.querySelector("td.pad")) return;
   const del = d.createElement("button");
   del.id = "edit-ui-del"; del.type = "button"; del.title = "Eliminar esta sección";
   del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Eliminar';
   d.body.appendChild(del);
   let actual = null;
   const bloque = el => {
-    if (!el || !cuerpo.contains(el) || el === cuerpo) return null;
+    const cuerpo = d.querySelector("td.pad");
+    if (!el || !cuerpo || !cuerpo.contains(el) || el === cuerpo) return null;
     const et = el.closest(".tl-e");
     if (et) return et;
     const enRecuadro = el.closest("td.box table");
@@ -1634,50 +1635,68 @@ function activarBorrar(d) {
     e.preventDefault(); e.stopPropagation();
     if (!actual) return;
     const b = actual; mostrar(null);
-    borrados.push({ nodo: b, padre: b.parentNode, sig: b.nextSibling, t: Date.now() });
+    guardar("borrar");
     b.remove();
     trasCambio();
     avisoBorrado();
   });
 }
 
-// Deshacer lo eliminado: Ctrl+Z / ⌘Z (o el botón «Deshacer» del aviso). Si lo último fue escribir texto,
-// Ctrl+Z deshace el texto como siempre.
-let borrados = [], ultimoTexto = 0;
+// Deshacer en el paso 2: Ctrl+Z / ⌘Z deshace cualquier cambio sobre el correo (texto, formato, colores, tamaño,
+// emojis, estilo de tabla, links y secciones eliminadas). Se guarda una copia del correo antes de cada cambio.
+let historial = [], ultimoTipo = "", ultimoT = 0;
+const contenidoCorreo = () => [...doc.body.children].filter(n => !/^edit-ui/.test(n.id)).map(n => n.outerHTML).join("");
+function guardar(tipo) {
+  if (!doc) return;
+  const ahora = Date.now();
+  // Lo que se hace seguido (escribir, arrastrar, elegir emoji) cuenta como un solo cambio.
+  if (tipo === ultimoTipo && /^(texto|tam|emoji|link)$/.test(tipo) && ahora - ultimoT < 1500) { ultimoT = ahora; return; }
+  if (tipo === "texto" && ahora - ultimoT < 100) return; // cambio hecho por un botón del panel: ya se guardó
+  historial.push({ html: contenidoCorreo(), title: doc.title });
+  if (historial.length > 100) historial.shift();
+  ultimoTipo = tipo; ultimoT = ahora;
+}
 function trasCambio() {
   btnActivo = null;
   const a = doc.querySelector(".btn a");
   $("link").value = a && LINK_OK.test(a.getAttribute("href") || "") ? a.getAttribute("href") : "";
   revisarLink(); syncAhora(); setTimeout(fitFrame, 30);
 }
-function avisoBorrado() {
+const teclaZ = () => /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘Z" : "Ctrl+Z";
+function avisoDeshacer(txt) {
   const el = $("aviso");
   el.className = "status";
-  el.textContent = "Sección eliminada. ";
+  el.textContent = txt + " ";
+  if (!historial.length) return;
   const u = document.createElement("button");
   u.type = "button"; u.className = "link"; u.textContent = "Deshacer";
-  u.onclick = () => deshacerBorrado();
-  el.append(u, ` (${/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘Z" : "Ctrl+Z"})`);
+  u.onclick = () => deshacer();
+  el.append(u, ` (${teclaZ()})`);
 }
-function deshacerBorrado() {
-  const r = borrados.pop();
+const avisoBorrado = () => avisoDeshacer("Sección eliminada.");
+function deshacer() {
+  const r = historial.pop();
   if (!r || !doc) return false;
-  if (r.sig && r.padre.contains(r.sig) && r.sig.parentNode === r.padre) r.padre.insertBefore(r.nodo, r.sig);
-  else r.padre.appendChild(r.nodo);
+  [...doc.body.children].filter(n => !/^edit-ui/.test(n.id)).forEach(n => n.remove());
+  doc.body.insertAdjacentHTML("afterbegin", r.html);
+  doc.querySelectorAll(".edit-sel, .edit-emo").forEach(x => x.classList.remove("edit-sel", "edit-emo"));
+  doc.querySelectorAll(EDITABLE).forEach(n => { n.setAttribute("contenteditable", "true"); n.setAttribute("spellcheck", "true"); });
+  doc.title = r.title; $("asunto").value = r.title; $("p-asunto").textContent = r.title || "(sin asunto)";
+  boxActivo = emoActivo = tablaActiva = ultimoEditable = null;
+  ultimoTipo = "";
   trasCambio();
-  if (borrados.length) avisoBorrado(); else setStatus($("aviso"), "Sección recuperada.");
+  avisoDeshacer(historial.length ? "Cambio deshecho." : "Cambio deshecho. No hay más cambios para deshacer.");
   return true;
 }
+const deshacerBorrado = deshacer;
 function teclaDeshacer(e) {
   if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.key.toLowerCase() !== "z") return;
-  if ($("paso-editar").hidden || !borrados.length) return;
+  if ($("paso-editar").hidden || !historial.length) return;
   const t = e.target;
   // En los campos del panel (asunto, link, código) se deja el deshacer normal.
   if (t && t.ownerDocument === document && /^(INPUT|TEXTAREA)$/.test(t.tagName)) return;
-  // Si lo último fue escribir en el correo, que deshaga el texto.
-  if (t && t.isContentEditable && ultimoTexto > borrados[borrados.length - 1].t) return;
   e.preventDefault();
-  deshacerBorrado();
+  deshacer();
 }
 document.addEventListener("keydown", teclaDeshacer);
 /* ---- Formato: negrita, cursiva, tamaño y color del botón ---- */
@@ -1697,6 +1716,7 @@ document.querySelectorAll("#fmt [data-f]").forEach(b => b.onclick = () => {
   if (!ed) { fmtMsg("Primero haz clic en un texto del correo.", true); return; }
   fmtMsg("Selecciona un texto del correo y aprieta un botón.");
   const f = b.dataset.f;
+  guardar("formato");
   if (f === "bold" || f === "italic") {
     $("frame").contentWindow.focus();
     const sel = doc.getSelection();
@@ -1737,6 +1757,7 @@ function pintarBoton(c, t) {
   const a = botonActivo();
   if (!a) { fmtMsg("Este correo no tiene botón.", true); return; }
   const td = a.closest("td.btn") || a.parentElement;
+  guardar("color");
   td.style.background = c;
   a.style.color = t || "#ffffff";
   marcar("sw-boton", c);
@@ -1746,6 +1767,7 @@ swatches("sw-boton", PAL_BOTON, ([c, , t]) => pintarBoton(c, t), true);
 swatches("sw-texto", PAL_TEXTO, ([c]) => {
   const ed = editableActual();
   if (!ed) { fmtMsg("Primero haz clic en un texto del correo.", true); return; }
+  guardar("color");
   const sel = doc.getSelection();
   if (sel && !sel.isCollapsed && ed.contains(sel.anchorNode)) {
     $("frame").contentWindow.focus();
@@ -1762,6 +1784,7 @@ const recuadroActivo = () => doc && (boxActivo && doc.contains(boxActivo) ? boxA
 swatches("sw-box", PAL_BOX, ([bg, , ct, cx, borde]) => {
   const td = recuadroActivo();
   if (!td) { fmtMsg("Este correo no tiene recuadros.", true); return; }
+  guardar("color");
   td.style.background = bg;
   td.style.borderLeft = "";
   td.querySelectorAll(".lt, .v, .k").forEach(x => { x.style.color = ct || (x.classList.contains("k") ? "#4429cc" : "#0b013c"); });
@@ -1783,8 +1806,8 @@ function leerTamano(td) {
   $("box-w").value = w; $("box-w-o").textContent = w + "%";
   $("box-h").value = h; $("box-h-o").textContent = h;
 }
-$("box-w").addEventListener("input", e => { const td = recuadroActivo(); if (td) { tamanoRecuadro(td, +e.target.value, null); sync(); fitFrame(); } });
-$("box-h").addEventListener("input", e => { const td = recuadroActivo(); if (td) { tamanoRecuadro(td, null, +e.target.value); sync(); fitFrame(); } });
+$("box-w").addEventListener("input", e => { const td = recuadroActivo(); if (td) { guardar("tam"); tamanoRecuadro(td, +e.target.value, null); sync(); fitFrame(); } });
+$("box-h").addEventListener("input", e => { const td = recuadroActivo(); if (td) { guardar("tam"); tamanoRecuadro(td, null, +e.target.value); sync(); fitFrame(); } });
 // Esquina para arrastrar: horizontal = ancho, vertical = alto.
 function activarTamano(d) {
   const h = d.createElement("div");
@@ -1803,7 +1826,7 @@ function activarTamano(d) {
     e.preventDefault();
     const t = td.closest("table"), cont = t.parentElement.getBoundingClientRect().width;
     arr = { x: e.clientX, y: e.clientY, w: t.getBoundingClientRect().width, p: parseInt(d.defaultView.getComputedStyle(td).paddingTop) || 18, cont };
-    boxActivo = td; revisarRecuadro();
+    boxActivo = td; revisarRecuadro(); guardar("arrastre");
   });
   d.addEventListener("mousemove", e => {
     if (!arr) return;
@@ -1820,6 +1843,7 @@ const EMO_LISTA = [...new Set(["📝", "📄", "📨", "✅", "⚖️", "📰", 
 $("emo-g").innerHTML = EMO_LISTA.map(e => `<button type="button" data-e="${e}" title="${e}">${e}</button>`).join("");
 function ponerEmoji(e) {
   if (!emoActivo || !doc.contains(emoActivo) || !e.trim()) return;
+  guardar("emoji");
   const sp = emoActivo.querySelector("span");
   (sp || emoActivo).textContent = e.trim();
   syncAhora();
@@ -1851,7 +1875,7 @@ function estilarTabla(t, est) {
 }
 document.querySelectorAll("#tab-est button").forEach(b => {
   b.addEventListener("mousedown", e => e.preventDefault());
-  b.onclick = () => { const t = tablaSel(); if (t) estilarTabla(t, b.dataset.est); };
+  b.onclick = () => { const t = tablaSel(); if (t) { guardar("tabla"); estilarTabla(t, b.dataset.est); } };
 });
 function revisarTabla() {
   const t = tablaSel();
@@ -1901,6 +1925,7 @@ function revisarLink() {
 // El link se escribe en el HTML apenas se pega. Si el correo no tiene botón, se agrega uno antes de la firma.
 $("link").addEventListener("input", () => {
   if (!doc) return;
+  guardar("link");
   const url = $("link").value.trim();
   let a = botonActivo();
   if (!a && LINK_OK.test(url)) {
