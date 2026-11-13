@@ -1298,7 +1298,7 @@ function cargar(html) {
   $("paso-editar").hidden = false;
   $("frame").srcdoc = previewHtml(html);
   $("codigo").value = html;
-  store.set("html", html);
+  store.set("html", html); store.set("paso", "editar");
   window.scrollTo(0, 0);
 }
 
@@ -1678,22 +1678,23 @@ document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", (
   headerSel = b.dataset.h; store.set("header", headerSel); segPress("[data-h]", "data-h", headerSel);
 }));
 // Se recupera el borrador, pero nunca el ejemplo: la caja parte vacía.
-{ const g = store.get("texto") || ""; $("texto").value = /^(\{\{título\}\} )?El tribunal declaró admisible (tu|la) solicitud/.test(g) || g === EJEMPLO ? "" : g; }
+// Cada persona recupera lo suyo (se guarda solo en su navegador). Alguien nuevo parte vacío.
+$("texto").value = store.get("texto") || "";
 $("texto").addEventListener("input", () => { store.set("texto", $("texto").value); vivoPronto(); });
 
 // Saludo: viene por defecto, pero se puede cambiar o quitar.
 const SALUDO_DEF = "Hola, {{nombre cliente}}:";
-// Cada correo nuevo parte con el saludo por defecto.
-let saludoOn = true;
-$("saludo").value = SALUDO_DEF;
+// El saludo parte por defecto; si la persona lo cambió o lo quitó, se le recupera al volver.
+let saludoOn = store.get("saludo-on") !== "0";
+$("saludo").value = store.get("saludo") ?? SALUDO_DEF;
 function saludoTexto() { return saludoOn ? ($("saludo").value.trim()) : ""; }
 function pintarSaludo() {
   $("saludo").hidden = !saludoOn; $("saludo-x").hidden = !saludoOn; $("saludo-on").hidden = saludoOn;
 }
-$("saludo").addEventListener("input", vivoPronto);
-$("saludo-x").onclick = () => { saludoOn = false; pintarSaludo(); vivoAhora(); };
+$("saludo").addEventListener("input", () => { store.set("saludo", $("saludo").value); vivoPronto(); });
+$("saludo-x").onclick = () => { saludoOn = false; store.set("saludo-on", "0"); pintarSaludo(); vivoAhora(); };
 $("saludo-on").onclick = () => {
-  saludoOn = true;
+  saludoOn = true; store.set("saludo-on", "1");
   if (!$("saludo").value.trim()) $("saludo").value = SALUDO_DEF;
   pintarSaludo(); vivoAhora(); $("saludo").focus();
 };
@@ -1728,6 +1729,8 @@ function vivoPronto() { clearTimeout(vivoT); vivoT = setTimeout(vivoAhora, 250);
 $("vivo").addEventListener("load", () => { vivoEscala(); setTimeout(vivoEscala, 120); });
 window.addEventListener("resize", () => requestAnimationFrame(vivoEscala));
 document.querySelectorAll("[data-h]").forEach(b => b.addEventListener("click", () => setTimeout(vivoAhora, 0)));
+// Si la persona estaba revisando su correo (paso 2), vuelve ahí mismo.
+if (store.get("paso") === "editar" && store.get("html")) { tipoActual = store.get("tipo") || ""; cargar(store.get("html")); }
 samplePromise.then(sm => { if (sm) $("vivo-nota").textContent = "Vista rápida · con Diseñar, Claude pule la redacción"; });
 vivoAhora();
 // Insertar una marca donde está el cursor (el recuadro envuelve lo seleccionado).
@@ -1856,7 +1859,9 @@ $("disenar").onclick = async () => {
 $("nuevo").onclick = () => {
   vista("pc");
   $("paso-editar").hidden = true; $("paso-escribir").hidden = false;
-  saludoOn = true; $("saludo").value = SALUDO_DEF; pintarSaludo();
+  // Correo nuevo: todo vacío, solo con el saludo y la despedida.
+  $("texto").value = ""; store.set("texto", ""); store.set("html", ""); store.set("paso", "escribir");
+  saludoOn = true; $("saludo").value = SALUDO_DEF; store.set("saludo", SALUDO_DEF); store.set("saludo-on", "1"); pintarSaludo();
   vivoUltimo = ""; vivoAhora();
   $("texto").focus(); window.scrollTo(0, 0);
 };
