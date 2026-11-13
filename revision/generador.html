@@ -894,7 +894,8 @@ const E = {
     + esc(t).replace(/\{\{[^}]+\}\}/g, v => `<span class="name" style="font-weight:700;color:#0b013c;border-bottom:3px solid #f0a23b;padding-bottom:1px;">${v}</span>`) + '</p>',
   h1: t => `<h1 class="h1" style="margin:0 0 14px;font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-0.5px;color:#0b013c;">${inline(acentuar(t))}</h1>`,
   sub: t => `<h2 class="h2 lt" style="margin:18px 0 8px;font-size:19px;line-height:1.3;font-weight:700;letter-spacing:-0.2px;color:#27198e;">${inline(t)}</h2>`,
-  p: t => `<p class="txt" style="margin:0 0 16px;color:#4f5157;">${inline(t)}</p>`,
+  // Un Enter dentro del texto es un salto de línea; una línea en blanco empieza otro párrafo.
+  p: t => `<p class="txt" style="margin:0 0 16px;color:#4f5157;">${inline(t).replace(/\n/g, "<br>")}</p>`,
   note: t => `<p class="txt" style="margin:0 0 16px;font-size:13px;color:#7a7d87;">${inline(t)}</p>`,
   box: (k, v, m) => {
     const size = String(v).length > 12 ? "20px" : "32px";
@@ -1347,14 +1348,14 @@ function basico(src) {
   const limpio = src
     .replace(/\s+(en|a)\s+https?:\/\/[^\s)]+/gi, (m, w) => w.toLowerCase() === "a" ? " al botón de abajo" : " en el botón de abajo")
     .replace(/\s*:?\s*https?:\/\/[^\s)]+/g, "").replace(/[ \t]+/g, " ");
-  const paras = limpio.split(/\n\s*\n/).map(p => p.replace(/\s*\n\s*/g, " ").trim()).filter(Boolean);
+  const paras = limpio.split(/\n\s*\n/).map(p => p.split("\n").map(l => l.trim()).filter(Boolean).join("\n")).filter(Boolean);
   const esDest = p => /^@@DEST\d+@@$/.test(p);
   const esBtn = p => /^@@BOTON\d+@@$/.test(p);
   const esTexto = p => !/^@@(DEST|BOTON|SUB|LINEA)\d+@@$/.test(p);
   const nro = p => +p.match(/\d+/)[0];
   // El título solo existe si se pidió con {{título}}: el texto libre queda siempre como texto.
   const tituloTxt = titulo.replace(/\*/g, "");
-  const primero = paras.find(esTexto) || "";
+  const primero = (paras.find(esTexto) || "").replace(/\n/g, " ");
   const base = tituloTxt || (primero.split(/(?<=[.!?])\s/)[0] || "").replace(/[.:]$/, "");
   const d = { tipo: "informativo", asunto: base.length <= 60 ? base : base.slice(0, 58).replace(/\s+\S*$/, "") + "…", pre: primero.split(/(?<=[.!?])\s/)[0].slice(0, 110), titulo,
     blocks: paras.map(t => esDest(t) ? { k: "destacado", t: dests[+t.match(/\d+/)[0]] }
@@ -1553,7 +1554,13 @@ $("frame").addEventListener("load", () => {
   doc.addEventListener("keydown", teclaDeshacer);
   activarBorrar(doc);
   activarTamano(doc);
-  doc.addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
+  // Enter: en un párrafo de texto hace un salto de línea; en títulos, botones y demás no hace nada.
+  doc.addEventListener("keydown", e => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const ed = e.target.closest && e.target.closest("[contenteditable]");
+    if (ed && ed.matches("p.txt:not(.hi), div.ls, div.m")) doc.execCommand("insertLineBreak");
+  });
   doc.addEventListener("paste", e => {
     e.preventDefault();
     const t = (e.clipboardData || window.clipboardData).getData("text/plain").replace(/\s*\n\s*/g, " ");
