@@ -250,6 +250,9 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
   background:var(--soft);color:var(--btn);font-size:12px;font-weight:700;text-align:center;transform:translateY(-1px)}
 .pasos-c b{color:var(--navy)}
 .fmt h3{font-size:15px}
+.fmt-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.fmt-top .link{font-size:12.5px}
+.fmt .ctx-off{display:none !important}
 .tip-h{font-size:22px;margin:0 0 2px}
 .tip span{font-size:13.5px;color:var(--muted)}
 .fmt-g{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
@@ -585,7 +588,8 @@ Liquidación
       </div>
 
       <div class="card fmt" id="fmt">
-        <h3>Formato</h3>
+        <div class="fmt-top"><h3 id="fmt-titulo">Formato</h3><button type="button" class="link" id="fmt-todo" hidden>Ver todas las opciones</button></div>
+        <div id="fmt-txt">
         <div class="fmt-g" role="toolbar" aria-label="Formato del texto">
           <button type="button" data-f="bold" title="Negrita (selecciona el texto)"><b>B</b></button>
           <button type="button" data-f="italic" title="Cursiva (selecciona el texto)"><i style="font-family:Georgia,serif">I</i></button>
@@ -593,7 +597,8 @@ Liquidación
           <button type="button" data-f="mas" title="Letra más grande">A<sup>+</sup></button>
         </div>
         <p class="hint" id="fmt-hint">Selecciona un texto del correo y aprieta un botón.</p>
-        <div class="fmt-sec">
+        </div>
+        <div class="fmt-sec" id="fmt-tcol">
           <span class="lbl">Color del texto</span>
           <div class="sw" id="sw-texto" role="group" aria-label="Color del texto"></div>
         </div>
@@ -965,7 +970,7 @@ const E = {
             ${s === "cur" ? '<div class="tl-s em" style="padding:2px 4px 0;font-size:12px;line-height:1.3;color:#4429cc;">Estamos aquí</div>' : ""}
           </td>`;
       }).join("");
-      return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0 26px;table-layout:fixed;">
+      return `<table class="linea-t" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0 26px;table-layout:fixed;">
         <tr>${label.replace("__N__", n)}</tr>
         <tr>${cols}</tr>
       </table>`;
@@ -983,7 +988,7 @@ const E = {
           </td>
         </tr>`;
     }).join("");
-    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 22px;">
+    return `<table class="linea-t" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 22px;">
         <tr>${label.replace("__N__", 2)}</tr>${rows}</table>`;
   },
   // Tabla: encabezado lavanda, filas con línea divisoria; montos a la derecha; la fila «Total» en negrita.
@@ -1575,6 +1580,7 @@ $("frame").addEventListener("load", () => {
     doc.execCommand("insertText", false, t);
   });
   doc.addEventListener("click", e => {
+    contextoDe(e.target);
     const tb = e.target.closest("table.tabla");
     if (tb) { tablaActiva = tb; revisarTabla(); }
     const dot = e.target.closest(".tl-d");
@@ -1600,6 +1606,7 @@ $("frame").addEventListener("load", () => {
   $("asunto").value = doc.title || "";
   $("p-asunto").textContent = doc.title || "(sin asunto)";
   btnActivo = null; boxActivo = null; emoActivo = null; tablaActiva = null;
+  aplicarContexto(null);
   const btn = doc.querySelector(".btn a");
   if (btn) { const h = btn.getAttribute("href") || ""; $("link").value = LINK_OK.test(h) ? h : ""; }
   else $("link").value = "";
@@ -1957,6 +1964,33 @@ function revisarColor() {
   const actual = hex || (rgb ? "#" + rgb.slice(1).map(x => (+x).toString(16).padStart(2, "0")).join("") : "");
   marcar("sw-boton", actual);
 }
+
+// Panel según lo que se toca: solo las opciones de ese bloque. Fuera de un bloque, todas.
+const CONTEXTOS = {
+  linea: ["Línea de tiempo", ["fmt-emo"]],
+  boton: ["Botón", ["fmt-color"]],
+  tabla: ["Tabla", ["fmt-txt", "fmt-tcol", "fmt-tabla"]],
+  recuadro: ["Recuadro", ["fmt-txt", "fmt-tcol", "fmt-box"]],
+  texto: ["Texto", ["fmt-txt", "fmt-tcol"]]
+};
+const SECCIONES = ["fmt-txt", "fmt-tcol", "fmt-color", "fmt-emo", "fmt-tabla", "fmt-box"];
+function aplicarContexto(ctx, extra = []) {
+  const c = CONTEXTOS[ctx];
+  SECCIONES.forEach(id => $(id).classList.toggle("ctx-off", !!c && !c[1].concat(extra).includes(id)));
+  $("fmt-titulo").textContent = c ? `Formato · ${c[0]}` : "Formato";
+  $("fmt-todo").hidden = !c;
+}
+function contextoDe(el) {
+  if (!el || !el.closest) return aplicarContexto(null);
+  if (el.closest(".linea-t, .tl-d")) return aplicarContexto("linea");
+  if (el.closest(".btn")) return aplicarContexto("boton");
+  if (el.closest("table.tabla")) return aplicarContexto("tabla");
+  const bx = el.closest("td.box");
+  if (bx) return aplicarContexto("recuadro", bx.querySelector(".btn") ? ["fmt-color"] : []);
+  if (el.closest("[contenteditable]")) return aplicarContexto("texto");
+  aplicarContexto(null);
+}
+$("fmt-todo").onclick = () => aplicarContexto(null);
 
 // Devuelve true si el botón del correo todavía no tiene un link que funcione.
 let btnActivo = null;
