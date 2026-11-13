@@ -95,7 +95,7 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .saludo small{font-size:12px;color:var(--muted);background:var(--soft);padding:3px 9px;border-radius:999px}
 /* Resaltado de marcas: el texto real va en el textarea (transparente) y debajo se dibuja una copia con colores. */
 .ta-wrap{position:relative}
-#texto,.ta-bg{font-family:var(--font);font-size:17px;line-height:1.6;padding:8px 18px 16px;letter-spacing:normal;word-spacing:normal;tab-size:4;
+#texto,.ta-bg{font-family:var(--font);font-size:17px;line-height:1.6;padding:8px 36px 16px 18px;letter-spacing:normal;word-spacing:normal;tab-size:4;
   white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;box-sizing:border-box}
 #texto{position:relative;display:block;width:100%;min-height:240px;border:0;border-radius:0 0 12px 12px;background:transparent;color:transparent;caret-color:#2f2f2f}
 #texto::placeholder{color:#9a9ca5}
@@ -107,10 +107,14 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .ta-bg .hp{color:#8a6d00;background:#fff3c4}
 .ta-bg .hs{color:#d9822b}
 .ta-bg .blq{display:block}
+.ta-bg .blq.del-hl{background-color:#fde8e8;border-radius:6px}
+.ta-x{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.ta-x button{position:absolute;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:#ecebf3;color:#6b6880;font:700 13px/20px Arial,sans-serif;text-align:center;cursor:pointer;pointer-events:auto;opacity:.8;transition:background .12s,color .12s}
+.ta-x button:hover,.ta-x button:focus-visible{background:#c62f3a;color:#fff;opacity:1;outline:none}
 .ta-bg .blq.sep{background-image:linear-gradient(to right,#e8b77f 55%,transparent 0);background-size:9px 1.5px;background-repeat:repeat-x;background-position:0 0}
 .leyenda{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
 .leyenda i{font-style:normal;border-radius:4px;padding:0 4px}
-.leyenda .lm{color:#4429cc;background:#ecebfd}.leyenda .lp{color:#8a6d00;background:#fff3c4}
+.leyenda .lm{color:#4429cc;background:#ecebfd}.leyenda .lx{display:inline-grid;place-items:center;width:16px;height:16px;padding:0;border-radius:50%;background:#ecebf3;color:#6b6880;font-weight:700}.leyenda .lp{color:#8a6d00;background:#fff3c4}
 .compose .go{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
 .opts-top{display:flex !important;align-items:center;gap:10px 12px;flex-wrap:wrap;grid-column:1/-1;margin-bottom:-4px}
 .opts-top > span{font-weight:700;color:var(--navy) !important}
@@ -423,9 +427,10 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
       <div class="ta-wrap">
         <div class="ta-bg" id="texto-bg" aria-hidden="true"></div>
         <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
+        <div class="ta-x" id="texto-x"></div>
       </div>
     </div>
-    <div class="limpiar-row"><span class="leyenda"><span><i class="lm">{{marca}}</i> no se borra</span><span><i class="lp">Escribe aquí…</i> reemplázalo por tu texto</span></span><span id="limpiar-msg" role="status"></span><button type="button" class="limpiar" id="limpiar" title="Borra todo el texto (el saludo se mantiene)">Limpiar</button></div>
+    <div class="limpiar-row"><span class="leyenda"><span><i class="lm">{{marca}}</i> no se borra</span><span><i class="lp">Escribe aquí…</i> reemplázalo por tu texto</span><span><i class="lx">×</i> borra el bloque</span></span><span id="limpiar-msg" role="status"></span><button type="button" class="limpiar" id="limpiar" title="Borra todo el texto (el saludo se mantiene)">Limpiar</button></div>
     <div class="agregar" id="texto-tip">
       <div class="ag-row">
         <span class="ag-t">Agregar</span>
@@ -2034,8 +2039,10 @@ function pintarTexto() {
   const pinta = l => esc(l).replace(RX_RESALTE, (m, a, b) =>
     a ? `<mark class="hm">${m}</mark>` : b ? `<mark class="hp">${m}</mark>` : `<span class="hs">${m}</span>`);
   let html = "", i = 0, bloques = 0;
+  rangos = [];
   const bloque = (j, k) => {
-    html += `<span class="blq${bloques++ ? " sep" : ""}">` + lineas.slice(j, k + 1).map(pinta).join("\n") + (k < n - 1 ? "\n" : "") + "</span>";
+    rangos.push([j, k]);
+    html += `<span class="blq${bloques++ ? " sep" : ""}" data-i="${rangos.length - 1}">` + lineas.slice(j, k + 1).map(pinta).join("\n") + (k < n - 1 ? "\n" : "") + "</span>";
   };
   while (i < n) {
     const l = lineas[i];
@@ -2057,8 +2064,41 @@ function pintarTexto() {
   bg.style.width = ta.clientWidth + "px";
   bg.style.height = ta.clientHeight + "px";
   bg.scrollTop = ta.scrollTop;
+  ponerEquis();
 }
-$("texto").addEventListener("scroll", () => { $("texto-bg").scrollTop = $("texto").scrollTop; });
+// Una × chiquita al lado de cada bloque: lo borra completo (marcas incluidas). Se puede deshacer con Ctrl+Z.
+let rangos = [];
+function ponerEquis() {
+  const ta = $("texto"), bg = $("texto-bg"), cap = $("texto-x");
+  const der = ta.offsetWidth - ta.clientWidth + 6;
+  cap.innerHTML = [...bg.querySelectorAll(".blq")].map(b => {
+    const top = b.offsetTop - ta.scrollTop + 3;
+    if (top < -10 || top > ta.clientHeight - 14) return "";
+    return `<button type="button" data-i="${b.dataset.i}" title="Borrar este bloque completo" aria-label="Borrar este bloque" style="top:${top}px;right:${der}px">×</button>`;
+  }).join("");
+}
+$("texto-x").addEventListener("mousedown", e => e.preventDefault());
+$("texto-x").addEventListener("mouseover", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const blq = $("texto-bg").querySelector(`.blq[data-i="${b.dataset.i}"]`); if (blq) blq.classList.add("del-hl");
+});
+$("texto-x").addEventListener("mouseout", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  $("texto-bg").querySelectorAll(".del-hl").forEach(x => x.classList.remove("del-hl"));
+});
+$("texto-x").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const r = rangos[+b.dataset.i]; if (!r) return;
+  const v = $("texto").value, lineas = v.split("\n"), n = lineas.length, [j, k] = r;
+  const ini = j ? lineas.slice(0, j).join("\n").length + 1 : 0;
+  let fin = lineas.slice(0, k + 1).join("\n").length + (k < n - 1 ? 1 : 0);
+  // Si quedaría una línea en blanco doble, se borra también la que sobra.
+  if (k + 1 < n && !lineas[k + 1].trim() && (j === 0 || !lineas[j - 1].trim())) fin += lineas[k + 1].length + (k + 1 < n - 1 ? 1 : 0);
+  escribirEnTexto("", ini, Math.min(fin, v.length));
+  $("limpiar-msg").textContent = `Bloque borrado · ${teclaZ()} para recuperarlo`;
+  clearTimeout($("limpiar").t); $("limpiar").t = setTimeout(() => $("limpiar-msg").textContent = "", 5000);
+});
+$("texto").addEventListener("scroll", () => { $("texto-bg").scrollTop = $("texto").scrollTop; ponerEquis(); });
 new ResizeObserver(pintarTexto).observe($("texto"));
 
 // Saludo: viene por defecto, pero se puede cambiar o quitar.
