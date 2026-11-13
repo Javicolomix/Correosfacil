@@ -2541,7 +2541,7 @@ $("disenar").onclick = async () => {
       if (!d.titulo && !d.blocks.length) d = null;
     } catch (e) { aviso = msgError(e) + " Lo armé con tu texto tal cual."; }
   } else {
-    aviso = "Aquí no está la redacción con Claude: lo armé con tu texto tal cual. Puedes ajustarlo en el correo.";
+    aviso = "";
   }
   if (!d) d = basico(texto);
   tipoActual = d.tipo || ""; store.set("tipo", tipoActual);
