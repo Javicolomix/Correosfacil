@@ -256,6 +256,10 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .sw-own{position:relative;display:grid;place-items:center;background:conic-gradient(#f44,#fd4,#4d8,#4af,#a4f,#f44);overflow:hidden}
 .sw-own span{font-weight:700;color:#fff;text-shadow:0 0 3px #0008;pointer-events:none}
 .sw-own input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.limpiar-row{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:-8px 2px -6px}
+.limpiar{font:inherit;font-size:12.5px;color:var(--muted);background:none;border:0;padding:2px 4px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.limpiar:hover{color:var(--btn)}
+#limpiar-msg{font-size:12px;color:var(--muted)}
 .agregar{display:grid;gap:8px}
 .tab-wrap{position:relative;display:inline-flex}
 .tab-pop{position:absolute;z-index:20;top:calc(100% + 6px);left:0;background:#fff;border:1px solid #dcd8f3;border-radius:12px;box-shadow:0 10px 30px rgba(11,1,60,.15);padding:12px;width:max-content;max-width:260px;display:grid;gap:8px}
@@ -395,6 +399,7 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
       </div>
       <textarea id="texto" aria-describedby="texto-tip" placeholder="Ej.: Recordarle al cliente que su cuota 4 de 12, de $89.900, vence el 10 de diciembre. Puede pagar en https://lexy.cl/ o por transferencia. Si ya pagó, el pago tarda hasta 48 horas en verse en el portal."></textarea>
     </div>
+    <div class="limpiar-row"><span id="limpiar-msg" role="status"></span><button type="button" class="limpiar" id="limpiar" title="Borra todo el texto (el saludo se mantiene)">Limpiar</button></div>
     <div class="agregar" id="texto-tip">
       <div class="ag-row">
         <span class="ag-t">Agregar</span>
@@ -734,10 +739,11 @@ Resolución de liquidación
 {{subtítulo}} El detalle de tu plan de pago
 
 {{tabla}}
-Concepto | Monto
-Cuota 4 de 12 | $89.900
-Gastos de tramitación | $0
-Total del mes | $89.900
+Cuota | Vence | Estado | Monto
+3 de 12 | 10 de octubre | ✅ Pagada | $89.900
+4 de 12 | 10 de noviembre | ⏳ Pendiente | $89.900
+5 de 12 | 10 de diciembre | 📅 Próxima | $89.900
+Total por pagar |  |  | $179.800
 {{tabla}}
 
 Puedes elegir cómo pagar:
@@ -2048,6 +2054,15 @@ function insertarTabla(c, f) {
   const a0 = i + ins.indexOf("Columna 1");
   ta.setSelectionRange(a0, a0 + "Columna 1".length);
 }
+// Limpiar: vacía el texto (el saludo queda). Se puede deshacer con Ctrl+Z / ⌘Z.
+$("limpiar").addEventListener("mousedown", e => e.preventDefault());
+$("limpiar").onclick = () => {
+  const ta = $("texto");
+  if (!ta.value) return;
+  escribirEnTexto("", 0, ta.value.length);
+  $("limpiar-msg").textContent = `Texto borrado · ${/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘Z" : "Ctrl+Z"} para recuperarlo`;
+  clearTimeout($("limpiar").t); $("limpiar").t = setTimeout(() => $("limpiar-msg").textContent = "", 5000);
+};
 // Tab salta al siguiente «Escribe aquí…» y lo deja seleccionado para escribir encima.
 $("texto").addEventListener("keydown", e => {
   if (e.key !== "Tab" || e.shiftKey) return;
