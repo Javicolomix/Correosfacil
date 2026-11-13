@@ -601,7 +601,8 @@ Liquidación
       </div>
 
       <div class="row">
-        <button class="btn ghost sm" id="nuevo" type="button">Escribir otro correo</button>
+        <button class="btn ghost sm" id="volver" type="button" title="Vuelve al texto tal como lo dejaste. Los cambios hechos aquí sobre el correo se pierden al volver a Diseñar.">← Volver al texto</button>
+        <button class="btn ghost sm" id="nuevo" type="button" title="Empieza un correo nuevo, en blanco">Escribir otro correo</button>
       </div>
     </aside>
   </div>
@@ -2159,6 +2160,14 @@ $("disenar").onclick = async () => {
   setStatus($("aviso"), aviso);
 };
 
+// Volver: regresa al paso de escritura con el mismo texto, saludo y header.
+$("volver").onclick = () => {
+  vista("pc");
+  $("paso-editar").hidden = true; $("paso-escribir").hidden = false;
+  store.set("paso", "escribir");
+  vivoUltimo = ""; vivoAhora();
+  $("texto").focus(); window.scrollTo(0, 0);
+};
 $("nuevo").onclick = () => {
   vista("pc");
   $("paso-editar").hidden = true; $("paso-escribir").hidden = false;
