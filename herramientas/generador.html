@@ -93,7 +93,7 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .saludo small{font-size:12px;color:var(--muted);background:var(--soft);padding:3px 9px;border-radius:999px}
 /* Resaltado de marcas: el texto real va en el textarea (transparente) y debajo se dibuja una copia con colores. */
 .ta-wrap{position:relative}
-#texto,.ta-bg{font-family:var(--font);font-size:17px;line-height:1.6;padding:8px 60px 16px 18px;letter-spacing:normal;word-spacing:normal;tab-size:4;
+#texto,.ta-bg{font-family:var(--font);font-size:17px;line-height:1.6;padding:8px 36px 16px 18px;letter-spacing:normal;word-spacing:normal;tab-size:4;
   white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;box-sizing:border-box}
 #texto{position:relative;display:block;width:100%;min-height:240px;border:0;border-radius:0 0 12px 12px;background:transparent;color:transparent;caret-color:#2f2f2f}
 #texto::placeholder{color:#9a9ca5}
@@ -439,7 +439,7 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
         <div class="ta-x" id="texto-x"></div>
       </div>
     </div>
-    <div class="limpiar-row"><span class="leyenda"><span><i class="lm">{{marca}}</i> no se borra</span><span><i class="lp">Escribe aquí…</i> reemplázalo por tu texto</span><span><i class="lx">⠿</i> arrastra para mover</span><span><i class="lx">×</i> borra el bloque</span></span><span id="limpiar-msg" role="status"></span><button type="button" class="limpiar" id="limpiar" title="Borra todo el texto (el saludo se mantiene)">Limpiar</button></div>
+    <div class="limpiar-row"><span class="leyenda"><span><i class="lm">{{marca}}</i> no se borra</span><span><i class="lp">Escribe aquí…</i> reemplázalo por tu texto</span><span><i class="lx">×</i> borra el bloque</span></span><span id="limpiar-msg" role="status"></span><button type="button" class="limpiar" id="limpiar" title="Borra todo el texto (el saludo se mantiene)">Limpiar</button></div>
     <div class="agregar" id="texto-tip">
       <div class="ag-row">
         <span class="ag-t">Agregar</span>
@@ -2203,8 +2203,7 @@ function ponerEquis() {
   cap.innerHTML = [...bg.querySelectorAll(".blq")].map(b => {
     const top = b.offsetTop - ta.scrollTop + 3;
     if (top < -10 || top > ta.clientHeight - 14) return "";
-    return `<button type="button" class="tx-mv" data-i="${b.dataset.i}" title="Arrastra para mover este bloque" aria-label="Mover este bloque" style="top:${top}px;right:${der + 24}px">⠿</button>`
-      + `<button type="button" class="tx-del" data-i="${b.dataset.i}" title="Borrar este bloque completo" aria-label="Borrar este bloque" style="top:${top}px;right:${der}px">×</button>`;
+    return `<button type="button" class="tx-del" data-i="${b.dataset.i}" title="Borrar este bloque completo" aria-label="Borrar este bloque" style="top:${top}px;right:${der}px">×</button>`;
   }).join("") + '<div class="tx-drop" id="tx-drop"></div>';
 }
 // Mover bloques en el texto: se arrastra el ⠿ y se suelta donde se quiere (línea morada).
