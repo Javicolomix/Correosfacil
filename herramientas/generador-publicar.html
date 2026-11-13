@@ -104,6 +104,8 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .ta-bg .hm{color:#4429cc;background:#ecebfd}
 .ta-bg .hp{color:#8a6d00;background:#fff3c4}
 .ta-bg .hs{color:#d9822b}
+.ta-bg .blq{display:block}
+.ta-bg .blq.sep{background-image:linear-gradient(to right,#e8b77f 55%,transparent 0);background-size:9px 1.5px;background-repeat:repeat-x;background-position:0 0}
 .leyenda{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
 .leyenda i{font-style:normal;border-radius:4px;padding:0 4px}
 .leyenda .lm{color:#4429cc;background:#ecebfd}.leyenda .lp{color:#8a6d00;background:#fff3c4}
@@ -1976,10 +1978,34 @@ $("texto").addEventListener("input", () => { store.set("texto", $("texto").value
 
 // Resalta en el cuadro: {{marcas}} en morado, «Escribe aquí…» (texto por reemplazar) en amarillo y separadores (| --- *) en naranjo.
 const RX_RESALTE = /(\{\{[^}\n]*\}\})|((?:Escribe|Pega) aquí[^\n|*]*?(?=\s\*|\s\||\shttps?:\/\/|\n|$)|\bColumna \d+\b|\bDato \d+\.\d+\b)|(^-{3,}$| \| |\s\*$)/gm;
+// Además separa visualmente cada bloque (título, texto, recuadro, tabla…) con una línea punteada, sin cambiar el texto.
+const PAREADAS = /\{\{\s*(cuadro destacado|recuadro destacado|destacar|cuadros? paralelos?|tabla|l[ií]nea de tiempo)\s*\}\}/i;
 function pintarTexto() {
   const ta = $("texto"), bg = $("texto-bg");
-  bg.innerHTML = esc(ta.value).replace(RX_RESALTE, (m, a, b) =>
-    a ? `<mark class="hm">${m}</mark>` : b ? `<mark class="hp">${m}</mark>` : `<span class="hs">${m}</span>`) + "\n ";
+  const lineas = ta.value.split("\n"), n = lineas.length;
+  const pinta = l => esc(l).replace(RX_RESALTE, (m, a, b) =>
+    a ? `<mark class="hm">${m}</mark>` : b ? `<mark class="hp">${m}</mark>` : `<span class="hs">${m}</span>`);
+  let html = "", i = 0, bloques = 0;
+  const bloque = (j, k) => {
+    html += `<span class="blq${bloques++ ? " sep" : ""}">` + lineas.slice(j, k + 1).map(pinta).join("\n") + (k < n - 1 ? "\n" : "") + "</span>";
+  };
+  while (i < n) {
+    const l = lineas[i];
+    if (!l.trim()) { html += pinta(l) + (i < n - 1 ? "\n" : ""); i++; continue; }
+    const m = l.match(PAREADAS);
+    if (m && !l.replace(PAREADAS, "").trim()) {
+      const clave = norm(m[1]).replace(/s\b/g, "");
+      let k = i + 1;
+      while (k < n && !(lineas[k].match(PAREADAS) && norm(lineas[k].match(PAREADAS)[1]).replace(/s\b/g, "") === clave)) k++;
+      if (k >= n) k = n - 1;
+      bloque(i, k); i = k + 1; continue;
+    }
+    if (/\{\{[^}]*\}\}/.test(l)) { bloque(i, i); i++; continue; }
+    let k = i;
+    while (k + 1 < n && lineas[k + 1].trim() && !/\{\{[^}]*\}\}/.test(lineas[k + 1])) k++;
+    bloque(i, k); i = k + 1;
+  }
+  bg.innerHTML = html + "\n ";
   bg.style.width = ta.clientWidth + "px";
   bg.style.height = ta.clientHeight + "px";
   bg.scrollTop = ta.scrollTop;
