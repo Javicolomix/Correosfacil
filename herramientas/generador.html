@@ -273,6 +273,11 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .r-box{background:#f0f0fb;border-radius:8px;padding:8px 10px;font:12.5px/1.4 Arial,sans-serif;color:#4f5157}
 .r-box strong{display:block;color:#0b013c}
 .r-par{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cm-t{font-size:13px;color:var(--navy)}
+.cm-tip{background:var(--soft);border-color:#e3e1f3}
+.r-sub{font:700 14px/1.3 Arial,sans-serif;color:#27198e}
+.r-txt{font:13px/1.5 Arial,sans-serif;color:#4f5157}
+.r-btn-s{display:table;margin-top:7px;padding:5px 10px;font-size:11.5px}
 .r-btn{justify-self:start;display:inline-block;background:#4429cc;color:#fff;border-radius:7px;padding:7px 13px;font:700 13px Arial,sans-serif}
 .r-tl{display:flex;align-items:center}
 .r-tl .d{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#f0f0fb;font-size:15px;flex:none}
@@ -374,18 +379,35 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
         <summary>¿Cómo se escriben? <span>Puedes usar cada una las veces que quieras</span></summary>
         <div class="como-g">
           <div class="cm">
+            <b class="cm-t">Título</b>
             <pre><i>{{título}}</i> Tu cuota vence pronto</pre>
             <div class="r-tit">Tu cuota vence <em>pronto</em></div>
-            <small>Para un subtítulo usa <b>{{subtítulo}}</b>: sale más chico y de un color.</small>
+            <small>Sale en dos colores: oscuro y el final en morado. Para elegir la parte morada, escríbela entre *asteriscos*.</small>
           </div>
           <div class="cm">
+            <b class="cm-t">Subtítulo</b>
+            <pre><i>{{subtítulo}}</i> Lo que viene ahora</pre>
+            <div class="r-sub">Lo que viene ahora</div>
+            <small>Más chico que el título y de un solo color.</small>
+          </div>
+          <div class="cm">
+            <b class="cm-t">Texto</b>
+            <pre>Te escribimos para contarte que tu caso avanzó.</pre>
+            <div class="r-txt">Te escribimos para contarte que tu caso avanzó.</div>
+            <small>Lo que escribas sin marca queda como texto normal. Deja una línea en blanco entre párrafos.</small>
+          </div>
+          <div class="cm">
+            <b class="cm-t">Recuadro</b>
             <pre><i>{{cuadro destacado}}</i>
 Importante
 Tu pago tarda 48 horas.
+<i>{{botón}}</i> Ver mi pago | https://…
 <i>{{cuadro destacado}}</i></pre>
-            <div class="r-box"><strong>Importante</strong>Tu pago tarda 48 horas.</div>
+            <div class="r-box"><strong>Importante</strong>Tu pago tarda 48 horas.<span class="r-btn r-btn-s">Ver mi pago</span></div>
+            <small>La 1.ª línea sale en negrita. El botón adentro es opcional.</small>
           </div>
           <div class="cm">
+            <b class="cm-t">Cuadro paralelo</b>
             <pre><i>{{cuadro paralelo}}</i>
 Plan mensual
 $29.900 al mes
@@ -394,21 +416,28 @@ $29.900 al mes
 Plan anual
 $299.000 al año
 <i>{{cuadro paralelo}}</i></pre>
-            <div class="r-par"><div class="r-box"><strong>Plan mensual</strong>$29.900 al mes</div><div class="r-box"><strong>Plan anual</strong>$299.000 al año</div></div>
-            <small>Separa cada opción con una línea <b>---</b>. Hasta 3 opciones.</small>
+            <div class="r-par"><div class="r-box"><strong>Plan mensual</strong>$29.900 al mes<span class="r-btn r-btn-s">Elegir</span></div><div class="r-box"><strong>Plan anual</strong>$299.000 al año</div></div>
+            <small>Separa cada opción con una línea <b>---</b> (hasta 3). En celular quedan una debajo de otra.</small>
           </div>
           <div class="cm">
+            <b class="cm-t">Botón</b>
             <pre><i>{{botón}}</i> Pagar mi cuota | https://lexy.cl/</pre>
             <span class="r-btn">Pagar mi cuota</span>
+            <small>Antes de la <b>|</b> va el texto del botón y después, el link.</small>
           </div>
           <div class="cm">
+            <b class="cm-t">Línea de tiempo</b>
             <pre><i>{{línea de tiempo}}</i>
 Solicitud presentada
 Admisibilidad *
 Liquidación
 <i>{{línea de tiempo}}</i></pre>
             <div class="r-tl"><span class="d">📝</span><span class="l on"></span><span class="d c">✅</span><span class="l"></span><span class="d f">🏛️</span></div>
-            <small>El * marca la etapa actual. Los emojis se eligen solos.</small>
+            <small>Una etapa por línea; el * marca la actual. Las siguientes salen con 🔒. Los emojis se eligen solos y se pueden cambiar después de Diseñar.</small>
+          </div>
+          <div class="cm cm-tip">
+            <b class="cm-t">Después de Diseñar</b>
+            <small>Haz clic en cualquier texto para cambiarlo. En el panel <b>Formato</b> puedes poner negrita o cursiva, cambiar el tamaño y los colores del texto, del botón y del recuadro, achicar un recuadro, cambiar emojis y eliminar secciones (Ctrl+Z para deshacer).</small>
           </div>
         </div>
       </details>
