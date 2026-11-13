@@ -236,6 +236,9 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .fmt-sec{display:grid;gap:2px;padding-top:10px;border-top:1px solid var(--line)}
 .fmt-sec[hidden]{display:none}
 .sw-box button{border-radius:8px;width:34px;height:26px}
+.emo-g{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:6px}
+.emo-g button{height:32px;border:1px solid transparent;border-radius:8px;background:#f7f7fb;font-size:17px;cursor:pointer;padding:0;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif}
+.emo-g button:hover{background:var(--soft);border-color:var(--lav)}
 .rng{display:grid;grid-template-columns:48px 1fr 40px;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:6px}
 .rng input{width:100%;accent-color:var(--btn)}
 .rng output{font-size:12px;text-align:right;color:var(--navy)}
@@ -469,6 +472,11 @@ Liquidación
         <div class="fmt-sec" id="fmt-color">
           <span class="lbl" id="fmt-btn-lbl">Color del botón</span>
           <div class="sw" id="sw-boton" role="group" aria-label="Color del botón"></div>
+        </div>
+        <div class="fmt-sec" id="fmt-emo" hidden>
+          <span class="lbl" id="fmt-emo-lbl">Emoji de la etapa</span>
+          <div class="emo-g" id="emo-g" role="group" aria-label="Emoji de la etapa"></div>
+          <label class="rng" style="grid-template-columns:48px 1fr">Otro <input type="text" id="emo-own" maxlength="8" placeholder="Pega un emoji" style="width:100%;padding:5px 8px;border:1px solid var(--line);border-radius:8px"></label>
         </div>
         <div class="fmt-sec" id="fmt-box">
           <span class="lbl" id="fmt-box-lbl">Color del recuadro</span>
@@ -753,9 +761,9 @@ const E = {
     items = items.map(x => { const [emo, t] = emojiEtapa(x.t, usados); return { ...x, emo, t }; });
     const EMO = "font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;";
     const dot = (s, i) => ({
-      done: `<div class="num" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#f0f0fb;border:3px solid #ffffff;font-size:19px;text-align:center;margin:0 auto;${EMO}">${items[i].emo}</div>`,
-      cur: `<div class="cur" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#4429cc;border:3px solid #d9d4fb;font-size:19px;text-align:center;margin:0 auto;${EMO}">${items[i].emo}</div>`,
-      fut: `<div class="fut" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#f4f4f6;border:3px solid #ffffff;font-size:18px;text-align:center;margin:0 auto;${EMO}"><span style="opacity:.4;filter:grayscale(1);-webkit-filter:grayscale(1);">${items[i].emo}</span></div>`
+      done: `<div class="num tl-d" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#f0f0fb;border:3px solid #ffffff;font-size:19px;text-align:center;margin:0 auto;${EMO}">${items[i].emo}</div>`,
+      cur: `<div class="cur tl-d" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#4429cc;border:3px solid #d9d4fb;font-size:19px;text-align:center;margin:0 auto;${EMO}">${items[i].emo}</div>`,
+      fut: `<div class="fut tl-d" style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#f4f4f6;border:3px solid #ffffff;font-size:18px;text-align:center;margin:0 auto;${EMO}"><span style="opacity:.4;filter:grayscale(1);-webkit-filter:grayscale(1);">${items[i].emo}</span></div>`
     })[s];
     const label = '<td colspan="__N__" class="k" style="padding:0 0 14px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4429cc;text-align:left;">Tu proceso</td>';
     const etapa = (s, i) => `<div class="tl-e" style="padding:9px 2px 0;font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${s === "cur" ? "#4429cc" : "#9a9ca5"};">${s === "fut" ? `<span style="${EMO}letter-spacing:0;">🔒</span> ` : ""}Etapa ${i + 1}</div>`;
@@ -1242,6 +1250,8 @@ const EDIT_CSS = `[contenteditable]{cursor:text;border-radius:4px;transition:out
 [contenteditable]:hover{outline:1.5px dashed #9d90fc;outline-offset:3px}
 [contenteditable]:focus{outline:2px solid #27198E;outline-offset:3px}
 .edit-sel{outline:1.5px dashed #e05a5a !important;outline-offset:4px;border-radius:6px}
+.tl-d{cursor:pointer}.tl-d:hover{outline:2px solid #9d90fc;outline-offset:2px}
+.edit-emo{outline:2px solid #27198E !important;outline-offset:3px}
 #edit-ui-del{position:absolute;z-index:9;display:none;align-items:center;gap:4px;height:26px;padding:0 9px 0 7px;border:0;border-radius:13px;
   background:#c62f3a;color:#fff;font:700 12px/1 Tahoma,Arial,sans-serif;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 #edit-ui-del:hover{background:#a3222c}
@@ -1258,7 +1268,7 @@ function exportHtml() {
   if (!doc) return "";
   const root = doc.documentElement.cloneNode(true);
   root.querySelectorAll("#edit-ui, #edit-ui-del, #edit-ui-rsz").forEach(n => n.remove());
-  root.querySelectorAll(".edit-sel").forEach(n => { n.classList.remove("edit-sel"); if (!n.className) n.removeAttribute("class"); });
+  root.querySelectorAll(".edit-sel, .edit-emo").forEach(n => { n.classList.remove("edit-sel", "edit-emo"); if (!n.className) n.removeAttribute("class"); });
   root.querySelectorAll("[contenteditable]").forEach(n => { n.removeAttribute("contenteditable"); n.removeAttribute("spellcheck"); });
   let out = "<!DOCTYPE html>\n" + root.outerHTML + "\n";
   for (const [u, data] of Object.entries(PREVIEW_IMG)) out = out.split(data).join(u);
@@ -1311,6 +1321,13 @@ $("frame").addEventListener("load", () => {
     doc.execCommand("insertText", false, t);
   });
   doc.addEventListener("click", e => {
+    const dot = e.target.closest(".tl-d");
+    if (dot) {
+      doc.querySelectorAll(".edit-emo").forEach(x => x.classList.remove("edit-emo"));
+      emoActivo = dot; dot.classList.add("edit-emo"); $("emo-own").value = "";
+      revisarEmoji();
+      $("fmt-emo").scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
     const bx = e.target.closest("td.box");
     if (bx) { boxActivo = bx; revisarRecuadro(); }
     const a = e.target.closest("a");
@@ -1326,7 +1343,7 @@ $("frame").addEventListener("load", () => {
   // panel lateral
   $("asunto").value = doc.title || "";
   $("p-asunto").textContent = doc.title || "(sin asunto)";
-  btnActivo = null; boxActivo = null;
+  btnActivo = null; boxActivo = null; emoActivo = null;
   const btn = doc.querySelector(".btn a");
   if (btn) { const h = btn.getAttribute("href") || ""; $("link").value = LINK_OK.test(h) ? h : ""; }
   else $("link").value = "";
@@ -1556,6 +1573,25 @@ function activarTamano(d) {
   });
   d.addEventListener("mouseup", () => { if (arr) { arr = null; syncAhora(); } });
 }
+// Emoji de cada etapa: clic en el círculo de la línea de tiempo y se elige otro.
+let emoActivo = null;
+const EMO_LISTA = [...new Set(["📝", "📄", "📨", "✅", "⚖️", "📰", "👤", "🏛️", "🤝", "🗓️", "💳", "💰", "✍️", "📜", "📧", "🔔",
+  "💬", "📞", "📅", "🔍", "⏳", "📦", "🏦", "🚫", "📊", "🏠", "💼", "🎉", "🚀", "🌱", "🏁", "📌", "⭐", "🎯", "💡", "🔑", "✨", "❌"])];
+$("emo-g").innerHTML = EMO_LISTA.map(e => `<button type="button" data-e="${e}" title="${e}">${e}</button>`).join("");
+function ponerEmoji(e) {
+  if (!emoActivo || !doc.contains(emoActivo) || !e.trim()) return;
+  const sp = emoActivo.querySelector("span");
+  (sp || emoActivo).textContent = e.trim();
+  syncAhora();
+}
+$("emo-g").querySelectorAll("button").forEach(b => { b.addEventListener("mousedown", e => e.preventDefault()); b.onclick = () => ponerEmoji(b.dataset.e); });
+$("emo-own").addEventListener("input", e => ponerEmoji(e.target.value));
+function revisarEmoji() {
+  const hay = doc && doc.querySelector(".tl-d");
+  $("fmt-emo").hidden = !hay;
+  if (!hay) return;
+  $("fmt-emo-lbl").textContent = emoActivo && doc.contains(emoActivo) ? "Emoji de la etapa (elige uno)" : "Emoji de la etapa: haz clic en un círculo de la línea de tiempo";
+}
 function revisarRecuadro() {
   const td = recuadroActivo();
   $("fmt-box").hidden = !td;
@@ -1583,7 +1619,7 @@ function revisarColor() {
 let btnActivo = null;
 const botonActivo = () => doc && (btnActivo && doc.contains(btnActivo) ? btnActivo : doc.querySelector(".btn a"));
 function revisarLink() {
-  revisarColor(); revisarRecuadro();
+  revisarColor(); revisarRecuadro(); revisarEmoji();
   const a = botonActivo();
   $("link-hint").hidden = !!a;
   $("link-lbl").textContent = a ? `Link del botón «${a.textContent.trim()}»` : "Link del correo";
