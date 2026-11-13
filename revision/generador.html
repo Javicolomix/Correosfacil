@@ -274,6 +274,7 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .r-tit{font:700 16px/1.2 Arial,sans-serif;color:#0b013c}.r-tit em{font-style:normal;color:#4429cc}
 .r-box{background:#f0f0fb;border-radius:8px;padding:8px 10px;font:12.5px/1.4 Arial,sans-serif;color:#4f5157}
 .r-box strong{display:block;color:#0b013c}
+.r-par{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .r-btn{justify-self:start;display:inline-block;background:#4429cc;color:#fff;border-radius:7px;padding:7px 13px;font:700 13px Arial,sans-serif}
 .r-tl{display:flex;align-items:center}
 .r-tl .d{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#f0f0fb;font-size:15px;flex:none}
@@ -366,6 +367,7 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
         <button type="button" class="marca" data-m="subtitulo"><span class="ag-i" style="font-size:10px">T</span>Subtítulo</button>
         <button type="button" class="marca" data-m="texto"><span class="ag-i">¶</span>Texto</button>
         <button type="button" class="marca" data-m="cuadro"><span class="ag-i">▢</span>Recuadro</button>
+        <button type="button" class="marca" data-m="paralelo"><span class="ag-i">◫</span>Cuadro paralelo</button>
         <button type="button" class="marca" data-m="boton"><span class="ag-i">◉</span>Botón</button>
         <button type="button" class="marca" data-m="linea"><span class="ag-i">⋯</span>Línea de tiempo</button>
       </div>
@@ -384,6 +386,18 @@ Importante
 Tu pago tarda 48 horas.
 <i>{{cuadro destacado}}</i></pre>
             <div class="r-box"><strong>Importante</strong>Tu pago tarda 48 horas.</div>
+          </div>
+          <div class="cm">
+            <pre><i>{{cuadro paralelo}}</i>
+Plan mensual
+$29.900 al mes
+<i>{{botón}}</i> Elegir | https://…
+---
+Plan anual
+$299.000 al año
+<i>{{cuadro paralelo}}</i></pre>
+            <div class="r-par"><div class="r-box"><strong>Plan mensual</strong>$29.900 al mes</div><div class="r-box"><strong>Plan anual</strong>$299.000 al año</div></div>
+            <small>Separa cada opción con una línea <b>---</b>. Hasta 3 opciones.</small>
           </div>
           <div class="cm">
             <pre><i>{{botón}}</i> Pagar mi cuota | https://lexy.cl/</pre>
@@ -810,6 +824,30 @@ const E = {
     return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 22px;">
         <tr>${label.replace("__N__", 2)}</tr>${rows}</table>`;
   },
+  // Cuadro paralelo: 2 o 3 opciones lado a lado (en celular, una debajo de otra).
+  paralelo: cols => {
+    const n = cols.length, w = Math.floor(100 / n);
+    const celda = (c, i) => {
+      const mb = c.match(/\s*\[\s*bot[oó]n\s*:\s*([^\]]*)\]\s*$/i);
+      if (mb) c = c.slice(0, mb.index);
+      const [tit, ...r] = c.split(/\s*\|\s*/);
+      const cuerpo = r.join(" ").trim();
+      let boton = "";
+      if (mb) { const [bl, bu] = parts(mb[1]); boton = E.button(bl || "Elegir", bu || "").replace("margin:6px 0 20px", "margin:14px 0 0"); }
+      const pad = `padding:0 ${i < n - 1 ? 6 : 0}px 0 ${i > 0 ? 6 : 0}px;`;
+      return `<td class="col" width="${w}%" valign="top" style="width:${w}%;vertical-align:top;${pad}">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+              <td class="box" valign="top" style="background:#f0f0fb;border-radius:12px;padding:18px;vertical-align:top;">
+                <div class="lt" style="font-size:16px;line-height:1.35;font-weight:700;color:#0b013c;">${inline(tit)}</div>${cuerpo ? `
+                <div class="ls" style="margin-top:6px;font-size:14px;line-height:1.55;color:#4f5157;">${inline(cuerpo)}</div>` : ""}${boton}
+              </td>
+            </tr></table>
+          </td>`;
+    };
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0;table-layout:fixed;">
+        <tr>${cols.map(celda).join("")}</tr>
+      </table>`;
+  },
   // «Título | texto»: el título va en navy y negrita; el resto, como texto normal dentro del mismo recuadro.
   destacado: t => {
     t = String(t);
@@ -864,6 +902,7 @@ const TPL = `<!DOCTYPE html>
     .padf{padding:26px 22px !important;}
     .h1{font-size:24px !important;}
     .h2{font-size:17px !important;}
+    .col{display:block !important;width:100% !important;padding:0 0 12px 0 !important;}
     .hi{font-size:18px !important;}
     .v{font-size:28px !important;}
     .tl-t{font-size:11px !important;padding:6px 2px 0 !important;}
@@ -925,7 +964,8 @@ const KEYS = {
   "titulo": "titulo", "subtitulo": "sub", "dato": "dato", "recuadro": "dato", "dato clave": "dato",
   "linea de tiempo": "linea", "etapas": "linea", "boton": "boton", "nota": "nota",
   "pasos": "pasos", "firma": "firma", "parrafo": "parrafo",
-  "destacado": "destacado", "destacar": "destacado", "cuadro destacado": "destacado", "recuadro destacado": "destacado"
+  "destacado": "destacado", "destacar": "destacado", "cuadro destacado": "destacado", "recuadro destacado": "destacado",
+  "paralelo": "paralelo", "cuadro paralelo": "paralelo"
 };
 const parts = v => v.split("|").map(s => s.trim());
 
@@ -946,6 +986,7 @@ function parse(src) {
       else if (key === "asunto") d.asunto = v;
       else if (key === "pre") d.pre = v;
       else if (key === "titulo") { if (d.titulo) { if (v) d.blocks.push({ k: "sub", t: v }); } else d.titulo = v; }
+      else if (key === "paralelo") { const cols = v.split(/\s*\|\|\|\s*/).filter(Boolean); if (cols.length) d.blocks.push({ k: "paralelo", cols }); }
       else if (key === "sub") { if (v) d.blocks.push({ k: "sub", t: v }); }
       else if (key === "parrafo") { if (v) d.blocks.push({ k: "p", t: v }); }
       else if (key === "destacado" || (key === "dato" && !v.includes("|"))) { if (v) d.blocks.push({ k: "destacado", t: v }); }
@@ -989,6 +1030,7 @@ const ACCIONES = [
 const tipoMarca = inner => {
   const n = norm(inner);
   if (/^(linea de tiempo|linea del tiempo|timeline|etapas)\b/.test(n)) return "Línea de tiempo";
+  if (/^(cuadros? paralelos?|paralelo|comparar|comparacion)\b/.test(n)) return "Paralelo";
   if (/destac|cuadro/.test(n)) return "Destacado";
   if (/^(boton|button|cta)\b/.test(n)) return "Botón";
   if (/^(sub ?titulo|subtitle|bajada)\b/.test(n)) return "Subtítulo";
@@ -1015,7 +1057,11 @@ const etapasLinea = t => {
     .replace(/\s*(\*|\((?:aqu[ií]|actual|hoy|estamos aqu[ií])\)|←.*|<-.*)\s*$/i, "*").trim())
     .filter(x => x && x !== "*").slice(0, 8).join(" | ");
 };
+// Cuadro paralelo: opciones lado a lado, separadas por una línea «---». Cada una es como un recuadro (título, texto y botón).
+const opcionesParalelo = t => t.replace(/^\s*paralelo\s*:\s*/i, "").split(/^\s*-{3,}\s*$/m)
+  .map(c => c.trim() ? recuadroConBoton(c) : "").filter(Boolean).slice(0, 3).join(" ||| ");
 const lineaMarca = (k, t) => {
+  if (k === "Paralelo") return `\n\nParalelo: ${opcionesParalelo(t)}\n\n`;
   if (k === "Destacado") return `\n\nDestacado: ${partirDestacado(t)}\n\n`;
   if (k === "Línea de tiempo") return `\n\nLínea de tiempo: ${etapasLinea(t)}\n\n`;
   t = t.replace(/\s*\n\s*/g, " ").replace(/^(destacado|boton|botón|titulo|título)\s*:\s*/i, "").trim();
@@ -1039,7 +1085,7 @@ function recuadroConBoton(contenido) {
   return partirDestacado(resto) + (btn !== null ? ` [Botón: ${btn}]` : "");
 }
 function cerrarRecuadros(out) {
-  for (const K of ["Destacado", "Línea de tiempo"]) {
+  for (const K of ["Paralelo", "Destacado", "Línea de tiempo"]) {
     const ms = [...out.matchAll(/\{\{([^}]*)\}\}/g)]
       .filter(m => tipoMarca(m[1].replace(/^\s*\//, "")) === K)
       .map(m => ({ i: m.index, end: m.index + m[0].length, cierre: !out.slice(m.index + m[0].length).match(/^[^\n]*/)[0].trim() }));
@@ -1047,7 +1093,7 @@ function cerrarRecuadros(out) {
     for (let k = 0; k < ms.length - 1; k++) {
       if (ms[k + 1].cierre) { pares.push([ms[k], ms[k + 1]]); k++; }
     }
-    const armar = c => K === "Destacado" ? recuadroConBoton(c) : etapasLinea(c);
+    const armar = c => K === "Destacado" ? recuadroConBoton(c) : K === "Paralelo" ? opcionesParalelo(c) : etapasLinea(c);
     for (const [a, b] of pares.reverse())
       out = out.slice(0, a.i) + `\n\n${K}: ${armar(out.slice(a.end, b.i))}\n\n` + out.slice(b.end);
   }
@@ -1056,7 +1102,7 @@ function cerrarRecuadros(out) {
 // El saludo lo pone la plantilla: si alguien lo escribe igual al comienzo, se quita.
 const sinSaludo = t => t.replace(/^\s*(hola|estimad[oa]s?|querid[oa])\b[^\n]{0,40}?(\{\{[^}]*\}\}|[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\s*[:,!]?[ \t]*(\n|$)/i, "");
 // Marcas mal escritas: {cuadro destacado}, [botón], {{{título}}}, (( … )) → {{…}}
-const normalizarMarcas = t => t.replace(/[\[{(]{1,3}\s*(\/?\s*(?:l[ií]nea de tiempo|subt[ií]tulo|cuadro destacado|recuadro destacado|cuadro|destacar|destacado|bot[oó]n|t[ií]tulo))\s*[\]})]{1,3}/gi,
+const normalizarMarcas = t => t.replace(/[\[{(]{1,3}\s*(\/?\s*(?:l[ií]nea de tiempo|subt[ií]tulo|cuadros? paralelos?|cuadro destacado|recuadro destacado|cuadro|destacar|destacado|bot[oó]n|t[ií]tulo))\s*[\]})]{1,3}/gi,
   (m, a) => `{{${a.replace(/\s+/g, " ").trim()}}}`);
 function marcarDestacados(src) {
   let out = cerrarRecuadros(normalizarMarcas(sinSaludo(src.replace(/\r/g, ""))));
@@ -1078,7 +1124,7 @@ function marcarDestacados(src) {
     }
     let k = null;
     const line = raw.replace(/\{\{([^}]*)\}\}/g, (m, a) => tipoMarca(a) ? (k = k || tipoMarca(a), "") : m).trim();
-    if ((k === "Destacado" || k === "Línea de tiempo") && !line) { bloque = []; bloqueK = k; continue; }
+    if ((k === "Destacado" || k === "Línea de tiempo" || k === "Paralelo") && !line) { bloque = []; bloqueK = k; continue; }
     if (k && !line) { pendiente = k; continue; }
     if (pendiente && line && !k) { k = pendiente; pendiente = null; }
     if (k && line) res.push(lineaMarca(k, line));
@@ -1098,6 +1144,8 @@ function basico(src) {
   let titulo = "";
   const botones = [], dests = [], subs = [], lineas = [];
   src = src.split("\n").map(l => {
+    const pa = l.match(/^\s*paralelo\s*:\s*(.*)$/i);
+    if (pa) { const b = parse(l.trim()).blocks[0]; if (!b) return ""; lineas.push(b); return `@@LINEA${lineas.length - 1}@@`; }
     const ln = l.match(/^\s*l[ií]nea de tiempo\s*:\s*(.*)$/i);
     if (ln) { const b = parse("Línea de tiempo: " + ln[1]).blocks[0]; if (!b || !b.items.length) return ""; lineas.push(b); return `@@LINEA${lineas.length - 1}@@`; }
     const ds = l.match(/^\s*destacado\s*:\s*(.*)$/i);
@@ -1131,10 +1179,10 @@ function basico(src) {
       : esBtn(t) ? botones[nro(t)]
       : /^@@SUB\d+@@$/.test(t) ? { k: "sub", t: subs[nro(t)] }
       : /^@@LINEA\d+@@$/.test(t) ? lineas[nro(t)] : { k: "p", t }) };
-  if (lineas.length) d.tipo = "hito";
+  if (lineas.some(b => b.k === "linea")) d.tipo = "hito";
   const acc = ACCIONES.find(([r]) => r.test(norm(src)));
-  if (acc && !lineas.length) d.tipo = "cta";
-  const botonEnRecuadro = dests.some(x => /\[\s*bot[oó]n\s*:/i.test(x));
+  if (acc && !lineas.some(b => b.k === "linea")) d.tipo = "cta";
+  const botonEnRecuadro = dests.some(x => /\[\s*bot[oó]n\s*:/i.test(x)) || lineas.some(b => b.k === "paralelo" && b.cols.some(c => /\[\s*bot[oó]n\s*:/i.test(c)));
   if (!botones.length && !botonEnRecuadro && (url || acc)) d.blocks.push({ k: "boton", t: acc ? acc[1] : "Ver mi caso", u: url || "" });
   d.blocks.push({ k: "firma" });
   return completarBotones(d, src);
@@ -1161,6 +1209,7 @@ function bodyHtml(d) {
     else if (b.k === "sub" && b.t) out.push(E.sub(b.t));
     else if (b.k === "dato") out.push(E.box(b.r, b.v, b.m));
     else if (b.k === "destacado" && b.t) out.push(E.destacado(b.t));
+    else if (b.k === "paralelo" && b.cols.length) out.push(E.paralelo(b.cols));
     else if (b.k === "boton" && b.t) out.push(E.button(b.t, b.u));
     else if (b.k === "nota" && b.t) out.push(E.note(b.t));
     else if (b.k === "firma") out.push(E.sign());
@@ -1210,7 +1259,7 @@ Botón: Texto del botón | link   (OBLIGATORIO cuando el cliente tiene que hacer
 Nota: (opcional, texto chico)
 Firma   (opcional: agrega «Tu equipo Lexy»)
 
-Si el texto trae líneas «Subtítulo:», mantenlas como «Subtítulo:» en su lugar. Si el texto trae varias líneas «Título:», la primera es el título y las demás son subtítulos: déjalas como líneas «Título:» en su lugar. Si trae una línea «Línea de tiempo:», mantenla igual (mismas etapas y el * en la actual). Si el texto trae una línea «Título:», ese es el título: úsalo tal cual y solo agrégale los *asteriscos*. Si trae una línea «Botón:», el correo lleva ese botón con ese texto y ese link (si viene sin texto, ponle uno según la acción; si viene sin link, FALTA_LINK).
+Si el texto trae líneas «Subtítulo:», mantenlas como «Subtítulo:» en su lugar. Si el texto trae varias líneas «Título:», la primera es el título y las demás son subtítulos: déjalas como líneas «Título:» en su lugar. Si trae una línea «Paralelo:», mantenla igual, con sus opciones separadas por « ||| » (puedes pulir la redacción). Si trae una línea «Línea de tiempo:», mantenla igual (mismas etapas y el * en la actual). Si el texto trae una línea «Título:», ese es el título: úsalo tal cual y solo agrégale los *asteriscos*. Si trae una línea «Botón:», el correo lleva ese botón con ese texto y ese link (si viene sin texto, ponle uno según la acción; si viene sin link, FALTA_LINK).
 
 Texto del correo:
 ${texto}`;
@@ -1745,8 +1794,8 @@ vivoAhora();
 function puntoInsercion(v, pos, m) {
   const fin = v.indexOf("\n", pos);
   pos = fin < 0 ? v.length : fin + 1;
-  for (const [rx, K] of [[/\{\{\s*l[ií]nea de tiempo\s*\}\}/gi, "linea"], [/\{\{\s*(?:cuadro destacado|recuadro destacado|destacar)\s*\}\}/gi, "cuadro"]]) {
-    if (m === "boton" && K === "cuadro") continue;
+  for (const [rx, K] of [[/\{\{\s*cuadros? paralelos?\s*\}\}/gi, "paralelo"], [/\{\{\s*l[ií]nea de tiempo\s*\}\}/gi, "linea"], [/\{\{\s*(?:cuadro destacado|recuadro destacado|destacar)\s*\}\}/gi, "cuadro"]]) {
+    if (m === "boton" && (K === "cuadro" || K === "paralelo")) continue;
     const marcas = [...v.matchAll(rx)].map(x => x.index);
     const antes = marcas.filter(x => x < pos);
     if (antes.length % 2 === 1) {
@@ -1772,6 +1821,7 @@ document.querySelectorAll(".marca").forEach(b => b.onclick = () => {
     : m === "cuadro" ? `${nl}{{cuadro destacado}}\n${sel || "⟦Escribe aquí el título del recuadro⟧\nEscribe aquí el texto del recuadro"}\n{{cuadro destacado}}\n`
     : m === "titulo" ? `${nl}{{título}} ${sel || "⟦Escribe aquí el título⟧"}\n`
     : m === "subtitulo" ? `${nl}{{subtítulo}} ${sel || "⟦Escribe aquí el subtítulo⟧"}\n`
+    : m === "paralelo" ? `${nl}{{cuadro paralelo}}\n${sel || "⟦Escribe aquí el título de la opción 1⟧\nEscribe aquí el texto de la opción 1\n{{botón}} Escribe aquí el texto del botón | Pega aquí el link\n---\nEscribe aquí el título de la opción 2\nEscribe aquí el texto de la opción 2\n{{botón}} Escribe aquí el texto del botón | Pega aquí el link"}\n{{cuadro paralelo}}\n`
     : m === "linea" ? `${nl}{{línea de tiempo}}\n${sel || "⟦Escribe aquí la etapa 1⟧\nEscribe aquí la etapa 2 *\nEscribe aquí la etapa 3"}\n{{línea de tiempo}}\n`
     : `${nl}{{botón}} ${sel || "⟦Escribe aquí el texto del botón⟧ | Pega aquí el link"}\n`;
   const a0 = ins.indexOf("⟦"), a1 = ins.indexOf("⟧") - 1;
@@ -1842,6 +1892,11 @@ $("disenar").onclick = async () => {
           if (bPedidos[0].u) bC[0].u = bPedidos[0].u;
         }
         completarBotones(d, marcado);
+      }
+      const pPedido = parse(marcado).blocks.find(b => b.k === "paralelo");
+      if (pPedido && !d.blocks.some(b => b.k === "paralelo")) {
+        const iF = d.blocks.findIndex(b => b.k === "firma");
+        d.blocks.splice(iF < 0 ? d.blocks.length : iF, 0, pPedido);
       }
       const lPedida = parse(marcado).blocks.find(b => b.k === "linea");
       if (lPedida && !d.blocks.some(b => b.k === "linea")) {
