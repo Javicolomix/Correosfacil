@@ -95,7 +95,7 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .saludo small{font-size:12px;color:var(--muted);background:var(--soft);padding:3px 9px;border-radius:999px}
 /* Resaltado de marcas: el texto real va en el textarea (transparente) y debajo se dibuja una copia con colores. */
 .ta-wrap{position:relative}
-#texto,.ta-bg{font-family:var(--font);font-size:17px;line-height:1.6;padding:8px 36px 16px 18px;letter-spacing:normal;word-spacing:normal;tab-size:4;
+#texto,.ta-bg{font-family:var(--font);font-size:17px;line-height:1.6;padding:8px 60px 16px 18px;letter-spacing:normal;word-spacing:normal;tab-size:4;
   white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;box-sizing:border-box}
 #texto{position:relative;display:block;width:100%;min-height:240px;border:0;border-radius:0 0 12px 12px;background:transparent;color:transparent;caret-color:#2f2f2f}
 #texto::placeholder{color:#9a9ca5}
@@ -110,7 +110,11 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .ta-bg .blq.del-hl{background-color:#fde8e8;border-radius:6px}
 .ta-x{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .ta-x button{position:absolute;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:#ecebf3;color:#6b6880;font:700 13px/20px Arial,sans-serif;text-align:center;cursor:pointer;pointer-events:auto;opacity:.8;transition:background .12s,color .12s}
-.ta-x button:hover,.ta-x button:focus-visible{background:#c62f3a;color:#fff;opacity:1;outline:none}
+.ta-x .tx-del:hover,.ta-x .tx-del:focus-visible{background:#c62f3a;color:#fff;opacity:1;outline:none}
+.ta-x .tx-mv{cursor:grab;font-size:12px;letter-spacing:-1px}
+.ta-x .tx-mv:hover{background:#27198E;color:#fff;opacity:1}
+.ta-x .tx-drop{position:absolute;left:12px;right:12px;height:3px;border-radius:2px;background:#4429cc;display:none;pointer-events:none}
+.ta-bg .blq.mv-hl{background-color:#ecebfd;border-radius:6px}
 .ta-bg .blq.sep{background-image:linear-gradient(to right,#e8b77f 55%,transparent 0);background-size:9px 1.5px;background-repeat:repeat-x;background-position:0 0}
 .leyenda{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
 .leyenda i{font-style:normal;border-radius:4px;padding:0 4px}
@@ -433,7 +437,7 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
         <div class="ta-x" id="texto-x"></div>
       </div>
     </div>
-    <div class="limpiar-row"><span class="leyenda"><span><i class="lm">{{marca}}</i> no se borra</span><span><i class="lp">Escribe aquí…</i> reemplázalo por tu texto</span><span><i class="lx">×</i> borra el bloque</span></span><span id="limpiar-msg" role="status"></span><button type="button" class="limpiar" id="limpiar" title="Borra todo el texto (el saludo se mantiene)">Limpiar</button></div>
+    <div class="limpiar-row"><span class="leyenda"><span><i class="lm">{{marca}}</i> no se borra</span><span><i class="lp">Escribe aquí…</i> reemplázalo por tu texto</span><span><i class="lx">⠿</i> arrastra para mover</span><span><i class="lx">×</i> borra el bloque</span></span><span id="limpiar-msg" role="status"></span><button type="button" class="limpiar" id="limpiar" title="Borra todo el texto (el saludo se mantiene)">Limpiar</button></div>
     <div class="agregar" id="texto-tip">
       <div class="ag-row">
         <span class="ag-t">Agregar</span>
@@ -1503,9 +1507,16 @@ const EDIT_CSS = `[contenteditable]{cursor:text;border-radius:4px;transition:out
 .edit-sel{outline:1.5px dashed #e05a5a !important;outline-offset:4px;border-radius:6px}
 .tl-d{cursor:pointer}.tl-d:hover{outline:2px solid #9d90fc;outline-offset:2px}
 .edit-emo{outline:2px solid #27198E !important;outline-offset:3px}
-#edit-ui-del{position:absolute;z-index:9;display:none;align-items:center;gap:4px;height:26px;padding:0 9px 0 7px;border:0;border-radius:13px;
-  background:#c62f3a;color:#fff;font:700 12px/1 Tahoma,Arial,sans-serif;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.25)}
-#edit-ui-del:hover{background:#a3222c}
+#edit-ui-bar{position:absolute;z-index:9;display:none;gap:4px;align-items:center}
+#edit-ui-bar button{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 9px;border:0;border-radius:13px;
+  background:#27198E;color:#fff;font:700 12px/1 Tahoma,Arial,sans-serif;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+#edit-ui-bar button:hover{background:#0b013c}
+#edit-ui-bar .mv{padding:0 8px;font-size:13px}
+#edit-ui-bar .drag{cursor:grab;letter-spacing:-1px}
+#edit-ui-del{background:#c62f3a !important;padding:0 9px 0 7px !important}
+#edit-ui-del:hover{background:#a3222c !important}
+#edit-ui-drop{position:absolute;z-index:8;display:none;height:3px;border-radius:2px;background:#4429cc;box-shadow:0 0 0 2px rgba(68,41,204,.2);pointer-events:none}
+.edit-drag{opacity:.45}
 #edit-ui-rsz{position:absolute;z-index:9;display:none;place-items:center;width:20px;height:20px;border-radius:5px;background:#27198E;color:#fff;font-size:11px;line-height:1;cursor:nwse-resize;user-select:none;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 #edit-ui-del svg{width:13px;height:13px}`;
 
@@ -1518,7 +1529,8 @@ function previewHtml(h) {
 function exportHtml() {
   if (!doc) return "";
   const root = doc.documentElement.cloneNode(true);
-  root.querySelectorAll("#edit-ui, #edit-ui-del, #edit-ui-rsz").forEach(n => n.remove());
+  root.querySelectorAll("#edit-ui, #edit-ui-bar, #edit-ui-del, #edit-ui-rsz, #edit-ui-drop").forEach(n => n.remove());
+  root.querySelectorAll(".edit-drag").forEach(n => { n.classList.remove("edit-drag"); if (!n.className) n.removeAttribute("class"); });
   root.querySelectorAll("[data-bg], [data-bc]").forEach(n => { n.removeAttribute("data-bg"); n.removeAttribute("data-bc"); });
   root.querySelectorAll(".edit-sel, .edit-emo").forEach(n => { n.classList.remove("edit-sel", "edit-emo"); if (!n.className) n.removeAttribute("class"); });
   root.querySelectorAll("[contenteditable]").forEach(n => { n.removeAttribute("contenteditable"); n.removeAttribute("spellcheck"); });
@@ -1622,46 +1634,89 @@ $("asunto").addEventListener("input", () => { if (!doc) return; doc.title = $("a
 // Bloques: todo lo que va directo en el cuerpo, y el botón que va dentro de un recuadro.
 function activarBorrar(d) {
   if (!d.querySelector("td.pad")) return;
-  const del = d.createElement("button");
-  del.id = "edit-ui-del"; del.type = "button"; del.title = "Eliminar esta sección";
-  del.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Eliminar';
-  d.body.appendChild(del);
-  let actual = null;
+  // Barra al pasar el mouse por un bloque: ⠿ arrastrar, ↑ ↓ mover y Eliminar.
+  const bar = d.createElement("div");
+  bar.id = "edit-ui-bar";
+  bar.innerHTML = '<button type="button" class="drag" data-a="drag" title="Arrastra para mover esta sección">⠿ Mover</button>'
+    + '<button type="button" class="mv" data-a="up" title="Subir">↑</button><button type="button" class="mv" data-a="down" title="Bajar">↓</button>'
+    + '<button type="button" id="edit-ui-del" data-a="del" title="Eliminar esta sección"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Eliminar</button>';
+  const drop = d.createElement("div");
+  drop.id = "edit-ui-drop";
+  d.body.append(bar, drop);
+  let actual = null, arrastre = null;
+  const cuerpo = () => d.querySelector("td.pad");
   const bloque = el => {
-    const cuerpo = d.querySelector("td.pad");
-    if (!el || !cuerpo || !cuerpo.contains(el) || el === cuerpo) return null;
+    const c = cuerpo();
+    if (!el || !c || !c.contains(el) || el === c) return null;
     const et = el.closest(".tl-e");
     if (et) return et;
     const enRecuadro = el.closest("td.box table");
     if (enRecuadro && enRecuadro.querySelector(".btn")) return enRecuadro;
-    while (el.parentElement && el.parentElement !== cuerpo) el = el.parentElement;
-    return el.parentElement === cuerpo ? el : null;
+    while (el.parentElement && el.parentElement !== c) el = el.parentElement;
+    return el.parentElement === c ? el : null;
   };
   const mostrar = b => {
-    if (actual === b) return;
+    if (arrastre || actual === b) return;
     if (actual) actual.classList.remove("edit-sel");
     actual = b;
-    if (!b) { del.style.display = "none"; return; }
+    if (!b) { bar.style.display = "none"; return; }
     b.classList.add("edit-sel");
+    const movible = b.parentElement === cuerpo();
+    bar.querySelectorAll(".drag, .mv").forEach(x => x.style.display = movible ? "" : "none");
     const r = b.getBoundingClientRect(), w = d.defaultView;
-    del.style.display = "inline-flex";
-    del.style.top = (r.top + w.scrollY - 13) + "px";
-    del.style.left = (r.right + w.scrollX - del.offsetWidth + 6) + "px";
+    bar.style.display = "inline-flex";
+    bar.style.top = (r.top + w.scrollY - 13) + "px";
+    bar.style.left = (r.right + w.scrollX - bar.offsetWidth + 6) + "px";
   };
-  d.addEventListener("mouseover", e => { if (e.target.closest("#edit-ui-del")) return; mostrar(bloque(e.target)); });
-  d.addEventListener("mouseleave", () => mostrar(null));
-  // En celular / touch: tocar un bloque lo selecciona.
-  d.addEventListener("touchstart", e => { if (!e.target.closest("#edit-ui-del")) mostrar(bloque(e.target)); }, { passive: true });
-  del.addEventListener("mousedown", e => e.preventDefault());
-  del.addEventListener("click", e => {
+  const refrescar = () => { const b = actual; actual = null; mostrar(b); };
+  d.addEventListener("mouseover", e => { if (e.target.closest("#edit-ui-bar")) return; mostrar(bloque(e.target)); });
+  d.addEventListener("mouseleave", () => { if (!arrastre) mostrar(null); });
+  d.addEventListener("touchstart", e => { if (!e.target.closest("#edit-ui-bar")) mostrar(bloque(e.target)); }, { passive: true });
+  bar.addEventListener("mousedown", e => e.preventDefault());
+  bar.addEventListener("click", e => {
+    const btn = e.target.closest("button"); if (!btn || !actual) return;
     e.preventDefault(); e.stopPropagation();
-    if (!actual) return;
-    const b = actual; mostrar(null);
-    guardar("borrar");
-    b.remove();
-    trasCambio();
-    avisoBorrado();
+    const b = actual, a = btn.dataset.a;
+    if (a === "del") { mostrar(null); guardar("borrar"); b.remove(); trasCambio(); avisoBorrado(); return; }
+    if (a === "up" && b.previousElementSibling) { guardar("mover"); b.parentElement.insertBefore(b, b.previousElementSibling); trasCambio(); refrescar(); }
+    if (a === "down" && b.nextElementSibling) { guardar("mover"); b.parentElement.insertBefore(b.nextElementSibling, b); trasCambio(); refrescar(); }
   });
+  // Arrastrar: se muestra una línea morada donde va a quedar la sección.
+  const destino = y => {
+    const hijos = [...cuerpo().children].filter(x => x !== arrastre.b);
+    return hijos.find(x => { const r = x.getBoundingClientRect(); return y < r.top + r.height / 2; }) || null;
+  };
+  bar.querySelector(".drag").addEventListener("pointerdown", e => {
+    if (!actual || actual.parentElement !== cuerpo()) return;
+    e.preventDefault();
+    arrastre = { b: actual, antes: undefined };
+    actual.classList.add("edit-drag");
+    bar.style.display = "none";
+  });
+  d.addEventListener("pointermove", e => {
+    if (!arrastre) return;
+    const c = cuerpo(), sig = destino(e.clientY), w = d.defaultView;
+    arrastre.antes = sig;
+    const rc = c.getBoundingClientRect();
+    let top;
+    if (sig) top = sig.getBoundingClientRect().top - 6;
+    else { const ult = [...c.children].filter(x => x !== arrastre.b).pop(); top = ult ? ult.getBoundingClientRect().bottom + 3 : rc.top; }
+    const pad = parseFloat(w.getComputedStyle(c).paddingLeft) || 0;
+    Object.assign(drop.style, { display: "block", top: (top + w.scrollY) + "px", left: (rc.left + pad + w.scrollX) + "px", width: (rc.width - 2 * pad) + "px" });
+  });
+  const soltar = () => {
+    if (!arrastre) return;
+    const { b, antes } = arrastre;
+    arrastre = null; drop.style.display = "none"; b.classList.remove("edit-drag");
+    if (antes !== undefined && antes !== b.nextElementSibling) {
+      guardar("mover");
+      b.parentElement.insertBefore(b, antes);
+      trasCambio();
+    }
+    actual = null; mostrar(null);
+  };
+  d.addEventListener("pointerup", soltar);
+  d.addEventListener("pointercancel", soltar);
 }
 
 // Deshacer en el paso 2: Ctrl+Z / ⌘Z deshace cualquier cambio sobre el correo (texto, formato, colores, tamaño,
@@ -2109,12 +2164,52 @@ function ponerEquis() {
   cap.innerHTML = [...bg.querySelectorAll(".blq")].map(b => {
     const top = b.offsetTop - ta.scrollTop + 3;
     if (top < -10 || top > ta.clientHeight - 14) return "";
-    return `<button type="button" data-i="${b.dataset.i}" title="Borrar este bloque completo" aria-label="Borrar este bloque" style="top:${top}px;right:${der}px">×</button>`;
-  }).join("");
+    return `<button type="button" class="tx-mv" data-i="${b.dataset.i}" title="Arrastra para mover este bloque" aria-label="Mover este bloque" style="top:${top}px;right:${der + 24}px">⠿</button>`
+      + `<button type="button" class="tx-del" data-i="${b.dataset.i}" title="Borrar este bloque completo" aria-label="Borrar este bloque" style="top:${top}px;right:${der}px">×</button>`;
+  }).join("") + '<div class="tx-drop" id="tx-drop"></div>';
 }
+// Mover bloques en el texto: se arrastra el ⠿ y se suelta donde se quiere (línea morada).
+function moverBloque(de, a) {
+  const lineas = $("texto").value.split("\n");
+  const partes = rangos.map(([j, k]) => lineas.slice(j, k + 1).join("\n"));
+  if (de === a || de + 1 === a) return;
+  const [p] = partes.splice(de, 1);
+  partes.splice(a > de ? a - 1 : a, 0, p);
+  escribirEnTexto(partes.join("\n\n") + "\n", 0, $("texto").value.length);
+}
+let txArr = null;
+$("texto-x").addEventListener("pointerdown", e => {
+  const b = e.target.closest(".tx-mv"); if (!b) return;
+  e.preventDefault();
+  txArr = { de: +b.dataset.i, a: null };
+  const blq = $("texto-bg").querySelector(`.blq[data-i="${b.dataset.i}"]`); if (blq) blq.classList.add("mv-hl");
+  document.body.style.cursor = "grabbing";
+});
+document.addEventListener("pointermove", e => {
+  if (!txArr) return;
+  const ta = $("texto"), r = ta.getBoundingClientRect(), y = e.clientY - r.top;
+  const blqs = [...$("texto-bg").querySelectorAll(".blq")];
+  let a = blqs.length, top = null;
+  for (const [n, b] of blqs.entries()) {
+    const t = b.offsetTop - ta.scrollTop;
+    if (y < t + b.offsetHeight / 2) { a = n; top = t; break; }
+  }
+  if (top === null) { const u = blqs[blqs.length - 1]; top = u ? u.offsetTop - ta.scrollTop + u.offsetHeight : 0; }
+  txArr.a = a;
+  const dl = $("tx-drop");
+  if (dl) Object.assign(dl.style, { display: "block", top: Math.max(0, top - 2) + "px" });
+});
+document.addEventListener("pointerup", () => {
+  if (!txArr) return;
+  const { de, a } = txArr; txArr = null;
+  document.body.style.cursor = "";
+  $("texto-bg").querySelectorAll(".mv-hl").forEach(x => x.classList.remove("mv-hl"));
+  const dl = $("tx-drop"); if (dl) dl.style.display = "none";
+  if (a !== null) moverBloque(de, a);
+});
 $("texto-x").addEventListener("mousedown", e => e.preventDefault());
 $("texto-x").addEventListener("mouseover", e => {
-  const b = e.target.closest("button"); if (!b) return;
+  const b = e.target.closest(".tx-del"); if (!b) return;
   const blq = $("texto-bg").querySelector(`.blq[data-i="${b.dataset.i}"]`); if (blq) blq.classList.add("del-hl");
 });
 $("texto-x").addEventListener("mouseout", e => {
@@ -2122,7 +2217,7 @@ $("texto-x").addEventListener("mouseout", e => {
   $("texto-bg").querySelectorAll(".del-hl").forEach(x => x.classList.remove("del-hl"));
 });
 $("texto-x").addEventListener("click", e => {
-  const b = e.target.closest("button"); if (!b) return;
+  const b = e.target.closest(".tx-del"); if (!b) return;
   const r = rangos[+b.dataset.i]; if (!r) return;
   const v = $("texto").value, lineas = v.split("\n"), n = lineas.length, [j, k] = r;
   const ini = j ? lineas.slice(0, j).join("\n").length + 1 : 0;
