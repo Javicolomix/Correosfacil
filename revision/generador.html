@@ -720,22 +720,46 @@ const TIPOS = {
   }
 };
 
-const EJEMPLO = `{{título}} El tribunal declaró admisible tu solicitud de liquidación
+const EJEMPLO = `{{título}} El tribunal declaró admisible tu *solicitud de liquidación*
 
-Antes ya habíamos presentado la solicitud. Ahora se publica en el Boletín Concursal y se designa al liquidador, lo que toma unos 30 días hábiles; después viene la resolución de liquidación.
+{{subtítulo}} ¿Qué significa esto para ti?
+
+Es un paso importante: el tribunal revisó tu solicitud y la aceptó. Ahora se publica en el Boletín Concursal y se designa al liquidador, lo que toma unos 30 días hábiles.
 
 {{línea de tiempo}}
 Solicitud presentada
 Admisibilidad *
 Publicación en el Boletín
-Liquidación
+Resolución de liquidación
 {{línea de tiempo}}
 
+{{subtítulo}} El detalle de tu plan de pago
+
+{{tabla}}
+Concepto | Monto
+Cuota 4 de 12 | $89.900
+Gastos de tramitación | $0
+Total del mes | $89.900
+{{tabla}}
+
+Puedes elegir cómo pagar:
+
+{{cuadro paralelo}}
+Cuota mensual
+$89.900 al mes, hasta el 10 de cada mes.
+{{botón}} Pagar cuota | https://lexy.cl/
+---
+Pago total
+$719.200 de una vez, sin preocuparte más.
+{{botón}} Pagar total | https://lexy.cl/
+{{cuadro paralelo}}
+
 {{cuadro destacado}}
-No tienes que hacer nada por ahora
-Te avisaremos por este medio apenas el tribunal dicte la resolución de liquidación. Mientras, puedes revisar el detalle de tu proceso.
-{{botón}} Ver mi proceso https://lexy.cl/
-{{cuadro destacado}}`;
+No tienes que hacer nada más por ahora
+Te avisaremos por este medio apenas el tribunal dicte la resolución de liquidación.
+{{cuadro destacado}}
+
+{{botón}} Ver mi caso | https://lexy.cl/`;
 
 /* ===================== Plantilla del correo (mismo diseño que build_emails.py) ===================== */
 const FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif";
