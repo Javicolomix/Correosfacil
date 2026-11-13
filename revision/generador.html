@@ -263,6 +263,10 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .te-navy i:first-child{background:#0b013c}.te-navy i:nth-child(2){background:#fff;border:1px solid #e3e1f3}.te-navy i:nth-child(3){background:#f8f7fe;border:1px solid #e3e1f3}
 .te-lav i:first-child{background:#f0f0fb}.te-lav i:nth-child(n+2){background:#fff;border-bottom:1px solid #e3e3e8}
 .te-lin i:first-child{background:#fff;border-bottom:2px solid #0b013c}.te-lin i:nth-child(n+2){background:#fff;border-bottom:1px solid #e3e3e8}
+.forma{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.forma button{display:grid;justify-items:center;gap:4px;padding:7px 4px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:12px;color:var(--navy);cursor:pointer}
+.forma button[aria-pressed="true"]{border-color:var(--btn);box-shadow:0 0 0 1px var(--btn)}
+.forma i{display:block;width:20px;height:20px;background:#d9d4fb}
 .emo-g{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:6px}
 .emo-g button{height:32px;border:1px solid transparent;border-radius:8px;background:#f7f7fb;font-size:17px;cursor:pointer;padding:0;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif}
 .emo-g button:hover{background:var(--soft);border-color:var(--lav)}
@@ -595,6 +599,14 @@ Liquidación
         <div class="fmt-sec" id="fmt-emo" hidden>
           <span class="lbl" id="fmt-emo-lbl">Emoji de la etapa</span>
           <div class="emo-g" id="emo-g" role="group" aria-label="Emoji de la etapa"></div>
+          <span class="lbl" style="margin-top:8px">Fondo del círculo <small style="font-weight:400;color:var(--muted)">(de la etapa elegida)</small></span>
+          <div class="sw" id="sw-emo" role="group" aria-label="Fondo del círculo"></div>
+          <span class="lbl" style="margin-top:8px">Forma <small style="font-weight:400;color:var(--muted)">(todas las etapas)</small></span>
+          <div class="forma" id="emo-forma" role="group" aria-label="Forma del fondo">
+            <button type="button" data-forma="circulo"><i style="border-radius:50%"></i>Círculo</button>
+            <button type="button" data-forma="cuadrado"><i style="border-radius:6px"></i>Cuadrado</button>
+            <button type="button" data-forma="nada"><i style="background:none;border:1px dashed #b9b6cc"></i>Sin fondo</button>
+          </div>
           <label class="rng" style="grid-template-columns:48px 1fr">Otro <input type="text" id="emo-own" maxlength="8" placeholder="Pega un emoji" style="width:100%;padding:5px 8px;border:1px solid var(--line);border-radius:8px"></label>
         </div>
         <div class="fmt-sec" id="fmt-tabla" hidden>
@@ -1089,6 +1101,7 @@ const TPL = `<!DOCTYPE html>
     .cur{border-color:#3b2f8f !important;}
     .tl-on{background:#9d90fc !important;}
     .tl-off{background:#2b2a32 !important;}
+    .tl-sin{background:transparent !important;border-color:transparent !important;}
     .btn{background:#9d90fc !important;}
     .btn a{color:#0b013c !important;}
     .foot{background:#0c0b0f !important;color:#8e8d98 !important;}
@@ -1492,6 +1505,7 @@ function exportHtml() {
   if (!doc) return "";
   const root = doc.documentElement.cloneNode(true);
   root.querySelectorAll("#edit-ui, #edit-ui-del, #edit-ui-rsz").forEach(n => n.remove());
+  root.querySelectorAll("[data-bg], [data-bc]").forEach(n => { n.removeAttribute("data-bg"); n.removeAttribute("data-bc"); });
   root.querySelectorAll(".edit-sel, .edit-emo").forEach(n => { n.classList.remove("edit-sel", "edit-emo"); if (!n.className) n.removeAttribute("class"); });
   root.querySelectorAll("[contenteditable]").forEach(n => { n.removeAttribute("contenteditable"); n.removeAttribute("spellcheck"); });
   let out = "<!DOCTYPE html>\n" + root.outerHTML + "\n";
@@ -1836,10 +1850,45 @@ function ponerEmoji(e) {
 }
 $("emo-g").querySelectorAll("button").forEach(b => { b.addEventListener("mousedown", e => e.preventDefault()); b.onclick = () => ponerEmoji(b.dataset.e); });
 $("emo-own").addEventListener("input", e => ponerEmoji(e.target.value));
+// Fondo (color) de la etapa elegida y forma (círculo, cuadrado o sin fondo) de todas las etapas de esa línea de tiempo.
+const PAL_EMO = [["#f0f0fb", "Lavanda"], ["#d9d4fb", "Lavanda fuerte"], ["#4429cc", "Morado Lexy"], ["#0b013c", "Navy"],
+  ["#e7f6ee", "Verde suave"], ["#fff6db", "Amarillo suave"], ["#fdecec", "Rojo suave"], ["#f4f4f6", "Gris"], ["#ffffff", "Blanco"]];
+swatches("sw-emo", PAL_EMO, ([c]) => {
+  if (!emoActivo || !doc.contains(emoActivo)) { fmtMsg("Primero haz clic en un círculo de la línea de tiempo.", true); return; }
+  guardar("color");
+  emoActivo.classList.remove("tl-sin");
+  emoActivo.style.background = c;
+  if (emoActivo.style.borderColor === "transparent") emoActivo.style.borderColor = emoActivo.dataset.bc || "#ffffff";
+  marcar("sw-emo", c);
+  syncAhora();
+});
+const lineaDe = dot => { let t = dot && dot.closest("table"); while (t && t.querySelectorAll(".tl-d").length < 2) t = t.parentElement.closest("table"); return t; };
+document.querySelectorAll("#emo-forma button").forEach(b => {
+  b.addEventListener("mousedown", e => e.preventDefault());
+  b.onclick = () => {
+    const base = emoActivo && doc.contains(emoActivo) ? emoActivo : doc.querySelector(".tl-d");
+    const linea = lineaDe(base);
+    if (!linea) return;
+    guardar("forma");
+    linea.querySelectorAll(".tl-d").forEach(d => {
+      const f = b.dataset.forma;
+      d.style.borderRadius = f === "cuadrado" ? "12px" : "50%";
+      d.classList.toggle("tl-sin", f === "nada");
+      if (f === "nada") {
+        if (d.style.background !== "transparent") { d.dataset.bg = d.style.background; d.dataset.bc = d.style.borderColor; }
+        d.style.background = "transparent"; d.style.borderColor = "transparent";
+      } else if (d.style.background === "transparent") { d.style.background = d.dataset.bg || "#f0f0fb"; d.style.borderColor = d.dataset.bc || "#ffffff"; }
+    });
+    revisarEmoji(); syncAhora();
+  };
+});
 function revisarEmoji() {
   const hay = doc && doc.querySelector(".tl-d");
   $("fmt-emo").hidden = !hay;
   if (!hay) return;
+  const base = emoActivo && doc.contains(emoActivo) ? emoActivo : hay;
+  const forma = base.classList.contains("tl-sin") ? "nada" : base.style.borderRadius === "12px" ? "cuadrado" : "circulo";
+  document.querySelectorAll("#emo-forma button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.forma === forma)));
   $("fmt-emo-lbl").textContent = emoActivo && doc.contains(emoActivo) ? "Emoji de la etapa (elige uno)" : "Emoji de la etapa: haz clic en un círculo de la línea de tiempo";
 }
 // Estilo de la tabla activa (la última en que se hizo clic, o la primera).
