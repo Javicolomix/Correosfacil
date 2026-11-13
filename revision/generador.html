@@ -1029,8 +1029,14 @@ const E = {
       `<td class="tc th" style="${TABLA[est].th(i, n)}text-align:${alin(i)};">${inline(c)}</td>`).join("");
     const tr = cuerpo.map((r, k) => {
       const total = /^(total|subtotal|saldo)/i.test(norm(r[0] || ""));
-      return "<tr>" + r.concat(Array(n - r.length).fill("")).map((c, i) =>
-        `<td class="tc row ${total ? "lt" : "txt"}" style="${TABLA[est].td(k, k === cuerpo.length - 1, total, i, n)}text-align:${alin(i)};">${inline(c)}</td>`).join("") + "</tr>";
+      // Fila «Total»: el monto siempre va en la última columna y alineado a la derecha.
+      let celdas = r.concat(Array(Math.max(0, n - r.length)).fill(""));
+      if (total) {
+        const montos = r.slice(1).filter(c => c.trim());
+        celdas = [r[0], ...Array(Math.max(0, n - 1 - montos.length)).fill(""), ...montos].slice(0, n);
+      }
+      return "<tr>" + celdas.map((c, i) =>
+        `<td class="tc row ${total ? "lt" : "txt"}" style="${TABLA[est].td(k, k === cuerpo.length - 1, total, i, n)}text-align:${total && i > 0 ? "right" : alin(i)};">${inline(c)}</td>`).join("") + "</tr>";
     }).join("\n          ");
     return `<table class="tabla" data-tabla="${est}" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="${TABLA[est].wrap}">
           <tr>${th}</tr>
@@ -1526,7 +1532,8 @@ function segPress(sel, attr, val) {
 
 /* ===================== Vista previa editable ===================== */
 const EDITABLE = "h1.h1, h2.h2, p.txt, div.tl-e, td.tc, div.k, td.k, div.v, div.m, div.lt, div.ls, div.em, div.tl-t, .btn a";
-const EDIT_CSS = `[contenteditable]{cursor:text;border-radius:4px;transition:outline-color .1s}
+const EDIT_CSS = `[contenteditable]{cursor:text;transition:outline-color .1s}
+[contenteditable]:not(td){border-radius:4px}
 [contenteditable]:hover{outline:1.5px dashed #9d90fc;outline-offset:3px}
 [contenteditable]:focus{outline:2px solid #27198E;outline-offset:3px}
 .edit-sel{outline:1.5px dashed #e05a5a !important;outline-offset:4px;border-radius:6px}
