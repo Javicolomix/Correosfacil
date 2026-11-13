@@ -804,7 +804,8 @@ const EMOJIS = [
   [/(termin|fin|cierre|listo|libre|extin|complet|exito)/, "🎉"], [/(inicio|bienven|comienz|empez|arranc)/, "🚀"],
   [/(nuev|vida|futuro)/, "🌱"]
 ];
-const EMOJI_RESERVA = ["📌", "⭐", "🧩", "🎯", "💡", "🧭", "🔑", "🏁", "📍", "✨"];
+// De reserva (cuando la etapa no dice nada reconocible): en tono jurídico, para que se vea serio desde el primer momento.
+const EMOJI_RESERVA = ["📄", "⚖️", "🏛️", "📝", "📜", "✍️", "🗂️", "🔍", "📅", "✅", "📌", "🏁"];
 function emojiEtapa(t, usados) {
   t = String(t || "").trim();
   const m = t.match(/^(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*)\s*/u);
