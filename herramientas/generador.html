@@ -612,7 +612,7 @@ Liquidación
           <button type="button" data-f="menos" title="Letra más chica">A<sup>−</sup></button>
           <button type="button" data-f="mas" title="Letra más grande">A<sup>+</sup></button>
         </div>
-        <p class="hint" id="fmt-hint">Selecciona un texto del correo y aprieta un botón.</p>
+        <p class="hint" id="fmt-hint">A− / A+: si seleccionas una parte, cambia solo esa; si no, cambia la línea donde está el cursor.</p>
         </div>
         <div class="fmt-sec" id="fmt-alin">
           <span class="lbl">Alineación</span>
@@ -1800,6 +1800,47 @@ function teclaDeshacer(e) {
 document.addEventListener("keydown", teclaDeshacer);
 /* ---- Formato: negrita, cursiva, tamaño y color del botón ---- */
 let ultimoEditable = null;
+// Tamaño de letra por partes: lo seleccionado, o la línea donde está el cursor (si el texto tiene varias líneas).
+// Si no hay selección ni varias líneas, devuelve false y se cambia el texto completo.
+function tamanoParcial(ed, delta) {
+  const sel = doc.getSelection(), w = doc.defaultView;
+  const r = sel && sel.rangeCount ? sel.getRangeAt(0) : null;
+  if (!r || !ed.contains(r.commonAncestorContainer)) return false;
+  const tam = el => parseFloat(w.getComputedStyle(el.nodeType === 1 ? el : el.parentElement).fontSize) || 16;
+  const lim = v => Math.max(10, Math.min(44, v));
+  const ajustar = sp => { sp.style.fontSize = lim(tam(sp) + delta) + "px"; sp.querySelectorAll("span").forEach(x => { if (x.style.fontSize) x.style.fontSize = ""; }); };
+  if (!r.collapsed) {
+    // ¿Ya es un trozo con tamaño propio y está seleccionado completo? Se ajusta ese mismo.
+    const anc = r.commonAncestorContainer.nodeType === 1 ? r.commonAncestorContainer : r.commonAncestorContainer.parentElement;
+    if (anc !== ed && anc.matches("span") && anc.style.fontSize && anc.textContent === r.toString()) { ajustar(anc); return true; }
+    const base = tam(r.startContainer);
+    const sp = doc.createElement("span");
+    sp.appendChild(r.extractContents());
+    r.insertNode(sp);
+    sp.style.fontSize = lim(base + delta) + "px";
+    sp.querySelectorAll("span").forEach(x => { if (x.style.fontSize) x.style.fontSize = ""; });
+    sel.removeAllRanges(); const nr = doc.createRange(); nr.selectNodeContents(sp); sel.addRange(nr);
+    return true;
+  }
+  if (!ed.querySelector("br")) return false;
+  let n = r.startContainer;
+  if (n === ed) n = ed.childNodes[Math.min(r.startOffset, ed.childNodes.length - 1)];
+  while (n && n.parentNode !== ed) n = n.parentNode;
+  if (!n) return false;
+  if (n.nodeName === "BR") n = n.previousSibling || n.nextSibling;
+  if (!n || n.nodeName === "BR") return false;
+  const linea = [n];
+  for (let p = n.previousSibling; p && p.nodeName !== "BR"; p = p.previousSibling) linea.unshift(p);
+  for (let q = n.nextSibling; q && q.nodeName !== "BR"; q = q.nextSibling) linea.push(q);
+  if (linea.length === 1 && linea[0].nodeType === 1 && linea[0].matches("span") && linea[0].style.fontSize) { ajustar(linea[0]); return true; }
+  const base = tam(linea[0]);
+  const sp = doc.createElement("span");
+  ed.insertBefore(sp, linea[0]);
+  linea.forEach(x => sp.appendChild(x));
+  sp.style.fontSize = lim(base + delta) + "px";
+  sp.querySelectorAll("span").forEach(x => { if (x.style.fontSize) x.style.fontSize = ""; });
+  return true;
+}
 const fmtMsg = (t, err) => { const h = $("fmt-hint"); h.textContent = t; h.style.color = err ? "#b42318" : ""; };
 document.querySelectorAll("#fmt button, #fmt label").forEach(b => b.addEventListener("mousedown", e => { if (b.tagName === "BUTTON") e.preventDefault(); }));
 function editableActual() {
@@ -1813,7 +1854,7 @@ function editableActual() {
 document.querySelectorAll("#fmt [data-f]").forEach(b => b.onclick = () => {
   const ed = editableActual();
   if (!ed) { fmtMsg("Primero haz clic en un texto del correo.", true); return; }
-  fmtMsg("Selecciona un texto del correo y aprieta un botón.");
+  fmtMsg("A− / A+: si seleccionas una parte, cambia solo esa; si no, cambia la línea donde está el cursor.");
   const f = b.dataset.f;
   guardar("formato");
   if (f === "bold" || f === "italic") {
@@ -1821,7 +1862,7 @@ document.querySelectorAll("#fmt [data-f]").forEach(b => b.onclick = () => {
     const sel = doc.getSelection();
     if (sel.isCollapsed) { const r = doc.createRange(); r.selectNodeContents(ed); sel.removeAllRanges(); sel.addRange(r); }
     doc.execCommand(f, false, null);
-  } else {
+  } else if (!tamanoParcial(ed, f === "mas" ? 2 : -2)) {
     const px = parseFloat(doc.defaultView.getComputedStyle(ed).fontSize) || 16;
     const nuevo = Math.max(10, Math.min(44, px + (f === "mas" ? 2 : -2)));
     ed.style.fontSize = nuevo + "px";
