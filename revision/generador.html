@@ -2405,6 +2405,23 @@ $("limpiar").onclick = () => {
   $("limpiar-msg").textContent = `Texto borrado · ${/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘Z" : "Ctrl+Z"} para recuperarlo`;
   clearTimeout($("limpiar").t); $("limpiar").t = setTimeout(() => $("limpiar-msg").textContent = "", 5000);
 };
+// Si se empieza a escribir con el cursor dentro o al lado de un «Escribe aquí…» (amarillo), ese texto se reemplaza solo.
+const RX_RELLENO = /(?:Escribe|Pega) aquí[^\n|*]*?(?=\s\*|\s\||\shttps?:\/\/|\n|$)|\bColumna \d+\b|\bDato \d+\.\d+\b/gm;
+$("texto").addEventListener("beforeinput", e => {
+  if (!/^insert(Text|FromPaste|ReplacementText|CompositionText)$/.test(e.inputType)) return;
+  const ta = e.target;
+  if (ta.selectionStart !== ta.selectionEnd) return;
+  const pos = ta.selectionStart;
+  for (const m of ta.value.matchAll(RX_RELLENO)) {
+    if (pos >= m.index && pos <= m.index + m[0].length) {
+      const dato = e.data ?? (e.dataTransfer && e.dataTransfer.getData("text/plain"));
+      if (dato == null) return;
+      e.preventDefault();
+      escribirEnTexto(dato, m.index, m.index + m[0].length);
+      return;
+    }
+  }
+});
 // Tab salta al siguiente «Escribe aquí…» y lo deja seleccionado para escribir encima.
 $("texto").addEventListener("keydown", e => {
   if (e.key !== "Tab" || e.shiftKey) return;
