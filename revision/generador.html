@@ -1916,6 +1916,8 @@ const botonActivo = () => doc && (btnActivo && doc.contains(btnActivo) ? btnActi
 function revisarLink() {
   revisarColor(); revisarRecuadro(); revisarEmoji(); revisarTabla();
   const a = botonActivo();
+  // El campo del link solo aparece si el correo tiene algún botón.
+  $("campo-link").hidden = !a;
   $("link-hint").hidden = !!a;
   $("link-lbl").textContent = a ? `Link del botón «${a.textContent.trim()}»` : "Link del correo";
   if (!a) { $("falta-link").hidden = true; $("link").classList.remove("sin-link"); return false; }
