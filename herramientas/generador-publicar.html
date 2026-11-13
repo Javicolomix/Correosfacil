@@ -71,11 +71,15 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .crear[hidden]{display:none}
 .crear .compose{max-width:none;margin:0}
 .vivo{position:sticky;top:16px;padding:16px;display:grid;gap:10px}
-.vivo-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.vivo-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .vivo-h b{color:var(--navy);font-size:15px}
 .vivo-h span{font-size:12.5px;color:var(--muted)}
 .vivo-box{background:#eef0f3;border-radius:10px;overflow-x:hidden;overflow-y:auto;max-height:calc(100vh - 100px)}
-.vivo-esc{overflow:hidden}
+.vivo-esc{overflow:hidden;margin:0 auto}
+.vivo-h > div:first-child{display:grid;gap:1px}
+.seg-sm button{padding:5px 11px;font-size:12.5px}
+.vivo-box.cel{padding:14px 0}
+.vivo-box.cel .vivo-esc{border-radius:22px;box-shadow:0 0 0 6px #1d1b26,0 8px 24px rgba(11,1,60,.25);background:#fff}
 #vivo{display:block;width:660px;height:600px;border:0;transform-origin:0 0;pointer-events:none;background:#eef0f3}
 @media (max-width:980px){.crear{grid-template-columns:1fr}.vivo{position:static}.vivo-box{max-height:none}}
 .compose h2{font-size:26px}
@@ -552,7 +556,13 @@ Liquidación
     </div>
   </div>
   <aside class="card vivo" aria-label="Vista previa del correo">
-    <div class="vivo-h"><b>Así va quedando</b><span id="vivo-nota">Se actualiza mientras escribes</span></div>
+    <div class="vivo-h">
+      <div><b>Así va quedando</b><span id="vivo-nota">Se actualiza mientras escribes</span></div>
+      <div class="seg seg-sm" role="group" aria-label="Ver como">
+        <button type="button" data-vv="pc" aria-pressed="true">Computador</button>
+        <button type="button" data-vv="cel" aria-pressed="false">Celular</button>
+      </div>
+    </div>
     <div class="vivo-box" id="vivo-box"><div class="vivo-esc" id="vivo-esc"><iframe id="vivo" title="Vista previa del correo" tabindex="-1"></iframe></div></div>
   </aside>
   </div>
@@ -2291,12 +2301,22 @@ pintarSaludo();
 // Vista previa en vivo: arma el correo con el texto tal cual (sin Claude) mientras se escribe.
 const VIVO_W = 660;
 let vivoT = 0, vivoUltimo = "";
+let vivoModo = "pc";
+document.querySelectorAll("[data-vv]").forEach(b => b.onclick = () => {
+  vivoModo = b.dataset.vv;
+  segPress("[data-vv]", "data-vv", vivoModo);
+  vivoEscala(); setTimeout(vivoEscala, 80);
+});
 function vivoEscala() {
   const f = $("vivo"), esc = $("vivo-esc"), box = $("vivo-box");
-  // En pantallas angostas se muestra a su ancho real (versión celular del correo) en vez de achicarla.
-  const w = box.clientWidth < 520 ? box.clientWidth : VIVO_W;
+  // Celular: el correo a 375 px (como un teléfono). Computador: a 660 px, achicado para que quepa.
+  // En pantallas angostas se muestra a su ancho real en vez de achicarlo.
+  const cel = vivoModo === "cel";
+  box.classList.toggle("cel", cel);
+  const w = cel ? 375 : box.clientWidth < 520 ? box.clientWidth : VIVO_W;
   f.style.width = w + "px";
-  const k = Math.min(1, box.clientWidth / w);
+  const k = Math.min(1, (box.clientWidth - (cel ? 28 : 0)) / w);
+  esc.style.width = Math.floor(w * k) + "px";
   let h = 600;
   try { h = f.contentDocument.documentElement.scrollHeight || h; } catch (e) {}
   f.style.height = h + "px";
