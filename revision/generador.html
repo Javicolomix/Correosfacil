@@ -633,6 +633,7 @@ Liquidación
           <div class="sw" id="sw-boton" role="group" aria-label="Color del botón"></div>
         </div>
         <div class="fmt-sec" id="fmt-emo" hidden>
+          <button type="button" class="btn sm" id="etapa-actual" style="justify-self:start;margin-bottom:8px">★ Marcar como etapa actual</button>
           <span class="lbl" id="fmt-emo-lbl">Emoji de la etapa</span>
           <div class="emo-g" id="emo-g" role="group" aria-label="Emoji de la etapa"></div>
           <span class="lbl" style="margin-top:8px">Fondo del círculo <small style="font-weight:400;color:var(--muted)">(de la etapa elegida)</small></span>
@@ -2053,6 +2054,30 @@ document.querySelectorAll("#emo-forma button").forEach(b => {
     revisarEmoji(); syncAhora();
   };
 });
+// Etapa actual: se rearma la línea de tiempo con la misma información (emojis y nombres) y la etapa elegida como «Estamos aquí».
+$("etapa-actual").addEventListener("mousedown", e => e.preventDefault());
+$("etapa-actual").onclick = () => {
+  if (!emoActivo || !doc.contains(emoActivo)) { fmtMsg("Primero haz clic en el círculo de la etapa en la que va el proceso.", true); return; }
+  const t = emoActivo.closest(".linea-t") || lineaDe(emoActivo);
+  if (!t) return;
+  const dots = [...t.querySelectorAll(".tl-d")];
+  const idx = dots.indexOf(emoActivo);
+  const items = dots.map((d, i) => {
+    const caja = d.closest("td.tl") || d.closest("tr");
+    const nom = caja.querySelector(".tl-t") || [...caja.querySelectorAll("td")].pop().querySelector("div");
+    const emo = ((d.querySelector("span") || d).textContent || "").trim();
+    return { t: (emo ? emo + " " : "") + (nom ? nom.textContent.trim() : ""), cur: i === idx };
+  });
+  guardar("etapa");
+  const tmp = doc.createElement("div");
+  tmp.innerHTML = E.timeline(items);
+  const nueva = tmp.firstElementChild;
+  t.replaceWith(nueva);
+  nueva.querySelectorAll(EDITABLE).forEach(n => { n.setAttribute("contenteditable", "true"); n.setAttribute("spellcheck", "true"); });
+  emoActivo = nueva.querySelectorAll(".tl-d")[idx] || null;
+  if (emoActivo) emoActivo.classList.add("edit-emo");
+  revisarEmoji(); syncAhora(); setTimeout(fitFrame, 30);
+};
 function revisarEmoji() {
   const hay = doc && doc.querySelector(".tl-d");
   $("fmt-emo").hidden = !hay;
@@ -2060,7 +2085,9 @@ function revisarEmoji() {
   const base = emoActivo && doc.contains(emoActivo) ? emoActivo : hay;
   const forma = base.classList.contains("tl-sin") ? "nada" : base.style.borderRadius === "12px" ? "cuadrado" : "circulo";
   document.querySelectorAll("#emo-forma button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.forma === forma)));
-  $("fmt-emo-lbl").textContent = emoActivo && doc.contains(emoActivo) ? "Emoji de la etapa (elige uno)" : "Emoji de la etapa: haz clic en un círculo de la línea de tiempo";
+  const elegido = emoActivo && doc.contains(emoActivo);
+  $("fmt-emo-lbl").textContent = elegido ? "Emoji de la etapa (elige uno)" : "Emoji de la etapa: haz clic en un círculo de la línea de tiempo";
+  $("etapa-actual").hidden = !elegido || emoActivo.classList.contains("cur");
 }
 // Estilo de la tabla activa (la última en que se hizo clic, o la primera).
 let tablaActiva = null;
