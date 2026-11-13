@@ -95,7 +95,9 @@ textarea:focus,input[type=text]:focus,input[type=url]:focus{border-color:var(--b
 .saludo small{font-size:12px;color:var(--muted);background:var(--soft);padding:3px 9px;border-radius:999px}
 #texto{min-height:240px;font-size:17px;line-height:1.6;padding:8px 18px 16px;border:0;border-radius:0 0 12px 12px}
 #texto:focus{outline:none}
-.compose .go{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.compose .go{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
+.opts-top{display:flex !important;align-items:center;gap:10px 12px;flex-wrap:wrap}
+.opts-top > span{font-weight:700;color:var(--navy) !important}
 .compose .opts{display:grid;gap:6px}
 .compose .opts span{font-size:13px;color:var(--muted)}
 .compose .foot{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
@@ -357,6 +359,13 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
     <h2>Escribe el texto de tu correo</h2>
     <p class="intro-c">Escribe tu correo, mira cómo queda al lado y aprieta <b>Diseñar</b>.</p>
     <label class="lbl" for="texto" hidden>Texto del correo</label>
+    <div class="opts opts-top">
+      <span>Elige el header</span>
+      <div class="seg" role="group" aria-label="Header">
+        <button type="button" data-h="navy" aria-pressed="true">Oscuro · generales</button>
+        <button type="button" data-h="claro" aria-pressed="false">Claro · tramitación</button>
+      </div>
+    </div>
     <div class="redactar">
       <div class="saludo">
         <input id="saludo" type="text" aria-label="Saludo del correo" spellcheck="false">
@@ -445,13 +454,6 @@ Liquidación
       </details>
     </div>
     <div class="go">
-      <div class="opts">
-        <span>Header</span>
-        <div class="seg" role="group" aria-label="Header">
-          <button type="button" data-h="navy" aria-pressed="true">Oscuro · generales</button>
-          <button type="button" data-h="claro" aria-pressed="false">Claro · tramitación</button>
-        </div>
-      </div>
       <button class="btn big" id="disenar" type="button">Diseñar</button>
     </div>
     <div class="foot">
