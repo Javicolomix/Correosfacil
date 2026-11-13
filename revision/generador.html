@@ -372,8 +372,8 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
         <button type="button" class="marca" data-m="subtitulo"><span class="ag-i" style="font-size:10px">T</span>Subtítulo</button>
         <button type="button" class="marca" data-m="texto"><span class="ag-i">¶</span>Texto</button>
         <button type="button" class="marca" data-m="cuadro"><span class="ag-i">▢</span>Recuadro</button>
-        <button type="button" class="marca" data-m="paralelo"><span class="ag-i">◫</span>Cuadro paralelo</button>
         <button type="button" class="marca" data-m="boton"><span class="ag-i">◉</span>Botón</button>
+        <button type="button" class="marca" data-m="paralelo"><span class="ag-i">◫</span>Cuadro paralelo</button>
         <button type="button" class="marca" data-m="linea"><span class="ag-i">⋯</span>Línea de tiempo</button>
       </div>
       <p class="ag-hint">Al agregar, escribe encima del texto marcado. Con <kbd>Tab</kbd> saltas al siguiente «Escribe aquí» o «Pega aquí el link».</p>
@@ -409,6 +409,12 @@ Tu pago tarda 48 horas.
             <small>La 1.ª línea sale en negrita. El botón adentro es opcional.</small>
           </div>
           <div class="cm">
+            <b class="cm-t">Botón</b>
+            <pre><i>{{botón}}</i> Pagar mi cuota | https://lexy.cl/</pre>
+            <span class="r-btn">Pagar mi cuota</span>
+            <small>Antes de la <b>|</b> va el texto del botón y después, el link.</small>
+          </div>
+          <div class="cm">
             <b class="cm-t">Cuadro paralelo</b>
             <pre><i>{{cuadro paralelo}}</i>
 Plan mensual
@@ -420,12 +426,6 @@ $299.000 al año
 <i>{{cuadro paralelo}}</i></pre>
             <div class="r-par"><div class="r-box"><strong>Plan mensual</strong>$29.900 al mes<span class="r-btn r-btn-s">Elegir</span></div><div class="r-box"><strong>Plan anual</strong>$299.000 al año</div></div>
             <small>Separa cada opción con una línea <b>---</b> (hasta 3). En celular quedan una debajo de otra.</small>
-          </div>
-          <div class="cm">
-            <b class="cm-t">Botón</b>
-            <pre><i>{{botón}}</i> Pagar mi cuota | https://lexy.cl/</pre>
-            <span class="r-btn">Pagar mi cuota</span>
-            <small>Antes de la <b>|</b> va el texto del botón y después, el link.</small>
           </div>
           <div class="cm">
             <b class="cm-t">Línea de tiempo</b>
