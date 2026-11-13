@@ -1491,7 +1491,7 @@ ${texto}`;
 /* ===================== Estado y utilidades ===================== */
 const $ = id => document.getElementById(id);
 // Versión de lo guardado: al cambiarla, todos (incluida la dueña) parten de cero con lo de por defecto.
-const PREFIJO = "lexy-correos-v2:";
+const PREFIJO = "lexy-correos-v3:";
 try { Object.keys(localStorage).filter(k => k.startsWith("lexy-correos") && !k.startsWith(PREFIJO)).forEach(k => localStorage.removeItem(k)); } catch (e) {}
 const store = {
   get(k) { try { return localStorage.getItem(PREFIJO + k); } catch (e) { return null; } },
