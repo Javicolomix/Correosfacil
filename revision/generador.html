@@ -240,6 +240,13 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .fmt-sec{display:grid;gap:2px;padding-top:10px;border-top:1px solid var(--line)}
 .fmt-sec[hidden]{display:none}
 .sw-box button{border-radius:8px;width:34px;height:26px}
+.tab-est{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.tab-est button{display:grid;gap:5px;justify-items:center;padding:8px 4px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:12px;color:var(--navy);cursor:pointer}
+.tab-est button[aria-pressed="true"]{border-color:var(--btn);box-shadow:0 0 0 1px var(--btn)}
+.te{display:grid;gap:2px;width:46px}.te i{display:block;height:7px;border-radius:2px}
+.te-navy i:first-child{background:#0b013c}.te-navy i:nth-child(2){background:#fff;border:1px solid #e3e1f3}.te-navy i:nth-child(3){background:#f8f7fe;border:1px solid #e3e1f3}
+.te-lav i:first-child{background:#f0f0fb}.te-lav i:nth-child(n+2){background:#fff;border-bottom:1px solid #e3e3e8}
+.te-lin i:first-child{background:#fff;border-bottom:2px solid #0b013c}.te-lin i:nth-child(n+2){background:#fff;border-bottom:1px solid #e3e3e8}
 .emo-g{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:6px}
 .emo-g button{height:32px;border:1px solid transparent;border-radius:8px;background:#f7f7fb;font-size:17px;cursor:pointer;padding:0;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif}
 .emo-g button:hover{background:var(--soft);border-color:var(--lav)}
@@ -252,6 +259,18 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .sw-own span{font-weight:700;color:#fff;text-shadow:0 0 3px #0008;pointer-events:none}
 .sw-own input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .agregar{display:grid;gap:8px}
+.tab-wrap{position:relative;display:inline-flex}
+.tab-pop{position:absolute;z-index:20;top:calc(100% + 6px);left:0;background:#fff;border:1px solid #dcd8f3;border-radius:12px;box-shadow:0 10px 30px rgba(11,1,60,.15);padding:12px;width:max-content;max-width:260px;display:grid;gap:8px}
+.tab-pop[hidden]{display:none}
+.tab-pop-t{margin:0;font-size:13px;color:var(--muted)}.tab-pop-t b{color:var(--navy)}
+.tab-grid{display:grid;grid-template-columns:repeat(6,22px);gap:3px}
+.tab-grid span{width:22px;height:22px;border:1px solid #dcd8f3;border-radius:4px;background:#fff;cursor:pointer}
+.tab-grid span.on{background:var(--lav);border-color:var(--btn)}
+.tab-num{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.tab-num label{display:grid;gap:2px;font-size:11.5px;color:var(--muted)}
+.tab-num input{width:62px;padding:5px 6px;border:1px solid var(--line);border-radius:7px}
+.tab-num .btn{padding:7px 12px;font-size:13px}
+.tab-pop small{font-size:11px;color:var(--muted)}
 .ag-hint{margin:-2px 0 0;font-size:12.5px;color:var(--muted)}
 .ag-hint kbd{font-family:var(--mono);font-size:11px;background:var(--soft);border:1px solid #dcd8f3;border-radius:4px;padding:0 5px;color:var(--navy)}
 .ag-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
@@ -277,10 +296,10 @@ input.sin-link{border-color:var(--err);background:#fff6f5}
 .r-box{background:#f0f0fb;border-radius:8px;padding:8px 10px;font:12.5px/1.4 Arial,sans-serif;color:#4f5157}
 .r-box strong{display:block;color:#0b013c}
 .r-par{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.r-tab{width:100%;border-collapse:collapse;font:12.5px/1.35 Arial,sans-serif;color:#4f5157}
-.r-tab th{background:#f0f0fb;color:#4429cc;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;text-align:left;padding:6px 8px}
-.r-tab td{padding:6px 8px;border-bottom:1px solid #e3e3e8}.r-tab th+th,.r-tab td+td{text-align:right}
-.r-tab tr.t td{font-weight:700;color:#0b013c;border-bottom:0}
+.r-tab{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e3e1f3;border-radius:9px;overflow:hidden;font:12.5px/1.35 Arial,sans-serif;color:#4f5157}
+.r-tab th{background:#0b013c;color:#fff;font-size:11.5px;text-align:left;padding:7px 9px}
+.r-tab td{padding:7px 9px}.r-tab tr:nth-child(odd) td{background:#f8f7fe}.r-tab th+th,.r-tab td+td{text-align:right}
+.r-tab tr.t td{font-weight:700;color:#0b013c;background:#f0f0fb;border-top:2px solid #4429cc}
 .cm-t{font-size:13px;color:var(--navy)}
 .cm-tip{background:var(--soft);border-color:#e3e1f3}
 .r-sub{font:700 14px/1.3 Arial,sans-serif;color:#27198e}
@@ -387,7 +406,19 @@ code.k{font-family:var(--mono);background:var(--soft);color:var(--navy);padding:
         <button type="button" class="marca" data-m="cuadro"><span class="ag-i">▢</span>Recuadro</button>
         <button type="button" class="marca" data-m="boton"><span class="ag-i">◉</span>Botón</button>
         <button type="button" class="marca" data-m="paralelo"><span class="ag-i">◫</span>Cuadro paralelo</button>
-        <button type="button" class="marca" data-m="tabla"><span class="ag-i">▦</span>Tabla</button>
+        <span class="tab-wrap">
+          <button type="button" class="marca" id="tabla-btn" aria-haspopup="true" aria-expanded="false"><span class="ag-i">▦</span>Tabla</button>
+          <div class="tab-pop" id="tabla-pop" hidden>
+            <p class="tab-pop-t">Elige columnas y filas: <b id="tabla-tam">2 × 3</b></p>
+            <div class="tab-grid" id="tabla-grid" role="grid" aria-label="Tamaño de la tabla"></div>
+            <div class="tab-num">
+              <label>Columnas <input type="number" id="tabla-c" min="1" max="6" value="2"></label>
+              <label>Filas <input type="number" id="tabla-f" min="1" max="15" value="3"></label>
+              <button type="button" class="btn sm" id="tabla-ok">Insertar</button>
+            </div>
+            <small>Las filas no cuentan el encabezado.</small>
+          </div>
+        </span>
         <button type="button" class="marca" data-m="linea"><span class="ag-i">⋯</span>Línea de tiempo</button>
       </div>
       <p class="ag-hint">Al agregar, escribe encima del texto marcado. Con <kbd>Tab</kbd> saltas al siguiente «Escribe aquí» o «Pega aquí el link».</p>
@@ -450,7 +481,7 @@ Interés | $0
 Total | $89.900
 <i>{{tabla}}</i></pre>
             <table class="r-tab"><tr><th>Concepto</th><th>Monto</th></tr><tr><td>Cuota 4 de 12</td><td>$89.900</td></tr><tr><td>Interés</td><td>$0</td></tr><tr class="t"><td>Total</td><td>$89.900</td></tr></table>
-            <small>Una fila por línea y columnas con <b>|</b>. También puedes pegar una tabla desde Excel. La 1.ª fila es el encabezado y «Total» sale en negrita.</small>
+            <small>Al apretar «Tabla» eliges columnas y filas. Una fila por línea y columnas con <b>|</b>; también puedes pegar desde Excel. «Total» sale destacado. Después de Diseñar puedes cambiar el estilo (Navy, Lavanda o Simple).</small>
           </div>
           <div class="cm">
             <b class="cm-t">Línea de tiempo</b>
@@ -540,6 +571,14 @@ Liquidación
           <span class="lbl" id="fmt-emo-lbl">Emoji de la etapa</span>
           <div class="emo-g" id="emo-g" role="group" aria-label="Emoji de la etapa"></div>
           <label class="rng" style="grid-template-columns:48px 1fr">Otro <input type="text" id="emo-own" maxlength="8" placeholder="Pega un emoji" style="width:100%;padding:5px 8px;border:1px solid var(--line);border-radius:8px"></label>
+        </div>
+        <div class="fmt-sec" id="fmt-tabla" hidden>
+          <span class="lbl" id="fmt-tabla-lbl">Estilo de la tabla</span>
+          <div class="tab-est" id="tab-est" role="group" aria-label="Estilo de la tabla">
+            <button type="button" data-est="navy"><span class="te te-navy"><i></i><i></i><i></i></span>Navy</button>
+            <button type="button" data-est="lavanda"><span class="te te-lav"><i></i><i></i><i></i></span>Lavanda</button>
+            <button type="button" data-est="lineas"><span class="te te-lin"><i></i><i></i><i></i></span>Simple</button>
+          </div>
         </div>
         <div class="fmt-sec" id="fmt-box">
           <span class="lbl" id="fmt-box-lbl">Color del recuadro</span>
@@ -779,6 +818,28 @@ function emojiEtapa(t, usados) {
   return [e, t];
 }
 
+// Estilos de tabla (todos con estilos en línea, aptos para correo). Navy es el de por defecto.
+const TABLA = {
+  navy: {
+    nombre: "Navy",
+    wrap: "margin:20px 0 24px;border-collapse:separate;border-spacing:0;border:1px solid #e3e1f3;border-radius:12px;",
+    th: (i, n) => `padding:12px 14px;background:#0b013c;color:#ffffff;font-size:13px;line-height:1.3;font-weight:700;${i === 0 ? "border-top-left-radius:11px;" : ""}${i === n - 1 ? "border-top-right-radius:11px;" : ""}`,
+    td: (k, last, total, i, n) => `padding:12px 14px;font-size:14px;line-height:1.4;background:${total ? "#f0f0fb" : k % 2 ? "#f8f7fe" : "#ffffff"};${total ? "font-weight:700;color:#0b013c;border-top:2px solid #4429cc;" : "color:#4f5157;"}${last && i === 0 ? "border-bottom-left-radius:11px;" : ""}${last && i === n - 1 ? "border-bottom-right-radius:11px;" : ""}`
+  },
+  lavanda: {
+    nombre: "Lavanda",
+    wrap: "margin:20px 0 24px;border-collapse:separate;border-spacing:0;",
+    th: (i, n) => `padding:10px 12px;background:#f0f0fb;color:#4429cc;font-size:11.5px;line-height:1.3;font-weight:700;letter-spacing:.6px;text-transform:uppercase;${i === 0 ? "border-radius:10px 0 0 10px;" : ""}${i === n - 1 ? "border-radius:0 10px 10px 0;" : ""}`,
+    td: (k, last, total) => `padding:11px 12px;font-size:14px;line-height:1.4;background:#ffffff;${last ? "" : "border-bottom:1px solid #ececf3;"}${total ? "font-weight:700;color:#0b013c;" : "color:#4f5157;"}`
+  },
+  lineas: {
+    nombre: "Simple",
+    wrap: "margin:20px 0 24px;border-collapse:separate;border-spacing:0;",
+    th: () => "padding:10px 4px;background:#ffffff;color:#0b013c;font-size:13px;line-height:1.3;font-weight:700;border-bottom:2px solid #0b013c;",
+    td: (k, last, total) => `padding:11px 4px;font-size:14px;line-height:1.4;background:#ffffff;border-bottom:1px solid ${total ? "#ffffff" : "#e3e3e8"};${total ? "font-weight:700;color:#0b013c;border-top:2px solid #0b013c;" : "color:#4f5157;"}`
+  }
+};
+
 const E = {
   // Saludo editable: las variables {{…}} van destacadas con el subrayado naranjo.
   hi: t => '<p class="txt hi" style="margin:0 0 10px;font-size:20px;line-height:1.4;color:#0b013c;">'
@@ -872,19 +933,19 @@ const E = {
         <tr>${label.replace("__N__", 2)}</tr>${rows}</table>`;
   },
   // Tabla: encabezado lavanda, filas con línea divisoria; montos a la derecha; la fila «Total» en negrita.
-  tabla: rows => {
+  tabla: (rows, est = "navy") => {
     const n = Math.max(...rows.map(r => r.length));
     const num = c => /^[-+]?\s*(\$|US\$|UF|CLP)?\s*[\d.,]+\s*(%|UF|CLP)?$/i.test(c.trim());
     const [cab, ...cuerpo] = rows;
+    const alin = i => i > 0 && cuerpo.length && cuerpo.every(r => !r[i] || num(r[i])) ? "right" : "left";
     const th = cab.concat(Array(n - cab.length).fill("")).map((c, i) =>
-      `<td class="tc th" style="padding:10px 12px;background:#f0f0fb;font-size:12px;line-height:1.3;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#4429cc;text-align:${i > 0 && cuerpo.every(r => !r[i] || num(r[i])) ? "right" : "left"};${i === 0 ? "border-radius:10px 0 0 10px;" : ""}${i === n - 1 ? "border-radius:0 10px 10px 0;" : ""}">${inline(c)}</td>`).join("");
+      `<td class="tc th" style="${TABLA[est].th(i, n)}text-align:${alin(i)};">${inline(c)}</td>`).join("");
     const tr = cuerpo.map((r, k) => {
       const total = /^(total|subtotal|saldo)/i.test(norm(r[0] || ""));
-      const borde = k === cuerpo.length - 1 ? "" : "border-bottom:1px solid #e3e3e8;";
       return "<tr>" + r.concat(Array(n - r.length).fill("")).map((c, i) =>
-        `<td class="tc row ${total ? "lt" : "txt"}" style="padding:11px 12px;${borde}font-size:14px;line-height:1.4;${total ? "font-weight:700;color:#0b013c;" : "color:#4f5157;"}text-align:${i > 0 && num(c) ? "right" : "left"};">${inline(c)}</td>`).join("") + "</tr>";
+        `<td class="tc row ${total ? "lt" : "txt"}" style="${TABLA[est].td(k, k === cuerpo.length - 1, total, i, n)}text-align:${alin(i)};">${inline(c)}</td>`).join("") + "</tr>";
     }).join("\n          ");
-    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0 24px;border-collapse:separate;border-spacing:0;">
+    return `<table class="tabla" data-tabla="${est}" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="${TABLA[est].wrap}">
           <tr>${th}</tr>
           ${tr}
       </table>`;
@@ -1448,6 +1509,8 @@ $("frame").addEventListener("load", () => {
     doc.execCommand("insertText", false, t);
   });
   doc.addEventListener("click", e => {
+    const tb = e.target.closest("table.tabla");
+    if (tb) { tablaActiva = tb; revisarTabla(); }
     const dot = e.target.closest(".tl-d");
     if (dot) {
       doc.querySelectorAll(".edit-emo").forEach(x => x.classList.remove("edit-emo"));
@@ -1470,7 +1533,7 @@ $("frame").addEventListener("load", () => {
   // panel lateral
   $("asunto").value = doc.title || "";
   $("p-asunto").textContent = doc.title || "(sin asunto)";
-  btnActivo = null; boxActivo = null; emoActivo = null;
+  btnActivo = null; boxActivo = null; emoActivo = null; tablaActiva = null;
   const btn = doc.querySelector(".btn a");
   if (btn) { const h = btn.getAttribute("href") || ""; $("link").value = LINK_OK.test(h) ? h : ""; }
   else $("link").value = "";
@@ -1719,6 +1782,35 @@ function revisarEmoji() {
   if (!hay) return;
   $("fmt-emo-lbl").textContent = emoActivo && doc.contains(emoActivo) ? "Emoji de la etapa (elige uno)" : "Emoji de la etapa: haz clic en un círculo de la línea de tiempo";
 }
+// Estilo de la tabla activa (la última en que se hizo clic, o la primera).
+let tablaActiva = null;
+const tablaSel = () => doc && (tablaActiva && doc.contains(tablaActiva) ? tablaActiva : doc.querySelector("table.tabla"));
+function estilarTabla(t, est) {
+  const filas = [...t.rows], n = Math.max(...filas.map(r => r.cells.length));
+  t.setAttribute("data-tabla", est);
+  t.style.cssText = TABLA[est].wrap;
+  filas.forEach((r, k) => [...r.cells].forEach((c, i) => {
+    const al = c.style.textAlign || "left", fs = c.dataset.fs;
+    if (k === 0) c.style.cssText = TABLA[est].th(i, n) + `text-align:${al};`;
+    else {
+      const total = /^(total|subtotal|saldo)/i.test(norm(r.cells[0].textContent || ""));
+      c.style.cssText = TABLA[est].td(k - 1, k === filas.length - 1, total, i, n) + `text-align:${al};`;
+    }
+  }));
+  revisarTabla(); syncAhora();
+}
+document.querySelectorAll("#tab-est button").forEach(b => {
+  b.addEventListener("mousedown", e => e.preventDefault());
+  b.onclick = () => { const t = tablaSel(); if (t) estilarTabla(t, b.dataset.est); };
+});
+function revisarTabla() {
+  const t = tablaSel();
+  $("fmt-tabla").hidden = !t;
+  if (!t) return;
+  $("fmt-tabla-lbl").textContent = doc.querySelectorAll("table.tabla").length > 1 ? "Estilo de la tabla (haz clic en la que quieras cambiar)" : "Estilo de la tabla";
+  const est = t.getAttribute("data-tabla") || "navy";
+  document.querySelectorAll("#tab-est button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.est === est)));
+}
 function revisarRecuadro() {
   const td = recuadroActivo();
   $("fmt-box").hidden = !td;
@@ -1746,7 +1838,7 @@ function revisarColor() {
 let btnActivo = null;
 const botonActivo = () => doc && (btnActivo && doc.contains(btnActivo) ? btnActivo : doc.querySelector(".btn a"));
 function revisarLink() {
-  revisarColor(); revisarRecuadro(); revisarEmoji();
+  revisarColor(); revisarRecuadro(); revisarEmoji(); revisarTabla();
   const a = botonActivo();
   $("link-hint").hidden = !!a;
   $("link-lbl").textContent = a ? `Link del botón «${a.textContent.trim()}»` : "Link del correo";
@@ -1903,10 +1995,40 @@ document.querySelectorAll(".marca").forEach(b => b.onclick = () => {
   escribirEnTexto(ins, i, j);
   if (a0 >= 0) $("texto").setSelectionRange(i + a0, i + a1);
 });
+// Tabla: se eligen columnas y filas en una grilla (o con los números) y se inserta con «Columna N» y «Dato F.C» para reemplazar.
+(() => {
+  const pop = $("tabla-pop"), grid = $("tabla-grid"), C = 6, F = 8;
+  grid.innerHTML = Array.from({ length: C * F }, (_, k) => `<span data-c="${k % C + 1}" data-f="${Math.floor(k / C) + 1}"></span>`).join("");
+  const marcar = (c, f) => {
+    grid.querySelectorAll("span").forEach(x => x.classList.toggle("on", +x.dataset.c <= c && +x.dataset.f <= f));
+    $("tabla-tam").textContent = `${c} × ${f}`; $("tabla-c").value = c; $("tabla-f").value = f;
+  };
+  const abrir = v => { pop.hidden = !v; $("tabla-btn").setAttribute("aria-expanded", String(v)); if (v) marcar(+$("tabla-c").value, +$("tabla-f").value); };
+  $("tabla-btn").addEventListener("mousedown", e => e.preventDefault());
+  $("tabla-btn").onclick = () => abrir(pop.hidden);
+  grid.addEventListener("mouseover", e => { const x = e.target.closest("span"); if (x) marcar(+x.dataset.c, +x.dataset.f); });
+  grid.addEventListener("mousedown", e => e.preventDefault());
+  grid.addEventListener("click", e => { const x = e.target.closest("span"); if (x) { insertarTabla(+x.dataset.c, +x.dataset.f); abrir(false); } });
+  ["tabla-c", "tabla-f"].forEach(id => $(id).addEventListener("input", () => marcar(Math.min(6, Math.max(1, +$("tabla-c").value || 1)), Math.min(15, Math.max(1, +$("tabla-f").value || 1)))));
+  $("tabla-ok").onclick = () => { insertarTabla(Math.min(6, Math.max(1, +$("tabla-c").value || 2)), Math.min(15, Math.max(1, +$("tabla-f").value || 3))); abrir(false); };
+  document.addEventListener("click", e => { if (!pop.hidden && !e.target.closest(".tab-wrap")) abrir(false); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !pop.hidden) abrir(false); });
+})();
+function insertarTabla(c, f) {
+  const ta = $("texto"), v = ta.value;
+  const i = puntoInsercion(v, Math.max(ta.selectionStart ?? v.length, ta.selectionEnd ?? v.length), "tabla");
+  const antes = v.slice(0, i), nl = antes && !antes.endsWith("\n") ? "\n" : "";
+  const cab = Array.from({ length: c }, (_, k) => `Columna ${k + 1}`).join(" | ");
+  const filas = Array.from({ length: f }, (_, r) => Array.from({ length: c }, (_, k) => `Dato ${r + 1}.${k + 1}`).join(" | ")).join("\n");
+  const ins = `${nl}{{tabla}}\n${cab}\n${filas}\n{{tabla}}\n`;
+  escribirEnTexto(ins, i, i);
+  const a0 = i + ins.indexOf("Columna 1");
+  ta.setSelectionRange(a0, a0 + "Columna 1".length);
+}
 // Tab salta al siguiente «Escribe aquí…» y lo deja seleccionado para escribir encima.
 $("texto").addEventListener("keydown", e => {
   if (e.key !== "Tab" || e.shiftKey) return;
-  const ta = e.target, rx = /(?:Escribe|Pega) aquí[^\n|]*?(?=\s\*|\s\||\shttps?:\/\/|\n|$)/g;
+  const ta = e.target, rx = /(?:Escribe|Pega) aquí[^\n|]*?(?=\s\*|\s\||\shttps?:\/\/|\n|$)|\bColumna \d+\b|\bDato \d+\.\d+\b/g;
   rx.lastIndex = ta.selectionEnd;
   let m = rx.exec(ta.value);
   if (!m) { rx.lastIndex = 0; m = rx.exec(ta.value); }
