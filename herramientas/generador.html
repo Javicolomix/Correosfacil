@@ -1310,7 +1310,8 @@ function cerrarRecuadros(out) {
   return out;
 }
 // El saludo lo pone la plantilla: si alguien lo escribe igual al comienzo, se quita.
-const sinSaludo = t => t.replace(/^\s*(hola|estimad[oa]s?|querid[oa])\b[^\n]{0,40}?(\{\{[^}]*\}\}|[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\s*[:,!]?[ \t]*(\n|$)/i, "");
+// Solo si la primera línea es un saludo corto que termina en «:», «,» o «!» (así «Hola mundo» se respeta como texto).
+const sinSaludo = t => t.replace(/^\s*(hola|estimad[oa]s?|querid[oa])\b[^\n]{0,40}?[:,!][ \t]*(\n|$)/i, "");
 // Marcas mal escritas: {cuadro destacado}, [botón], {{{título}}}, (( … )) → {{…}}
 const normalizarMarcas = t => t.replace(/[\[{(]{1,3}\s*(\/?\s*(?:l[ií]nea de tiempo|subt[ií]tulo|cuadros? paralelos?|tabla|cuadro destacado|recuadro destacado|cuadro|destacar|destacado|bot[oó]n|t[ií]tulo))\s*[\]})]{1,3}/gi,
   (m, a) => `{{${a.replace(/\s+/g, " ").trim()}}}`);
@@ -2405,20 +2406,36 @@ $("limpiar").onclick = () => {
 };
 // Si se empieza a escribir con el cursor dentro o al lado de un «Escribe aquí…» (amarillo), ese texto se reemplaza solo.
 const RX_RELLENO = /(?:Escribe|Pega) aquí[^\n|*]*?(?=\s\*|\s\||\shttps?:\/\/|\n|$)|\bColumna \d+\b|\bDato \d+\.\d+\b/gm;
+// Se deja que el navegador escriba normal y, justo después, se borra lo que quedó del «Escribe aquí…» a cada lado.
+let rellenoPend = null;
 $("texto").addEventListener("beforeinput", e => {
-  if (!/^insert(Text|FromPaste|ReplacementText|CompositionText)$/.test(e.inputType)) return;
+  rellenoPend = null;
+  if (e.isComposing || !/^insert(Text|FromPaste|ReplacementText)$/.test(e.inputType)) return;
   const ta = e.target;
-  if (ta.selectionStart !== ta.selectionEnd) return;
+  if (ta.selectionStart !== ta.selectionEnd) return; // si está seleccionado, el navegador ya lo reemplaza
   const pos = ta.selectionStart;
   for (const m of ta.value.matchAll(RX_RELLENO)) {
-    if (pos >= m.index && pos <= m.index + m[0].length) {
-      const dato = e.data ?? (e.dataTransfer && e.dataTransfer.getData("text/plain"));
-      if (dato == null) return;
-      e.preventDefault();
-      escribirEnTexto(dato, m.index, m.index + m[0].length);
-      return;
-    }
+    if (pos >= m.index && pos <= m.index + m[0].length) { rellenoPend = { ini: m.index, fin: m.index + m[0].length, pos, largo: ta.value.length }; return; }
   }
+});
+$("texto").addEventListener("input", () => {
+  const r = rellenoPend; rellenoPend = null;
+  if (!r) return;
+  const ta = $("texto"), puesto = ta.value.length - r.largo;
+  if (puesto <= 0) return;
+  // Primero lo que sobra a la derecha (no cambia las posiciones de la izquierda) y después lo de la izquierda.
+  const borrar = (a, b) => {
+    if (b <= a) return;
+    ta.setSelectionRange(a, b);
+    let ok = false;
+    try { ok = document.execCommand("delete"); } catch (e) {}
+    if (!ok) ta.setRangeText("", a, b, "end");
+  };
+  borrar(r.pos + puesto, r.fin + puesto);
+  borrar(r.ini, r.pos);
+  const fin = r.ini + puesto;
+  ta.setSelectionRange(fin, fin);
+  store.set("texto", ta.value); vivoPronto(); pintarTexto();
 });
 // Tab salta al siguiente «Escribe aquí…» y lo deja seleccionado para escribir encima.
 $("texto").addEventListener("keydown", e => {
