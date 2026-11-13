@@ -1672,7 +1672,7 @@ function guardar(tipo) {
   if (!doc) return;
   const ahora = Date.now();
   // Lo que se hace seguido (escribir, arrastrar, elegir emoji) cuenta como un solo cambio.
-  if (tipo === ultimoTipo && /^(texto|tam|emoji|link)$/.test(tipo) && ahora - ultimoT < 1500) { ultimoT = ahora; return; }
+  if (tipo === ultimoTipo && /^(texto|tam|emoji|link|color)$/.test(tipo) && ahora - ultimoT < 1500) { ultimoT = ahora; return; }
   if (tipo === "texto" && ahora - ultimoT < 100) return; // cambio hecho por un botón del panel: ya se guardó
   historial.push({ html: contenidoCorreo(), title: doc.title });
   if (historial.length > 100) historial.shift();
@@ -1803,7 +1803,9 @@ swatches("sw-texto", PAL_TEXTO, ([c]) => {
 // Recuadro: el último en que se hizo clic (o el primero del correo).
 let boxActivo = null;
 const recuadroActivo = () => doc && (boxActivo && doc.contains(boxActivo) ? boxActivo : doc.querySelector("td.box"));
-swatches("sw-box", PAL_BOX, ([bg, , ct, cx, borde]) => {
+swatches("sw-box", PAL_BOX, ([bg, nombre, ct, cx]) => {
+  // Color propio: si el fondo es oscuro, título y texto van en claro.
+  if (nombre === "Otro") { cx = ct === "#ffffff" ? "#e6e3fb" : ""; ct = ct === "#ffffff" ? "#ffffff" : ""; }
   const td = recuadroActivo();
   if (!td) { fmtMsg("Este correo no tiene recuadros.", true); return; }
   guardar("color");
@@ -1813,7 +1815,7 @@ swatches("sw-box", PAL_BOX, ([bg, , ct, cx, borde]) => {
   td.querySelectorAll(".ls, .m").forEach(x => { x.style.color = cx || "#4f5157"; });
   marcar("sw-box", bg);
   syncAhora();
-});
+}, true);
 // Ancho (% del correo) y alto (relleno de arriba y abajo) del recuadro activo.
 function tamanoRecuadro(td, w, h) {
   const t = td.closest("table");
@@ -1883,7 +1885,7 @@ swatches("sw-emo", PAL_EMO, ([c]) => {
   if (emoActivo.style.borderColor === "transparent") emoActivo.style.borderColor = emoActivo.dataset.bc || "#ffffff";
   marcar("sw-emo", c);
   syncAhora();
-});
+}, true);
 const lineaDe = dot => { let t = dot && dot.closest("table"); while (t && t.querySelectorAll(".tl-d").length < 2) t = t.parentElement.closest("table"); return t; };
 document.querySelectorAll("#emo-forma button").forEach(b => {
   b.addEventListener("mousedown", e => e.preventDefault());
